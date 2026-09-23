@@ -9,7 +9,7 @@ Build mode: fast
 
 ## Slices
 
-- [ ] **1. Grundgerüst läuft: Demo-Haushalt sichtbar und persistent**
+- [x] **1. Grundgerüst läuft: Demo-Haushalt sichtbar und persistent**
   Becomes usable: `pnpm dev` startet App + API; „Mit Demo-Familie testen“ legt Expedition 33 an; Hauptbildschirm zeigt Haushaltsname und die 4 Personen als Profil-Umschalter mit Pastell-Farben; alles überlebt einen Server-Neustart (SQLite).
   Why now: Bootstrap lebt laut Regel im ersten nutzbaren Slice — und die Personen mit ihren Einschränkungen sind der Rohstoff des Kerns, plus früheste Stelle, an der sich das Persistenz-Schema bewährt oder nicht.
   PRD ref: `prd.md > The Core Journey` (Schritte 1–2), `prd.md > Screens and Layout` (Hauptbildschirm), `prd.md > States and Boundaries` (Persistenz, Identität)
@@ -19,7 +19,7 @@ Build mode: fast
   Learner check: App öffnen, Demo-Familie anlegen, Profil-Umschalter durchklicken (Ansicht und Farbe wechseln), API neu starten — Familie noch da?
   Commit: `Scaffold monorepo with demo household, person switcher, SQLite persistence`
 
-- [ ] **2. Planner-Risiko-Proof: Claude-Aufruf mit Schema-Zwang und PII-Filter**
+- [x] **2. Planner-Risiko-Proof: Claude-Aufruf mit Schema-Zwang und PII-Filter**
   Becomes usable: Technische Naht mit lauffähigem Beweis: `pnpm planner:smoke` druckt einen validierten Wochenplan-Entwurf; Modell-/Preis-/SDK-Fragen aus dem Spec sind verifiziert und notiert.
   Why now: Einziger technischer Einzelschritt nach der Ausnahmeregel — der Spec markiert Anthropic-API-Details als unverifiziert; schlägt die Schema-Zwangsantwort anders aus als angenommen, muss sich der Plan jetzt ändern, bevor UI und Endpunkte darauf bauen.
   PRD ref: `prd.md > Features and Behavior > Wochenplan`
@@ -111,3 +111,8 @@ Reflection: [offen]
 Activity mode: [offen]
 
 ## Revisions
+
+- **node:sqlite statt better-sqlite3** — better-sqlite3 ließ sich unter Node 26 nicht installieren (kein vorkompiliertes Binary für die neue Node-ABI, node-gyp-Fallback fehlgeschlagen). Das eingebaute `node:sqlite` eliminiert die native Abhängigkeit komplett; SQLite als Datenbank-Entscheidung bleibt unverändert, nur das Bindings-Paket entfällt. `db.transaction()`-Helfer existiert dort nicht → explizites BEGIN/COMMIT.
+- **DB-Pfad korrigiert** — `dataDir` rechnete von `apps/api/src/db` nur drei Ebenen hoch statt vier und legte die Laufzeit-DB unter `apps/data/` statt im Repo-Root. Gefunden über `lsof`: der Server hielt eine Datei offen, die alle Reinigungen nie erreichte (deshalb „überlebte" ein alter Haushalts-Eintrag jeden Reset).
+- **zod v4 + SDK 0.128** — Der `zodOutputFormat`-Helper des aktuellen SDKs erwartet zod-v4-Schemata; mit klassischem zod v3 crashte die Schema-Konvertierung (`reading 'def'`). packages/shared und apps/api wurden auf zod 4 gehoben, danach liefen Schema-Zwangsantwort und Validierung. Modell/Preise verifiziert: `claude-opus-5`, $5/$25 pro Mio. Tokens (siehe spec.md > Decisions and Open Issues).
+- **z.ai-Endpunkt statt Anthropic, create statt parse** — Lerner-Entscheidung: der LLM-Aufruf läuft über den z.ai-Anthropic-kompatiblen Endpunkt (`ANTHROPIC_BASE_URL`) mit Modell `glm-5.3` (Modell-Code-Liste per `/v1/models` ermittelt). Zwei Anpassungen daran: (1) der Shim erzwingt `output_config`/json_schema NICHT und liefert JSON teils in ```-Fences → der Planner nutzt `messages.create` + eigene JSON-Extraktion + zod-Validierung (Retry-Mechanik unverändert, Härte jetzt vollständig server-seitig); (2) glm-5.3 macht standardmäßig ausgiebiges Thinking und lief ohne es in Timeouts → `thinking: {type: "disabled"}` + harte 60-s-Timeout + maxRetries 0 im Request. Live-Beweis: validierter 7-Tage-Plan aus echtem Aufruf, Miss-Log liefert konstruktive Datenlücken-Feedbacks.
