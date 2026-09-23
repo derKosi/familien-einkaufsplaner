@@ -1,0 +1,28 @@
+# Personal learning context — keep out of commits by default
+/devpost/learner-profile.md
+
+# Credentials and local secrets
+.env
+.env.*
+!.env.example
+
+# OS / editor noise
+.DS_Store
+
+# Kursmaterial des Devpost-Learn-Hackathons — nicht Teil des Projekt-Repos
+.claude/
+.agents/
+agent/
+skills-lock.json
+
+# Build & dependencies
+node_modules/
+dist/
+apps/web/dist/
+
+# Runtime data (SQLite) — Snapshots und Rezepte in data/ werden committet, die DB nicht
+data/app.db
+data/app.db-journal
+data/app.db-shm
+data/app.db-wal
+

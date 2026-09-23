@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PRD — Familien-Einkaufsplaner</title>
+<style>
+  :root {
+    --paper: #faf7f2;
+    --ink: #1c1a17;
+    --muted: #6b655c;
+    --line: #e4ddd1;
+    --accent: #a8c6a0;
+    --accent-deep: #5f8158;
+    --accent-bg: #eef4ec;
+    --amber: #8a6d1c;
+    --amber-bg: #fdf6e0;
+    --clay: #9c3d22;
+    --clay-bg: #f8ece6;
+    --card: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  main { max-width: 920px; margin: 0 auto; padding: 0 24px 80px; }
+  header.hero { padding: 56px 0 8px; }
+  .chip {
+    display: inline-block; background: var(--accent-deep); color: #fff;
+    font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    padding: 4px 12px; border-radius: 999px;
+  }
+  h1 { font-size: clamp(28px, 4.6vw, 40px); line-height: 1.15; margin: 18px 0 10px; letter-spacing: -0.02em; }
+  .oneliner { font-size: 18px; color: var(--muted); max-width: 680px; margin: 0; }
+  .canonical { margin-top: 18px; font-size: 13px; color: var(--muted); }
+  .canonical code { background: #efe9de; padding: 2px 6px; border-radius: 4px; }
+  h2 {
+    font-size: 14px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--muted); margin: 56px 0 16px; display: flex; align-items: center; gap: 12px;
+  }
+  h2::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+  .expansion {
+    background: var(--accent-bg); border-radius: 12px; padding: 14px 18px;
+    font-size: 14.5px; margin-bottom: 20px;
+  }
+  .expansion b { color: var(--accent-deep); }
+  figure.diagram { margin: 0; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 20px 10px 6px; }
+  figure.diagram svg { width: 100%; height: auto; display: block; }
+  figcaption { font-size: 13px; color: var(--muted); padding: 10px 12px 8px; }
+  .screens { background: var(--card); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+  .screens nav { display: flex; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  .screens nav button {
+    flex: 1 1 auto; border: none; background: none; cursor: pointer;
+    font: inherit; font-size: 13.5px; font-weight: 600; padding: 13px 8px; color: var(--muted);
+    border-right: 1px solid var(--line);
+  }
+  .screens nav button:last-child { border-right: none; }
+  .screens nav button[aria-selected="true"] { background: var(--ink); color: #fff; }
+  .screens .panel { padding: 22px 24px; }
+  .screens .panel h3 { margin: 0 0 10px; font-size: 16px; }
+  .screens .panel ul { margin: 0; padding-left: 20px; font-size: 14.5px; }
+  .screens .panel li { margin-bottom: 6px; }
+  .wire { border: 1px solid var(--line); border-radius: 10px; padding: 12px; background: var(--paper); margin-bottom: 14px; }
+  .wire .whdr { display: flex; gap: 8px; align-items: center; }
+  .wire .whdr .hd { flex: 1; background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; font-size: 12.5px; }
+  .wire .hero-card { background: var(--accent-bg); border: 1.5px solid var(--accent-deep); border-radius: 8px; padding: 10px 12px; margin-top: 8px; font-size: 13px; }
+  .wire .hero-card b { color: var(--accent-deep); }
+  .wire .days { display: flex; gap: 5px; margin-top: 8px; }
+  .wire .day { flex: 1; background: var(--card); border: 1px solid var(--line); border-radius: 6px; text-align: center; font-size: 10.5px; padding: 6px 2px; color: var(--muted); }
+  .wire .day.today { border-color: var(--accent-deep); background: var(--accent-bg); color: var(--ink); font-weight: 700; }
+  .wire .cta { margin-top: 8px; background: var(--ink); color: #fff; border-radius: 8px; text-align: center; padding: 9px; font-size: 13px; font-weight: 700; }
+  .feat { margin-bottom: 12px; }
+  details.bucket { background: var(--card); border: 1px solid var(--line); border-radius: 12px; margin-bottom: 12px; }
+  details.bucket summary {
+    cursor: pointer; padding: 16px 20px; font-weight: 700; font-size: 15.5px;
+    display: flex; align-items: center; gap: 10px; list-style: none;
+  }
+  details.bucket summary::-webkit-details-marker { display: none; }
+  details.bucket summary .arrow { margin-left: auto; transition: transform .2s; color: var(--muted); }
+  details.bucket[open] summary .arrow { transform: rotate(90deg); }
+  details.bucket .body { padding: 0 20px 18px; }
+  .pill { font-size: 11.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; border-radius: 999px; padding: 3px 10px; }
+  details.build summary .pill { background: var(--accent-bg); color: var(--accent-deep); }
+  details.test summary .pill { background: var(--amber-bg); color: var(--amber); }
+  details.later summary .pill { background: var(--accent-bg); color: var(--accent-deep); }
+  details.nongoal summary .pill { background: var(--clay-bg); color: var(--clay); }
+  details.bucket ul { margin: 0; padding-left: 20px; }
+  details.bucket li { margin-bottom: 8px; font-size: 14.5px; }
+  details.bucket li b { display: block; font-size: 15px; }
+  details.bucket li span { color: #443f38; }
+  .crit { margin-top: 10px; background: var(--amber-bg); border-radius: 8px; padding: 10px 14px; font-size: 13.5px; }
+  .crit b { color: var(--amber); }
+  .crit ul { margin: 6px 0 0; padding-left: 18px; }
+  .stategrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+  .state { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+  .state h3 { margin: 0 0 6px; font-size: 15px; }
+  .state p { margin: 0; font-size: 14px; color: #443f38; }
+  .openq { background: var(--card); border: 1.5px dashed var(--amber); border-radius: 12px; padding: 18px 22px; }
+  .openq h3 { margin: 0 0 8px; font-size: 15px; color: var(--amber); }
+  .openq ol { margin: 0; padding-left: 20px; font-size: 14.5px; }
+  .openq li { margin-bottom: 6px; }
+  footer { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+
+<header class="hero">
+  <span class="chip">PRD · Genehmigt</span>
+  <h1>Familien-Einkaufsplaner</h1>
+  <p class="oneliner">Produktdefinition: was jemand sieht, tut und zurückbekommt. Aus dem Scope-Sketch wird ein konkretes, prüfbares Verhalten.</p>
+  <p class="canonical">Verbindliches Dokument: <code>devpost/prd.md</code> · Basis: <code>devpost/scope.md</code> (genehmigt)</p>
+</header>
+
+<div class="expansion">
+  <b>Was der PRD geklärt hat:</b> Der Scope sagte „Nutzer passt den Plan an“ — jetzt wissen wir: Tipp auf einen Tag im Wochenstreifen, Personenanzahl angeben, Gerichtvorschläge aus den aktuellen Angeboten, bestätigen, Liste skaliert sich. Jede vage Stelle aus dem Scope ist jetzt ein konkretes Verhalten mit Prüfkriterium.
+</div>
+
+<h2>Die Reise in sechs Schritten</h2>
+
+<figure class="diagram">
+<svg viewBox="0 0 880 240" role="img" aria-label="Reisediagramm: Erststart, Haushalt anlegen, Plan aus Angeboten, Anpassen, Einkaufen, Woche durchziehen — mit Schleife zur neuen Woche">
+  <defs>
+    <marker id="arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1c1a17"/>
+    </marker>
+    <style>
+      .jn { fill: #ffffff; stroke: #e4ddd1; }
+      .jn.hot { fill: #eef4ec; stroke: #5f8158; stroke-width: 1.5; }
+      .jn-num { font: 700 13px -apple-system, "Segoe UI", sans-serif; fill: #5f8158; }
+      .jn-title { font: 700 13px -apple-system, "Segoe UI", sans-serif; fill: #1c1a17; }
+      .jn-sub { font: 400 11px -apple-system, "Segoe UI", sans-serif; fill: #6b655c; }
+      .jflow { stroke: #1c1a17; stroke-width: 1.5; fill: none; marker-end: url(#arr2); }
+      .jloop { stroke: #9c3d22; stroke-width: 1.4; fill: none; stroke-dasharray: 5 4; marker-end: url(#arr2); }
+      .jloop-t { font: 600 12px -apple-system, "Segoe UI", sans-serif; fill: #9c3d22; }
+    </style>
+  </defs>
+  <g>
+    <rect class="jn hot" x="12"  y="40" width="128" height="84" rx="10"/>
+    <text class="jn-num" x="26" y="62">1</text><text class="jn-title" x="40" y="62">Erststart</text>
+    <text class="jn-sub" x="24" y="84">Demo-Familie testen</text>
+    <text class="jn-sub" x="24" y="100">oder eigener Haushalt</text>
+
+    <rect class="jn" x="156" y="40" width="128" height="84" rx="10"/>
+    <text class="jn-num" x="170" y="62">2</text><text class="jn-title" x="184" y="62">Personen</text>
+    <text class="jn-sub" x="168" y="84">Person für Person,</text>
+    <text class="jn-sub" x="168" y="100">Skip/Later, editierbar</text>
+
+    <rect class="jn" x="300" y="40" width="128" height="84" rx="10"/>
+    <text class="jn-num" x="314" y="62">3</text><text class="jn-title" x="328" y="62">Plan</text>
+    <text class="jn-sub" x="312" y="84">Laden wählen, Angebote</text>
+    <text class="jn-sub" x="312" y="100">holen, Woche generieren</text>
+
+    <rect class="jn" x="444" y="40" width="128" height="84" rx="10"/>
+    <text class="jn-num" x="458" y="62">4</text><text class="jn-title" x="472" y="62">Anpassen</text>
+    <text class="jn-sub" x="456" y="84">Grillabend für 5 oder</text>
+    <text class="jn-sub" x="456" y="100">Tage aussetzen</text>
+
+    <rect class="jn hot" x="588" y="40" width="128" height="84" rx="10"/>
+    <text class="jn-num" x="602" y="62">5</text><text class="jn-title" x="616" y="62">Einkaufen</text>
+    <text class="jn-sub" x="600" y="84">Liste nach Abteilung,</text>
+    <text class="jn-sub" x="600" y="100">Mengen, Preise, Abhaken</text>
+
+    <rect class="jn" x="732" y="40" width="136" height="84" rx="10"/>
+    <text class="jn-num" x="746" y="62">6</text><text class="jn-title" x="760" y="62">Woche</text>
+    <text class="jn-sub" x="744" y="84">Next Meal, Vorbereitet-</text>
+    <text class="jn-sub" x="744" y="100">Zähler, schnell kochbar</text>
+
+    <path class="jflow" d="M140,82 L156,82"/>
+    <path class="jflow" d="M284,82 L300,82"/>
+    <path class="jflow" d="M428,82 L444,82"/>
+    <path class="jflow" d="M572,82 L588,82"/>
+    <path class="jflow" d="M716,82 L732,82"/>
+    <path class="jloop" d="M800,124 C 800,190 460,205 364,130"/>
+    <text class="jloop-t" x="470" y="196">Nächste Woche: neues Angebot, neuer Plan</text>
+  </g>
+</svg>
+<figcaption>Schritt 1 und 5 sind die beweiskräftigen Momente — der Zwei-Wege-Einstieg und die abteilungsortierte Liste. Die Schleife ist der Wochenrhythmus aus dem Scope.</figcaption>
+</figure>
+
+<h2>Die vier Oberflächen</h2>
+
+<div class="screens" id="screens">
+  <nav role="tablist" aria-label="Oberflächen">
+    <button role="tab" aria-selected="true" data-panel="s1">Hauptbildschirm</button>
+    <button role="tab" aria-selected="false" data-panel="s2">Tagesdetail</button>
+    <button role="tab" aria-selected="false" data-panel="s3">Einkaufsliste</button>
+    <button role="tab" aria-selected="false" data-panel="s4">Onboarding &amp; Einstellungen</button>
+  </nav>
+
+  <div class="panel" id="s1">
+    <div class="wire" aria-hidden="true">
+      <div class="whdr">
+        <div class="hd"><b>Familie Expedition 33</b> · Aldi Süd ▾</div>
+        <div class="hd">Plan basiert auf <b>14</b> aktuellen Angeboten · [V]</div>
+      </div>
+      <div class="hero-card"><b>NEXT MEAL · 18:30</b> — Zucchini-Pasta mit Hack (4 Personen) · <b>3 Mahlzeiten vorbereitet</b></div>
+      <div class="days">
+        <div class="day">Mo<br>F·M·A</div><div class="day">Di<br>F·M</div><div class="day">Mi<br>F·M</div><div class="day">Do<br>F·M·A</div><div class="day">Fr<br>F·M·A</div><div class="day today">Sa<br>🥩 M</div><div class="day">So<br>F·M·A</div>
+      </div>
+      <div class="cta">Einkaufsliste — 27 Positionen</div>
+    </div>
+    <ul>
+      <li>Kopfzeile: Haushaltsname, <b>Ladenwahl pro Woche</b>, Indikator „N aktuelle Angebote", Profil-Umschalter (färbt die Ansicht).</li>
+      <li>Hero: nächstes Essen, Portionen, Zähler „X Mahlzeiten vorbereitet".</li>
+      <li>Wochenstreifen: Mahlzeiten-Chips (F/M/A), Event-Marker, heute hervorgehoben.</li>
+      <li>Einkaufslisten-Button als CTA.</li>
+    </ul>
+  </div>
+
+  <div class="panel" id="s2" hidden>
+    <ul>
+      <li>Gerichte des Tages mit Personen (wer isst mit) und <b>„schnell kochbar"-Flag</b> für Werktage.</li>
+      <li>Pro Gericht auflösbar: Zutaten mit Mengen (daher speist sich die Liste).</li>
+      <li>Einstieg für <b>„Event hinzufügen"</b> und <b>„Tag aussetzen"</b>.</li>
+      <li>Event-Flow: Personenanzahl → Gerichtvorschläge aus den aktuellen Angeboten (freie Eingabe auch) → bestätigen → Plan &amp; Liste skalieren.</li>
+    </ul>
+    <div class="crit"><b>Prüfkriterium:</b> Grillabend mit 5 Nachbarn angelegt → Samstag-Abendessen skaliert auf 9 Personen, mindestens ein Event-Gericht trägt einen Angebotspreis, die Liste enthält die zusätzlichen Mengen.</div>
+  </div>
+
+  <div class="panel" id="s3" hidden>
+    <ul>
+      <li>Zeile = Produkt × Menge („500 g Hackfleisch", „2× Zucchini") × Preis × <b>Angebots-Badge</b>.</li>
+      <li>Gleiche Zutaten aus mehreren Rezepten sind <b>zu einer Position aggregiert</b>.</li>
+      <li>Gruppiert nach Ladenabteilung: Obst &amp; Gemüse, Fleisch, Milchprodukte, Trockenware.</li>
+      <li>Abhaken mit Fortschrittsanzeige — der Begleiter im realen Laden.</li>
+    </ul>
+    <div class="crit"><b>Prüfkriterium:</b> Die Mengen einer Liste stimmen mit den Rezepten der Woche überein (nachrechenbar an 2–3 Beispielprodukten); Positionen mit aktueller Aktion sind als solche erkennbar.</div>
+  </div>
+
+  <div class="panel" id="s4" hidden>
+    <ul>
+      <li><b>Erststart:</b> zwei Wege — „Mit Demo-Familie testen" (Expedition 33 vorbefüllt) oder „Eigenen Haushalt anlegen".</li>
+      <li><b>Person für Person:</b> Name, Rolle, Einschränkungen, optional Kalorienziel, Aktivitätsfragen (Beruf/Alltag → geschätzter Verbrauch).</li>
+      <li><b>Skip/Later</b> an jeder Frage; unvollständige Personen sind markiert und editierbar.</li>
+      <li><b>Einstellungen (PoC):</b> Personen editieren + Wochenmuster ändern. Mehr nicht.</li>
+      <li>Wochenmuster: einstellbar mit guten Defaults — E33: werktags F(to go)+A für alle, Eltern +M(to go), sa nur M, so alles.</li>
+    </ul>
+    <div class="crit"><b>Prüfkriterium:</b> Eine übersprungene Frage erzeugt keine Sackgasse — die Person taucht im Haushalt auf (als unvollständig markiert) und lässt sich später vervollständigen; der Plan arbeitet mit dem, was da ist.</div>
+  </div>
+</div>
+
+<h2>Verhalten im Detail</h2>
+
+<details class="bucket build" open>
+  <summary><span class="pill">Bauen</span> Die fünf Funktionsbereiche<span class="arrow">›</span></summary>
+  <div class="body">
+    <ul>
+      <li><b>Haushalt &amp; Personen.</b><span>Person-für-Person-Anlage, Skip/Later, editierbar; Demo-Haushalt Expedition 33 (Lune, Verso, Gustav 33 laktoseintolerant, Maelle 16 vegetarisch, Verso mit Kalorienziel); Profil-Umschalter ohne Login.</span></li>
+      <li><b>Wochenplan.</b><span>Aus Mahlzeitenmuster + echten Angeboten; respektiert Einschränkungen, Kalorienziele inkl. Verbrauchsschätzung, Abwechslung, schnell-kochbar-Flags; Regenerieren ersetzt sichtbar. Planen und Einkaufen sind entkoppelte Rollen — Lune plant mittwochs, Verso kauft donnerstagmorgens.</span></li>
+      <li><b>Events &amp; Ausnahmen.</b><span>Event mit Personenanzahl und Angebots-Vorschlägen; Tage aussetzen; sofortige Aktualisierung von Plan und Liste.</span></li>
+      <li><b>Einkaufsliste.</b><span>Aggregierte Mengen, Preise, Angebots-Badges, Abteilungsgruppen, Abhaken mit Fortschritt.</span></li>
+      <li><b>Angebots-Basis.</b><span>„Basiert auf N aktuellen Angeboten" als Beleg; stehendes Sortiment als Rückgrat; bei fehlenden Daten offene Meldung + letzte Lage mit Datum.</span></li>
+    </ul>
+  </div>
+</details>
+
+<h2>Zustände &amp; Grenzen</h2>
+<div class="stategrid">
+  <div class="state"><h3>Erstnutzung</h3><p>Zwei-Wege-Einstieg; der Demo-Weg überspringt das Onboarding.</p></div>
+  <div class="state"><h3>Unvollständige Person</h3><p>Existiert, ist markiert, editierbar; der Plan arbeitet mit dem, was vorhanden ist.</p></div>
+  <div class="state"><h3>Keine Angebotsdaten</h3><p>Offene Meldung („Keine aktuellen Angebote für Lidl gefunden") + Option „letzte Lage vom DD.MM. nutzen" — nie still fingiert.</p></div>
+  <div class="state"><h3>Persistenz</h3><p>Haushalt, Personen, Plan, Liste und Abhak-Status überleben das Schließen; ein fester Haushalt, keine Konten.</p></div>
+  <div class="state"><h3>Identität</h3><p>Profil-Umschalter = Ansichtswechsel ohne Auth; nichts ist verborgen.</p></div>
+  <div class="state"><h3>Tonalität</h3><p>Ernährung behandelt, nicht gepredigt — Kalorien dezent pro Person, keine Nag-Banner.</p></div>
+  <div class="state"><h3>Grundvorrat</h3><p>Salz, Öl, Essig, Standard-Gewürze werden vorausgesetzt und erscheinen nie automatisch auf der Liste (das „Salz-Problem“).</p></div>
+</div>
+
+<h2>Grenzen des PoC</h2>
+
+<details class="bucket later">
+  <summary><span class="pill">Später</span> Bewusst aufgeschoben<span class="arrow">›</span></summary>
+  <div class="body">
+    <ul>
+      <li><b>Konten &amp; Tenant.</b><span>Echte Logins, gemeinsamer Speicher, Konto-Übertragung bei Trennung.</span></li>
+      <li><b>Pantry + Favoriten pro Person.</b><span>Küchenbestand; Favoriten als späterer Brückenschlag zum Vorrat.</span></li>
+      <li><b>History alter Pläne.</b><span>Für den Beweis nicht nötig.</span></li>
+      <li><b>Sport-Tracking &amp; Gewichtsverlauf.</b><span>Verbrauch kommt im PoC aus dem Onboarding-Profil.</span></li>
+      <li><b>Weitere Demo-Haushalte (2–3 Konstellationen).</b><span>Material für einen späteren „echten" PoC.</span></li>
+      <li><b>Küchenausstattung, Garten-Überschuss, Resteverwertung, Saisonalität, mehrwöchige Pläne, Non-Food, Haustierbedarf (z. B. Katzenfutter).</b><span>Aus dem Scope übernommen bzw. als Non-Food-/Vorrats-Erweiterung eingeordnet.</span></li>
+    </ul>
+  </div>
+</details>
+
+<details class="bucket nongoal">
+  <summary><span class="pill">Non-Goals</span> Wird nicht getan<span class="arrow">›</span></summary>
+  <div class="body">
+    <ul>
+      <li><b>Mehrere Läden vergleichen.</b><span>Ein Laden, ein Einkauf.</span></li>
+      <li><b>Login/Auth.</b><span>Beweist den Kernel nicht.</span></li>
+      <li><b>HelloFresh-Modell.</b><span>Kein Abo, keine Lieferbox.</span></li>
+      <li><b>Ernährungs-Moral.</b><span>Information statt Druck.</span></li>
+      <li><b>Zier-Animationen, Hintergrundvideos.</b><span>„Wir sind kein Insta."</span></li>
+    </ul>
+  </div>
+</details>
+
+<h2>Offene Fragen</h2>
+<div class="openq">
+  <h3>Drei Dinge, die noch offen sind</h3>
+  <ol>
+    <li><b>Rezept-Pool:</b> Arbeitsannahme — ein kuratierter, kleiner Pool discounter-typischer Rezepte (mit Tags vegetarisch/milchfrei/schnell und Mengen) wird mitgeliefert. <b>Klärt zu Beginn von 4-spec.</b></li>
+    <li><b>Beschaffung der echten Angebotsdaten</b> (Scraping vs. gepflegte echte Momentaufnahme) — größte technische Entscheidung, bewusst an 4-spec verwiesen.</li>
+    <li><b>Projektname</b> über den Arbeitstitel hinaus — relevant erst für 6-ship.</li>
+    <li><b>Monetarisierung („how do we make money“)</b> — angesprochen und bewusst geparkt: kein PoC-Thema, blockiert 4-spec nicht.</li>
+  </ol>
+</div>
+
+<footer>
+  Status: Genehmigt · Verbindliches Dokument: <code>devpost/prd.md</code> · Diese Seite wird bei Änderungen neu erzeugt.
+</footer>
+
+</main>
+<script>
+  (function () {
+    var root = document.getElementById('screens');
+    var tabs = root.querySelectorAll('nav button');
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        tabs.forEach(function (t) {
+          t.setAttribute('aria-selected', t === tab ? 'true' : 'false');
+          root.querySelector('#' + t.dataset.panel).hidden = t !== tab;
+        });
+      });
+    });
+  })();
+</script>
+</body>
+</html>

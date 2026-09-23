@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scope — Familien-Einkaufsplaner</title>
+<style>
+  :root {
+    --paper: #faf7f2;
+    --ink: #1c1a17;
+    --muted: #6b655c;
+    --line: #e4ddd1;
+    --accent: #f5c400;
+    --accent-ink: #1c1a17;
+    --teal: #0f6b5f;
+    --teal-bg: #e7f2ef;
+    --clay: #9c3d22;
+    --clay-bg: #f8ece6;
+    --card: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  main { max-width: 880px; margin: 0 auto; padding: 0 24px 80px; }
+  header.hero { padding: 56px 0 8px; }
+  .chip {
+    display: inline-block;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 999px;
+  }
+  h1 { font-size: clamp(30px, 5vw, 44px); line-height: 1.1; margin: 18px 0 10px; letter-spacing: -0.02em; }
+  .oneliner { font-size: 19px; color: var(--muted); max-width: 640px; margin: 0; }
+  .canonical { margin-top: 18px; font-size: 13px; color: var(--muted); }
+  .canonical code { background: #efe9de; padding: 2px 6px; border-radius: 4px; }
+  h2 {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 56px 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  h2::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+  .kernel {
+    background: var(--card);
+    border: 2px solid var(--ink);
+    border-radius: 14px;
+    padding: 26px 28px;
+    font-size: 18px;
+    box-shadow: 5px 5px 0 var(--accent);
+  }
+  .kernel strong { background: var(--accent); padding: 0 4px; }
+  figure.diagram { margin: 0; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 20px 12px 8px; }
+  figure.diagram svg { width: 100%; height: auto; display: block; }
+  figcaption { font-size: 13px; color: var(--muted); padding: 10px 12px 6px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; }
+  .card h3 { margin: 0 0 6px; font-size: 16px; }
+  .card p { margin: 0; font-size: 14.5px; color: #443f38; }
+  .card .tag { display: inline-block; font-size: 11.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--teal); background: var(--teal-bg); border-radius: 999px; padding: 2px 10px; margin-bottom: 10px; }
+  .rhythm { background: var(--card); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+  .rhythm nav { display: flex; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  .rhythm nav button {
+    flex: 1 1 auto;
+    border: none; background: none; cursor: pointer;
+    font: inherit; font-size: 14px; font-weight: 600;
+    padding: 14px 10px; color: var(--muted);
+    border-right: 1px solid var(--line);
+  }
+  .rhythm nav button:last-child { border-right: none; }
+  .rhythm nav button[aria-selected="true"] { background: var(--ink); color: #fff; }
+  .rhythm .panel { padding: 22px 24px; font-size: 15.5px; min-height: 118px; }
+  .rhythm .panel b { display: block; margin-bottom: 4px; }
+  .steps { counter-reset: step; margin: 0; padding: 0; list-style: none; }
+  .steps li { counter-increment: step; position: relative; padding: 0 0 16px 46px; }
+  .steps li::before {
+    content: counter(step);
+    position: absolute; left: 0; top: -2px;
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--ink); color: #fff;
+    font-weight: 700; font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .steps li::after { content: ""; position: absolute; left: 14px; top: 32px; bottom: 2px; width: 2px; background: var(--line); }
+  .steps li:last-child::after { display: none; }
+  .steps b { display: block; }
+  .steps span { color: #443f38; font-size: 14.5px; }
+  .demo { background: var(--card); border: 1px solid var(--line); border-left: 6px solid var(--accent); border-radius: 12px; padding: 22px 26px; }
+  .demo ol { margin: 12px 0 0; padding-left: 22px; }
+  .demo li { margin-bottom: 6px; font-size: 15.5px; }
+  .beat { margin-top: 16px; background: #fff8d6; border-radius: 8px; padding: 12px 16px; font-size: 15px; }
+  details.bucket { background: var(--card); border: 1px solid var(--line); border-radius: 12px; margin-bottom: 12px; }
+  details.bucket summary {
+    cursor: pointer; padding: 16px 20px; font-weight: 700; font-size: 15.5px;
+    display: flex; align-items: center; gap: 10px; list-style: none;
+  }
+  details.bucket summary::-webkit-details-marker { display: none; }
+  details.bucket summary .arrow { margin-left: auto; transition: transform .2s; color: var(--muted); }
+  details.bucket[open] summary .arrow { transform: rotate(90deg); }
+  details.bucket .body { padding: 0 20px 18px; }
+  details.later summary .pill { background: var(--teal-bg); color: var(--teal); }
+  details.cut   summary .pill { background: var(--clay-bg); color: var(--clay); }
+  .pill { font-size: 11.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; border-radius: 999px; padding: 3px 10px; }
+  details.bucket ul { margin: 0; padding-left: 20px; }
+  details.bucket li { margin-bottom: 10px; font-size: 14.5px; }
+  details.bucket li b { display: block; font-size: 15px; }
+  details.bucket li span { color: #443f38; }
+  .inlist { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 20px 24px; }
+  .inlist ul { margin: 0; padding-left: 20px; }
+  .inlist li { margin-bottom: 7px; font-size: 15px; }
+  footer { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+
+<header class="hero">
+  <span class="chip">Scope · Genehmigt</span>
+  <h1>Familien-Einkaufsplaner</h1>
+  <p class="oneliner">Aus den echten Wochenangeboten eines Discounters (Aldi Süd / Lidl) einen Essensplan für den ganzen Haushalt bauen — mit Einkaufsliste inklusive Mengen für <em>einen</em> Einkauf.</p>
+  <p class="canonical">Verbindliches Dokument: <code>devpost/scope.md</code> — diese Seite ist nur die Begleitung.</p>
+</header>
+
+<h2>Der einzigartige Kern</h2>
+<div class="kernel">
+  <strong>Ein Haushalt, ein Plan, ein Einkauf</strong> — aber die Personen darin sind unterschiedlich: ein Kind vegetarisch, eines laktoseintolerant, ein Erwachsener im Kaloriendefizit. Der Plan löst diese Einschränkungen <em>gleichzeitig</em> auf, aus echten aktuellen Angeboten, mit konkreten Produkten und Mengen. Kein bestehendes Tool verbindet Prospektdaten + personenbezogene Einschränkungen + eine gemeinsame Einkaufsliste. Nebenbei ist der Plan die Verschwendungsprävention: exakte Mengen, nichts verdirbt, weil falsch geplant wurde. Und das alles dezent: Ernährung wird behandelt, nicht gepredigt.
+</div>
+
+<h2>Wer es nutzt · womit es gespeist wird</h2>
+
+<figure class="diagram">
+<svg viewBox="0 0 880 430" role="img" aria-label="Diagramm: Haushalt und Angebote fließen in den Planungs-Motor, daraus entsteht der Wochenplan, daraus die Einkaufsliste für einen Einkauf">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1c1a17"/>
+    </marker>
+    <style>
+      .box { fill: #ffffff; stroke: #e4ddd1; rx: 12; }
+      .hero-box { fill: #fff8d6; stroke: #1c1a17; stroke-width: 1.6; }
+      .title { font: 700 15px -apple-system, "Segoe UI", sans-serif; fill: #1c1a17; }
+      .sub { font: 400 13px -apple-system, "Segoe UI", sans-serif; fill: #443f38; }
+      .dim { font: 400 12px -apple-system, "Segoe UI", sans-serif; fill: #6b655c; }
+      .flow { stroke: #1c1a17; stroke-width: 1.6; fill: none; marker-end: url(#arr); }
+      .feedback { stroke: #9c3d22; stroke-width: 1.4; fill: none; stroke-dasharray: 5 4; marker-end: url(#arr); }
+      .fb-label { font: 600 12px -apple-system, "Segoe UI", sans-serif; fill: #9c3d22; }
+    </style>
+  </defs>
+
+  <!-- Haushalt -->
+  <rect class="box" x="16" y="28" width="240" height="168" rx="12"/>
+  <text class="title" x="34" y="56">Haushalt — 4 Personen</text>
+  <text class="sub"  x="34" y="84">Lune · kocht, plant den Einkauf</text>
+  <text class="sub"  x="34" y="108">Verso · Kalorienziel + Verbrauch</text>
+  <text class="sub"  x="34" y="132">Maelle (16) · vegetarisch</text>
+  <text class="sub"  x="34" y="156">Gustav (33) · laktoseintolerant</text>
+  <text class="dim"  x="34" y="182">ein Profil pro Person</text>
+
+  <!-- Angebote -->
+  <rect class="box" x="16" y="240" width="240" height="140" rx="12"/>
+  <text class="title" x="34" y="268">Echte Angebote</text>
+  <text class="sub"  x="34" y="294">Aldi Süd · Lidl</text>
+  <text class="sub"  x="34" y="318">laufende Woche, mit Preisen</text>
+  <text class="dim"  x="34" y="344">Mindestens 1 echte Momentaufnahme</text>
+
+  <!-- Motor -->
+  <rect class="hero-box" x="330" y="150" width="212" height="110" rx="12"/>
+  <text class="title" x="352" y="192">Planungs-Motor</text>
+  <text class="sub"  x="352" y="216">LLM-Agent auf einem Server</text>
+  <text class="sub"  x="352" y="238">löst alle Einschränkungen</text>
+
+  <!-- Wochenplan -->
+  <rect class="box" x="618" y="34" width="246" height="118" rx="12"/>
+  <text class="title" x="638" y="62">Wochenplan</text>
+  <text class="sub"  x="638" y="88">Gerichte für die ganze Familie,</text>
+  <text class="sub"  x="638" y="110">Abwechslung statt Wiederholung</text>
+  <text class="sub"  x="638" y="132">unter der Woche schnell kochbar</text>
+
+  <!-- Einkaufsliste -->
+  <rect class="box" x="618" y="196" width="246" height="112" rx="12"/>
+  <text class="title" x="638" y="224">Einkaufsliste</text>
+  <text class="sub"  x="638" y="250">konkretes Produkt × Menge</text>
+  <text class="sub"  x="638" y="272">aus den Rezepten der Woche,</text>
+  <text class="sub"  x="638" y="294">Preise aus dem Prospekt</text>
+
+  <!-- Ziel -->
+  <rect class="hero-box" x="618" y="352" width="246" height="52" rx="12"/>
+  <text class="title" x="672" y="384">1 Laden · 1 Einkauf · 1 Woche</text>
+
+  <!-- Flüsse -->
+  <path class="flow" d="M256,112 C 295,112 300,165 330,185"/>
+  <path class="flow" d="M256,310 C 295,310 300,255 330,225"/>
+  <path class="flow" d="M542,190 C 575,175 585,120 618,100"/>
+  <path class="flow" d="M542,220 C 575,235 585,240 618,248"/>
+  <path class="flow" d="M741,308 L741,352"/>
+
+  <!-- Feedback Events -->
+  <path class="feedback" d="M600,300 C 540,330 470,300 450,262"/>
+  <text class="fb-label" x="452" y="330">Events &amp; Ausnahmen:</text>
+  <text class="fb-label" x="452" y="348">„Grillabend Sa, 5 Pers.“ · „Di/Mi aussetzen“</text>
+</svg>
+<figcaption>Personen und Angebote fließen in den Planungs-Motor; der Wochenplan und die Einkaufsliste sind die Ausgabe. Events und Ausnahmen greifen vor der Liste ein.</figcaption>
+</figure>
+
+<div class="cards" style="margin-top:14px;">
+  <div class="card">
+    <span class="tag">Demo-Familie</span>
+    <h3>Der Haushalt</h3>
+    <p>Lune, Verso, Gustav (33) und Maelle (16) — Maelle isst vegetarisch, Gustav ist laktoseintolerant, Verso will mit Kalorienziel abnehmen. Ein Wocheneinkauf bei einem Discounter statt HelloFresh-Preisen und Einkaufschaos.</p>
+  </div>
+  <div class="card">
+    <span class="tag">Flexibilität</span>
+    <h3>Events &amp; Ausnahmen</h3>
+    <p>„Grillabend Samstag mit 5 Nachbarn“ ergänzen oder „Dienstag und Mittwoch aussetzen“ — Plan und Einkaufsliste passen sich an. Bewusst simpel: ein Werkzeug, kein Kalendersystem.</p>
+  </div>
+  <div class="card">
+    <span class="tag">Der Erbauer</span>
+    <h3>Der echte Nutzer</h3>
+    <p>Berufstätig (08:00–19:00), kauft donnerstags nach der Arbeit ein. Will sonntags wissen, was gekocht wird — und unter der Woche schnell zubereitbare Gerichte.</p>
+  </div>
+  <div class="card">
+    <span class="tag">Abgrenzung</span>
+    <h3>Anti-Beispiele</h3>
+    <p>HelloFresh: zu teuer. Yazio: ich muss alles selbst eintragen. ChatGPT: empfiehlt Karotten, kennt aber keine Preise und keine Familienmitglieder.</p>
+  </div>
+</div>
+
+<h2>Der Kern-Ablauf · einmal pro Woche</h2>
+
+<div class="rhythm" id="rhythm">
+  <nav role="tablist" aria-label="Wochenrhythmus">
+    <button role="tab" aria-selected="true" data-panel="p1">Donnerstag</button>
+    <button role="tab" aria-selected="false" data-panel="p2">Sonntag</button>
+    <button role="tab" aria-selected="false" data-panel="p3">Montag / Dienstag</button>
+    <button role="tab" aria-selected="false" data-panel="p4">Rest der Woche</button>
+  </nav>
+  <div class="panel" id="p1"><b>Der eine Einkauf.</b>Nach der Arbeit: Angebote frisch geholt, Plan fertig, Liste in der Hand — genau die Produkte in genau den Mengen, ein Laden.</div>
+  <div class="panel" id="p2" hidden><b>Wissen, was kommt.</b>Der Wochenplan steht: Welche Gerichte wann, was ist am Event-Tag anders, was wird vorbereitet.</div>
+  <div class="panel" id="p3" hidden><b>Schnell kochen.</b>Angeleitete schnelle Gerichte für die Abende nach dem 11-Stunden-Tag — geplant, nicht improvisiert.</div>
+  <div class="panel" id="p4" hidden><b>Nachschlagen statt nachdenken.</b>Was koche ich heute, mit was aus dem Vorrat — der Plan läuft, der nächste Donnerstag kommt von selbst.</div>
+</div>
+
+<h2>Wann es „funktioniert“</h2>
+<div class="demo">
+  Die 60-Sekunden-Demo:
+  <ol>
+    <li>Planer öffnen → Wochenplan für die 4-köpfige Familie sichtbar, jedes Gericht in Zutaten mit Mengen auflösbar.</li>
+    <li>Profil-Umschalter zeigt: Maelles Gericht ist vegetarisch, Gustavs Milchprodukte sind ersetzt — und Versos Kalorienziel ist mit seinem geschätzten Verbrauch aus dem Profil eingerechnet.</li>
+    <li>„Grillabend Samstag, 5 Personen“ als Event ergänzt → Plan <em>und</em> Einkaufsliste aktualisieren sich.</li>
+    <li>Die Liste basiert nachweislich auf echten, aktuellen Angeboten — mit Preisen.</li>
+  </ol>
+  <div class="beat"><b>Der „oh, das ist cool“-Moment:</b> Die Einkaufsliste enthält ein konkretes Aktionsprodukt in genau der Menge, die die Rezepte der Woche brauchen.</div>
+</div>
+
+<h2>Im Proof of Concept</h2>
+<div class="inlist">
+  <ul>
+    <li>Ein Haushalt (Lune, Verso, Gustav, Maelle) mit den genannten Einschränkungen; pro Person ein optionales Kalorienziel, das der Plan rechnet — geschätzter Tagesverbrauch aus einfachen Onboarding-Fragen (u. a. Beruf/Alltag, wie aktiv ist der Tag)</li>
+    <li>Plan für eine Woche</li>
+    <li>Events/Ausnahmen als einfaches Werkzeug: ein Tag aussetzen oder ein Event-Gericht ergänzen</li>
+    <li>Echte Angebotsdaten von Aldi Süd und Lidl — mindestens eine echte Momentaufnahme der laufenden Woche</li>
+    <li>Einkaufsliste mit Mengen und Preisen</li>
+    <li>Profil-Umschalter statt Login (Lune / Verso / Gustav / Maelle)</li>
+    <li>Tonalität: Einschränkungen werden dezent behandelt, nicht gepredigt — Kalorien erscheinen ruhig pro Person, Rücksicht auf sensible Vorgeschichten</li>
+    <li>Ein fester Haushalt, keine Mandanten-Verwaltung</li>
+  </ul>
+</div>
+
+<h2>Drüber hinaus</h2>
+<details class="bucket later">
+  <summary><span class="pill">Später</span> Wertvoll — aber nicht der Beweis<span class="arrow">›</span></summary>
+  <div class="body">
+    <ul>
+      <li><b>Echte Logins pro Familienmitglied, ein Tenant.</b><span>Gemeinsamer Speicher, jeder sieht den Plan.</span></li>
+      <li><b>Mehrwöchige, flexibel wiederholbare Pläne.</b><span>Grundstabilität mit dynamischer Anpassung über mehrere Wochen.</span></li>
+      <li><b>Küchenbestand.</b><span>„Was ist noch da?“ — nur kaufen, was fehlt.</span></li>
+      <li><b>Saisonale &amp; thematische Rezeptvielfalt.</b><span>Gegen die Eintönigkeit, jahreszeitenbezogen.</span></li>
+      <li><b>Fitness-/Trainingstagebücher pro Person.</b><span>Reps und Gewichte tracken wäre zu viel für den PoC — der grobe Tagesverbrauch fließt stattdessen schon über das Onboarding-Profil ein.</span></li>
+      <li><b>Küchen-Ausstattungsprofil.</b><span>Was ist verfügbar → Rezeptpool passt sich an. Der PoC nimmt eine normale Vollküche an.</span></li>
+      <li><b>Garten-Überschuss einbinden.</b><span>Eigene Tomaten &amp; Co. als Planungs-Input.</span></li>
+      <li><b>Resteverwertung als eigenes Feature.</b><span>Die exakten Mengen des PoC sind die erste Stufe der Verschwendungsprävention.</span></li>
+      <li><b>Weitere Zielgruppen.</b><span>Z. B. ältere Paare (~70), die gern kochen und mehr Abwechslung wollen.</span></li>
+      <li><b>Non-Food.</b><span>Putzmittel und Haushaltsartikel in die Planung aufnehmen.</span></li>
+    </ul>
+  </div>
+</details>
+
+<details class="bucket cut">
+  <summary><span class="pill">Bewusst raus</span> Nichts verschwindet still<span class="arrow">›</span></summary>
+  <div class="body">
+    <ul>
+      <li><b>Mehrere Läden vergleichen.</b><span>Der Wert ist <em>ein</em> Laden, <em>ein</em> Einkauf — ein Ketten-Preisvergleich würde PoC und Kernidee sprengen.</span></li>
+      <li><b>Login/Authentifizierung.</b><span>Beweist den Kern nicht; der Profil-Umschalter zeigt die Mehrpersonen-Idee im Video. Echte Logins im Tenant kommen später.</span></li>
+      <li><b>HelloFresh-artige Kochbox-Funktionen.</b><span>Kein Liefermodell, kein Abo — Preise aus dem Prospekt sind der Gegenentwurf.</span></li>
+    </ul>
+  </div>
+</details>
+
+<footer>
+  Status: Genehmigt · Verbindliches Dokument: <code>devpost/scope.md</code> · Diese Seite wird bei Änderungen neu erzeugt.
+</footer>
+
+</main>
+<script>
+  (function () {
+    var root = document.getElementById('rhythm');
+    var tabs = root.querySelectorAll('nav button');
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        tabs.forEach(function (t) {
+          t.setAttribute('aria-selected', t === tab ? 'true' : 'false');
+          root.querySelector('#' + t.dataset.panel).hidden = t !== tab;
+        });
+      });
+    });
+  })();
+</script>
+</body>
+</html>

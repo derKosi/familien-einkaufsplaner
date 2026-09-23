@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spec — Familien-Einkaufsplaner</title>
+<style>
+  :root {
+    --paper: #faf7f2;
+    --ink: #1c1a17;
+    --muted: #6b655c;
+    --line: #e4ddd1;
+    --blue: #43618e;
+    --blue-bg: #e9eef5;
+    --amber: #8a6d1c;
+    --amber-bg: #fdf6e0;
+    --clay: #9c3d22;
+    --clay-bg: #f8ece6;
+    --card: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.55; -webkit-font-smoothing: antialiased; }
+  main { max-width: 920px; margin: 0 auto; padding: 0 24px 80px; }
+  header.hero { padding: 56px 0 8px; }
+  .chip { display: inline-block; background: var(--blue); color: #fff; font-size: 13px; font-weight: 700;
+    letter-spacing: .06em; text-transform: uppercase; padding: 4px 12px; border-radius: 999px; }
+  h1 { font-size: clamp(28px, 4.6vw, 40px); line-height: 1.15; margin: 18px 0 10px; letter-spacing: -0.02em; }
+  .oneliner { font-size: 18px; color: var(--muted); max-width: 680px; margin: 0; }
+  .canonical { margin-top: 18px; font-size: 13px; color: var(--muted); }
+  .canonical code { background: #efe9de; padding: 2px 6px; border-radius: 4px; }
+  h2 { font-size: 14px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
+    margin: 56px 0 16px; display: flex; align-items: center; gap: 12px; }
+  h2::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+  .plain { background: var(--card); border: 1px solid var(--line); border-left: 6px solid var(--blue);
+    border-radius: 12px; padding: 22px 26px; font-size: 15.5px; }
+  .plain p { margin: 0 0 12px; } .plain p:last-child { margin: 0; }
+  figure.diagram { margin: 0; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 20px 10px 6px; }
+  figure.diagram svg { width: 100%; height: auto; display: block; }
+  figcaption { font-size: 13px; color: var(--muted); padding: 10px 12px 8px; }
+  table.stack { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; font-size: 14.5px; }
+  table.stack th { text-align: left; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+    background: var(--paper); padding: 10px 14px; border-bottom: 1px solid var(--line); }
+  table.stack td { padding: 11px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  table.stack tr:last-child td { border-bottom: none; }
+  table.stack td b { display: block; } table.stack td span { color: #443f38; font-size: 13.5px; }
+  details.bucket { background: var(--card); border: 1px solid var(--line); border-radius: 12px; margin-bottom: 12px; }
+  details.bucket summary { cursor: pointer; padding: 15px 20px; font-weight: 700; font-size: 15px;
+    display: flex; align-items: center; gap: 10px; list-style: none; }
+  details.bucket summary::-webkit-details-marker { display: none; }
+  details.bucket summary .arrow { margin-left: auto; transition: transform .2s; color: var(--muted); }
+  details.bucket[open] summary .arrow { transform: rotate(90deg); }
+  details.bucket .body { padding: 0 20px 16px; font-size: 14.5px; }
+  .pill { font-size: 11.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; border-radius: 999px; padding: 3px 10px; }
+  details.comp summary .pill { background: var(--blue-bg); color: var(--blue); }
+  details.fail summary .pill { background: var(--amber-bg); color: var(--amber); }
+  details.simple summary .pill { background: #eef4ec; color: #5f8158; }
+  details.dec summary .pill { background: var(--clay-bg); color: var(--clay); }
+  details.bucket .prdref { display: inline-block; font-size: 12px; color: var(--muted); background: var(--paper);
+    border: 1px solid var(--line); border-radius: 6px; padding: 1px 8px; margin-left: 8px; vertical-align: middle; }
+  details.bucket pre { background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px;
+    font-size: 12.5px; overflow-x: auto; line-height: 1.5; }
+  .stategrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+  .state { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+  .state h3 { margin: 0 0 6px; font-size: 15px; }
+  .state p { margin: 0; font-size: 14px; color: #443f38; }
+  .openq { background: var(--card); border: 1.5px dashed var(--amber); border-radius: 12px; padding: 18px 22px; }
+  .openq h3 { margin: 0 0 8px; font-size: 15px; color: var(--amber); }
+  .openq ul { margin: 0; padding-left: 20px; font-size: 14.5px; }
+  footer { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+
+<header class="hero">
+  <span class="chip">Spec · Genehmigt</span>
+  <h1>Familien-Einkaufsplaner</h1>
+  <p class="oneliner">Der Bauplan: TypeScript-Monorepo, Fastify + React, SQLite, ein LLM-Aufruf mit fester Antwortstruktur — und eine saubere Naht für den späteren Angebot-Fetcher.</p>
+  <p class="canonical">Verbindliches Dokument: <code>devpost/spec.md</code> · Basis: <code>devpost/prd.md</code> (genehmigt)</p>
+</header>
+
+<h2>Wie es funktioniert — in einem Absatz</h2>
+<div class="plain">
+  <p>Du öffnest die Seite → der Browser lädt eine React-App → sie fragt den Fastify-Server per REST/JSON → der liest und schreibt eine SQLite-Datei auf einem Docker-Mount. Beim <b>„Plan erstellen“</b> sammelt der Server vier Dinge — Personen mit Einschränkungen, Wochenmuster, Rezept-Pool, neueste Angebots-Momentaufnahme — und gibt sie einem <b>einzelnen Claude-Aufruf</b> mit fester Antwortstruktur mit. Die Antwort wird gegen ein Schema geprüft (max. 2 kontrollierte Retries), erst dann gespeichert.</p>
+  <p>Die <b>Einkaufsliste rechnet der Server selbst</b> aus — Zutaten aggregiert, Preise aus den Angeboten, kcal aus einem Nährwert-Werkblatt. <b>Das LLM wählt und kombiniert; rechnen tut der Rechner.</b></p>
+</div>
+
+<h2>Die Architektur</h2>
+
+<figure class="diagram">
+<svg viewBox="0 0 880 400" role="img" aria-label="Architektur: React SPA über REST am Fastify-Server, der SQLite und Datenpakete liest, Claude-API aufruft und Angebots-Snapshots aus data/ lädt — mit Naht für den späteren Fetcher">
+  <defs>
+    <marker id="arr3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1c1a17"/>
+    </marker>
+    <style>
+      .bx { fill: #ffffff; stroke: #e4ddd1; }
+      .bx.blue { fill: #e9eef5; stroke: #43618e; stroke-width: 1.5; }
+      .bx.dark { fill: #1c1a17; }
+      .bt { font: 700 14px -apple-system, "Segoe UI", sans-serif; fill: #1c1a17; }
+      .bt.w { fill: #ffffff; }
+      .bs { font: 400 12px -apple-system, "Segoe UI", sans-serif; fill: #443f38; }
+      .bs.d { fill: #b9b2a6; }
+      .fl { stroke: #1c1a17; stroke-width: 1.6; fill: none; marker-end: url(#arr3); }
+      .ext { stroke: #9c3d22; stroke-width: 1.5; fill: none; stroke-dasharray: 5 4; marker-end: url(#arr3); }
+      .extt { font: 600 12px -apple-system, "Segoe UI", sans-serif; fill: #9c3d22; }
+      .g { font: 600 11px -apple-system, "Segoe UI", sans-serif; fill: #6b655c; letter-spacing: .08em; }
+    </style>
+  </defs>
+
+  <rect class="bx blue" x="24" y="120" width="200" height="130" rx="12"/>
+  <text class="bt" x="42" y="148">React SPA</text>
+  <text class="bs" x="42" y="170">Vite-Build · 4 Oberflächen</text>
+  <text class="bs" x="42" y="188">Theming: Pastell je Person,</text>
+  <text class="bs" x="42" y="206">Light/Dark/System</text>
+  <text class="bs" x="42" y="230">apps/web</text>
+
+  <rect class="bx dark" x="300" y="104" width="230" height="162" rx="12"/>
+  <text class="bt w" x="318" y="132">Fastify API</text>
+  <text class="bs d" x="318" y="154">REST + JSON, typisiert</text>
+  <text class="bs d" x="318" y="178">planner.ts → Claude-Aufruf</text>
+  <text class="bs d" x="318" y="196">aggregation.ts → Liste, kcal</text>
+  <text class="bs d" x="318" y="220">offers/store.ts → Naht</text>
+  <text class="bs d" x="318" y="244">apps/api</text>
+
+  <rect class="bx" x="620" y="24" width="236" height="110" rx="12"/>
+  <text class="bt" x="638" y="50">Claude API</text>
+  <text class="bs" x="638" y="70">ein Aufruf, feste Antwortstruktur,</text>
+  <text class="bs" x="638" y="86">zod-Validierung, max. 2 Retries</text>
+  <text class="extt" x="638" y="108">Empfang: nur pseudonymisierter Kern</text>
+  <text class="extt" x="638" y="124">(GUIDs statt Namen, keine PII)</text>
+
+  <rect class="bx" x="620" y="160" width="236" height="106" rx="12"/>
+  <text class="bt" x="638" y="188">SQLite + data/</text>
+  <text class="bs" x="638" y="210">app.db · offers/*.json</text>
+  <text class="bs" x="638" y="228">recipes.json · nutrition.json</text>
+  <text class="bs" x="638" y="252">Docker-Bind-Mount</text>
+
+  <path class="fl" d="M224,175 C 255,175 265,180 300,183"/>
+  <text class="bs" x="238" y="166">REST/JSON</text>
+  <path class="fl" d="M530,140 C 565,125 580,90 620,74"/>
+  <path class="fl" d="M530,210 C 565,225 580,225 620,220"/>
+  <path class="ext" d="M738,134 L738,160"/>
+  <text class="extt" x="748" y="152">Validierter Plan wird gespeichert</text>
+
+  <rect class="bx" x="620" y="300" width="236" height="76" rx="12"/>
+  <text class="bt" x="638" y="326">Lidl / Aldi Süd Seiten</text>
+  <text class="bs" x="638" y="348">Quelle der echten Snapshots —</text>
+  <text class="bs" x="638" y="366">im Build, nicht zur Laufzeit</text>
+  <path class="fl" d="M738,300 L738,266"/>
+  <path class="ext" d="M300,300 C 400,320 560,320 620,348"/>
+  <text class="extt" x="330" y="336">später: echter Fetcher / nächtlicher Cron an dieser Naht</text>
+
+  <text class="g" x="24" y="286">EIN PROZESS IM DOCKER-CONTAINER · FASTIFY SERVIERT DIE SPA STATISCH MIT</text>
+</svg>
+<figcaption>Der blaue Kasten ist der einzige externe Dienst zur Laufzeit (Claude API, Cent-Beträge). Lidl/Aldi-Seiten sind Quelle im Build, nicht Abhängigkeit der App. Die gestrichelte Naht (`OfferSource`) ist der Andockpunkt für den späteren nächtlichen Abgleich.</figcaption>
+</figure>
+
+<h2>Der Stack</h2>
+<table class="stack">
+  <tr><th>Baustein</th><th>Wahl &amp; Begründung — Zuschreibung: <b>Lerner</b> = eigene Idee, <b>bestätigt</b> = Agent-Empfehlung, akzeptiert</th></tr>
+  <tr><td><b>TypeScript überall</b></td><td><span><b>Bestätigt.</b> Eine Sprache, weniger Bruchstellen im Agenten-Build. Tradeoff: .NET-Erfahrung bleibt bewusst ungenutzt.</span></td></tr>
+  <tr><td><b>Monorepo (Workspaces)</b></td><td><span><b>Lerner</b>, vom Agenten bekräftigt: Zwei-Repos-Split explizit verworfen — geteilte zod-Typen würden Kopier-Drift, zwei CIs für einen Container. <code>packages/shared</code> ist das Herz der typisierten Endpunkte.</span></td></tr>
+  <tr><td><b>Vite + React</b></td><td><span><b>Lerner-Intuition</b>, bestätigt; HTMX (Lerner-Idee) verworfen (Client-Interaktivität: Theming-Switch, Abhaken, Streifen).</span></td></tr>
+  <tr><td><b>Node + Fastify</b></td><td><span><b>Bestätigt.</b> Börsenreif, wenig Magie, gute Doku — „langweilig und wartbar“.</span></td></tr>
+  <tr><td><b>SQLite (better-sqlite3)</b></td><td><span><b>Bestätigt</b>; GCP-Idee verworfen — eine Datei am Mount, gleiche Datenform, null Zusatzdienst.</span></td></tr>
+  <tr><td><b>zod in packages/shared</b></td><td><span><b>Lerner</b>: „typisierte Antworten Ende-zu-Ende“; dieselben Schemas validieren die LLM-Ausgabe.</span></td></tr>
+  <tr><td><b>Anthropic TS SDK</b></td><td><span><b>Lerner-Scope</b>, Agent-Ausgestaltung inkl. PII-Filter: Rezeptauswahl, Constraint-Check, Wochenplan, Portionierung.</span></td></tr>
+  <tr><td><b>REST + JSON</b></td><td><span><b>Bestätigt</b>; Protobuf/SignalR verworfen — Debuggen mit curl, Real-Time löst ein Problem, das der PoC nicht hat.</span></td></tr>
+  <tr><td><b>Vitest</b></td><td><span><b>Bestätigt.</b> Aggregation, Kalorien, Schema-Validierung, PII-Filter — „nachrechenbar“ wird bewiesen.</span></td></tr>
+  <tr><td><b>Docker, ein Container</b></td><td><span><b>Lerner</b>: „eh in Docker mit Mount“. Fastify serviert die SPA mit; <code>data/</code> am Bind-Mount. VM-Deployment optional in 6-ship.</span></td></tr>
+</table>
+
+<h2>Komponenten — jede mit ihrem PRD-Zuhause</h2>
+
+<details class="bucket comp" open>
+  <summary><span class="pill">Frontend</span> apps/web — die vier Oberflächen<span class="prdref">prd.md › Screens and Layout</span><span class="arrow">›</span></summary>
+  <div class="body">Hauptbildschirm (Ladenwahl, „basiert auf N Angeboten“, Next-Meal-Hero, Wochenstreifen, Listen-CTA), Tagesdetail, Einkaufsliste, Onboarding/Einstellungen. Theming über CSS-Custom-Properties: Light/Dark/System, große-Schrift-Option, reduced-motion, Pastell-Paare pro Person am Profil-Umschalter. Kein CSS-Framework.</div>
+</details>
+
+<details class="bucket comp">
+  <summary><span class="pill">Backend</span> apps/api — Fastify-REST<span class="prdref">prd.md › Features and Behavior</span><span class="arrow">›</span></summary>
+  <div class="body">Endpoints: <code>GET /api/state</code>, <code>POST /api/household/demo</code>, <code>POST /api/persons</code>, <code>PATCH /api/persons/:id</code>, <code>POST /api/plan/generate</code>, <code>POST /api/plan/events</code>, <code>POST /api/plan/exemptions</code>, <code>PATCH /api/shopping-list/:itemId</code>, <code>GET /api/offers/latest</code>, <code>POST /api/offers/refresh</code>. Alle Antworten typisiert über <code>packages/shared</code>.</div>
+</details>
+
+<details class="bucket comp">
+  <summary><span class="pill">Der Kopf</span> llm/planner.ts + context-contract.ts<span class="prdref">prd.md › Wochenplan</span><span class="arrow">›</span></summary>
+  <div class="body">Kontext sammeln → <b>PII-Filter:</b> Personen werden pseudonymisiert (GUID statt Name, Rollenklasse statt Alter, Constraint-Tags + reine Zahlen; Namen, Haushaltsname, Beruf-Freitext verlassen den Server nie) → Claude mit fester Antwortstruktur → zod-Validierung → max. 2 kontrollierte Retries mit Fehlerkontext → Plan re-pseudonymisiert zurückübersetzt und persistiert. Aufgaben (Lerner-Entscheidung): Rezeptauswahl, Allergie-/Constraint-Check, Wochenplanzusammenstellung, Portionierung. Um die offene Frage „Kerne oder voller Kontext": Start mit dem Minimal-Kern + Miss-Log; Qualitätsverlust wird durch kontrolliertes Erweitern des Vertrags beantwortet, nie durch PII-Nachschub.</div>
+</details>
+
+<details class="bucket comp">
+  <summary><span class="pill">Der Rechner</span> domain/aggregation.ts<span class="prdref">prd.md › Einkaufsliste</span><span class="arrow">›</span></summary>
+  <div class="body">Deterministisch: Zutaten der Wochenrezepte aggregieren (Gramm summieren, Stück zählen: „2× Zucchini“), Preise + Angebots-Badges aus dem Snapshot, Gruppierung nach Abteilung, kcal aus <code>data/nutrition.json</code>. Hier liegen die Vitest-Tests — das „nachrechenbar“-Versprechen aus dem PRD.</div>
+</details>
+
+<details class="bucket comp">
+  <summary><span class="pill">Die Naht</span> offers/store.ts + data/<span class="prdref">prd.md › Angebots-Basis</span><span class="arrow">›</span></summary>
+  <div class="body"><code>OfferSource.latest()</code> liefert den neuesten Snapshot aus <code>data/offers/*.json</code> (Datum im Dateinamen + <code>fetchedAt</code>/<code>source</code> im File), <code>refresh()</code> scannt erneut. Snapshots entstehen im Build: Agent überführt 20–30 reale Aktionen von den Lidl-/Aldi-Süd-Angebotsseiten in JSON — echte Daten, dokumentierte Herkunft. Später dockt der nächtliche Fetcher hier an.</div>
+</details>
+
+<details class="bucket comp">
+  <summary><span class="pill">Daten</span> Rezept-Pool &amp; Persistenz<span class="prdref">prd.md › Open Questions</span><span class="arrow">›</span></summary>
+  <div class="body"><code>data/recipes.json</code>: ~24 kuratierte discounter-typische Rezepte (Zutaten mit Grammatur, Tags vegetarisch/milchfrei/schnell, Kurz-Anleitung) — beantwortet die offene PRD-Frage. SQLite-Tabellen: <code>household</code>, <code>person</code>, <code>week_plan</code> (zod-gültiges JSON), <code>list_item</code>, <code>event</code>. Alles überlebt Neustart am Bind-Mount.</div>
+</details>
+
+<h2>Wenn etwas bricht</h2>
+<div class="stategrid">
+  <div class="state"><h3>LLM liefert Müll</h3><p>zod fängt es → 2 Retries mit Fehlerkontext → klare Fehlermeldung; der bisherige Plan bleibt unangetastet.</p></div>
+  <div class="state"><h3>Kein aktueller Snapshot</h3><p>Offene Meldung mit Datum der letzten Lage + Option „trotzdem planen“; Plan wird als „ohne aktuelle Angebote“ markiert.</p></div>
+  <div class="state"><h3>Claude-API langsam/weg</h3><p>Ladeanzeige, Timeout-Meldung; Plan und Liste bleiben nutzbar — Liste ist ohne LLM neu berechenbar.</p></div>
+</div>
+
+<h2>Bewusste Vereinfachungen</h2>
+<details class="bucket simple">
+  <summary><span class="pill">Vereinfacht</span> Sechs Ersetzungen mit Begründung<span class="arrow">›</span></summary>
+  <div class="body">
+    <ul>
+      <li><b>Datierte echte Snapshots</b> statt Live-Scraper — die Daten sind echt, nur der Transport ist manuell; Fetcher dockt später an <code>OfferSource</code>.</li>
+      <li><b>Refresh beim Laden/Knopf</b> statt nächtlichem Cron — Lerner-Idee, auf „nach erstem Deploy“ verschoben.</li>
+      <li><b>Voller Payload</b> statt Delta-Protokoll — ein paar KB JSON.</li>
+      <li><b>SQLite</b> statt Cloud-DB — ein Dienst weniger.</li>
+      <li><b>Profil-Umschalter</b> statt Auth — aus dem PRD.</li>
+      <li><b>Nährwert-Tabelle</b> statt LLM-Schätzung — nachrechenbar schlägt gefühlt.</li>
+    </ul>
+  </div>
+</details>
+
+<h2>Entscheidungen &amp; Restpunkte</h2>
+<details class="bucket dec">
+  <summary><span class="pill">Dokumentiert</span> Wer entschied was — und das eine echte Unbekannte<span class="arrow">›</span></summary>
+  <div class="body">
+    <p><b>Lerner-Entscheidungen:</b> Docker + Mount; Monorepo; typisierte Endpunkte; LLM-Scope auf vier Aufgaben; <b>PII-Minimierung am LLM-Aufruf</b> (nur IDs/GUIDs, kein PII). Verworfene Lerner-Ideen: HTMX, GCP-DB, Protobuf/SignalR, nächtlicher Cron (verschoben), Delta-Protokoll.</p>
+    <p><b>Agent-Empfehlungen, bestätigt:</b> TypeScript überall, Fastify, SQLite, REST+JSON, Snapshot-Strategie, Nährwert-Tabelle; Monorepo statt Zwei-Repos (auf explizite Nachfrage bekräftigt: geteilte Typen schlagen Repos-Grenzen).</p>
+    <p><b>Geklärtes Unbekanntes 1:</b> Wie zuverlässig liefert das LLM validierbare Pläne? → Schema-Zwangsantwort + zod + begrenzte Retries + „letzter guter Plan bleibt“. Im Build: Test mit geflashter Invalid-Antwort.</p>
+    <p><b>Geklärtes Unbekanntes 2:</b> „Kerne oder voller Kontext“ beim LLM-Aufruf? → Minimal-Kern pseudonymisiert starten + Miss-Log; Qualitätsverlust = kontrolliert Vertragsfeld ergänzen, nie PII-Nachschub. Beleg im Build: Planner-Testlauf mit/ohne Vertragsfelder.</p>
+  </div>
+</details>
+
+<div class="openq" style="margin-top:16px;">
+  <h3>Zu Build-Beginn verifizieren (nicht live geprüft)</h3>
+  <ul>
+    <li>Aktuelles Anthropic-Modell + Preis für strukturierte Ausgaben (Kosten: Cent-Beträge — Angabe heute unverifiziert).</li>
+    <li>Exakte SDK-API für Schema-Zwangsantworten („structured outputs“/Tool-Use) variiert nach SDK-Version.</li>
+    <li>Caddy/Subdomain auf der Azure-VM — bewusst an <code>6-ship</code> delegiert.</li>
+  </ul>
+</div>
+
+<footer>
+  Status: Genehmigt · Verbindliches Dokument: <code>devpost/spec.md</code> · Diese Seite wird bei Änderungen neu erzeugt.
+</footer>
+
+</main>
+</body>
+</html>

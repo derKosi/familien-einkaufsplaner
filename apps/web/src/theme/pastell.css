@@ -1,0 +1,28 @@
+/* Pastell-Paare (Main + Akzent) — eine Kombination pro Person.
+   Der Profil-Umschalter setzt data-person auf <body>, die Variablen färben die Ansicht. */
+
+:root {
+  --paper: #faf7f2;
+  --ink: #1c1a17;
+  --muted: #6b655c;
+  --line: #e4ddd1;
+  --card: #ffffff;
+  --person-main: #e9eef5;
+  --person-accent: #43618e;
+}
+
+[data-person="salbei"]  { --person-main: #e7f2ea; --person-accent: #5f8158; }
+[data-person="aprikot"] { --person-main: #fbeadd; --person-accent: #b06a3b; }
+[data-person="lavendel"]{ --person-main: #efe9f8; --person-accent: #6b4fa3; }
+[data-person="himmel"]  { --person-main: #e7f0f8; --person-accent: #3f6f9e; }
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
