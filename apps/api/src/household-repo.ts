@@ -3,6 +3,9 @@ import { AppState, Household, Person } from "@fep/shared";
 import { db } from "./db/sqlite.js";
 import { DEMO_HOUSEHOLD_NAME, demoPersons } from "./demo-seed.js";
 import { offersSummary } from "./offers/store.js";
+import { loadWeekPlan } from "./plan-repo.js";
+import { loadRecipes, recipesSummary } from "./domain/recipes.js";
+import { computeNextMeal, countPreparedMeals } from "./domain/weeklogic.js";
 
 interface PersonRow {
   id: string;
@@ -29,13 +32,34 @@ function rowToPerson(row: PersonRow): Person {
   });
 }
 
+/** Alle Personen des (einzigen) Haushalts — Kontext-Baustein für den Planner. */
+export function loadPersons(): Person[] {
+  const row = db.prepare("SELECT id FROM household LIMIT 1").get() as { id: string } | undefined;
+  if (!row) return [];
+  const rows = db.prepare("SELECT * FROM person WHERE household_id = ? ORDER BY rowid").all(row.id) as unknown as PersonRow[];
+  return rows.map(rowToPerson);
+}
+
 /** Ein fester Haushalt im PoC — die erste (einzige) Zeile gilt. */
 export function getState(): AppState {
   const offers = offersSummary();
+  const recipes = recipesSummary();
+  const weekPlan = loadWeekPlan();
+
+  const planView = weekPlan
+    ? {
+        nextMeal: computeNextMeal(weekPlan, (id) => loadRecipes().find((r) => r.id === id)?.title, new Date()),
+        mealsPrepared: countPreparedMeals(weekPlan, new Date()),
+        mealsTotal: weekPlan.days.reduce((n, d) => n + d.meals.length, 0),
+      }
+    : { nextMeal: null, mealsPrepared: 0, mealsTotal: 0 };
+
   const householdRow = db.prepare("SELECT id, name FROM household LIMIT 1").get() as
     | { id: string; name: string }
     | undefined;
-  if (!householdRow) return AppState.parse({ household: null, offers });
+  if (!householdRow) {
+    return AppState.parse({ household: null, offers, recipes, ...planView });
+  }
 
   const personRows = db
     .prepare("SELECT * FROM person WHERE household_id = ? ORDER BY rowid")
@@ -48,6 +72,9 @@ export function getState(): AppState {
       persons: personRows.map(rowToPerson),
     }),
     offers,
+    recipes,
+    weekPlan,
+    ...planView,
   });
 }
 

@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { PlannerOutput, type PlannerOutput as PlannerOutputT } from "@fep/shared";
 import type { PlannerContext } from "./context-contract.js";
+import { recipeSatisfies } from "../domain/planrules.js";
 
 /**
  * Der Kopf (spec.md > llm/planner.ts): Claude wählt Rezepte, prüft Constraints,
@@ -28,6 +29,15 @@ export interface PlanClient {
       content: Array<{ type: string; text?: string }>;
     }>;
   };
+}
+
+/**
+ * Der echte SDK-Client (ANTHROPIC_API_KEY / ANTHROPIC_BASE_URL aus der Umgebung).
+ * Der Cast lokalisiert die Überladungs-Schärfe des SDK an genau einer Stelle —
+ * das Verhalten selbst beweist der Smoke-Test.
+ */
+export function realPlanClient(): PlanClient {
+  return new Anthropic() as unknown as PlanClient;
 }
 
 export class PlannerError extends Error {
@@ -93,6 +103,30 @@ function validateAgainstPool(plan: PlannerOutputT, context: PlannerContext): str
   return null;
 }
 
+/**
+ * Fachliche Prüfung (spec.md > planner.ts): jede Mahlzeit gegen die Constraints
+ * aller Mitesser. Fehlermeldung enthält nur GUIDs — der Kontextvertrag gilt auch
+ * im Retry-Text.
+ */
+function validateConstraints(plan: PlannerOutputT, context: PlannerContext): string | null {
+  const tagsById = new Map(context.recipes.map((r) => [r.id, r.tags]));
+  const personById = new Map(context.persons.map((p) => [p.personRef, p]));
+  for (const day of plan.days) {
+    for (const meal of day.meals) {
+      const tags = tagsById.get(meal.recipeId) ?? [];
+      for (const ref of meal.personRefs) {
+        const person = personById.get(ref);
+        for (const constraint of person?.constraints ?? []) {
+          if (!recipeSatisfies(tags, constraint)) {
+            return `Tag ${day.day} ${meal.slot}: Person ${ref} hat Constraint "${constraint}", Rezept "${meal.recipeId}" verletzt das. Setze sie auf ein geeignetes Rezept oder plane das Gericht ohne sie.`;
+          }
+        }
+      }
+    }
+  }
+  return null;
+}
+
 export async function generateWeekPlan(
   client: PlanClient,
   context: PlannerContext,
@@ -129,6 +163,12 @@ export async function generateWeekPlan(
       const poolProblem = validateAgainstPool(parsed.data, context);
       if (poolProblem) {
         previousErrors.push(poolProblem);
+        continue;
+      }
+
+      const constraintProblem = validateConstraints(parsed.data, context);
+      if (constraintProblem) {
+        previousErrors.push(constraintProblem);
         continue;
       }
 

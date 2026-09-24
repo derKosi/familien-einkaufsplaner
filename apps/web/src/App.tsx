@@ -1,39 +1,32 @@
 import { useEffect, useState } from "react";
-import type { OffersSummary, Person } from "@fep/shared";
-import { fetchState, seedDemoHousehold } from "./lib/api.js";
+import type { Person, Store } from "@fep/shared";
+import { fetchState, generatePlan, seedDemoHousehold } from "./lib/api.js";
 import { FirstStart } from "./views/FirstStart.js";
 import { Main } from "./views/Main.js";
 
 const STORAGE_KEY = "fep.current-person";
 
 export default function App() {
-  const [state, setState] = useState<"loading" | "ready">("loading");
-  const [household, setHousehold] = useState<null | import("@fep/shared").Household>(null);
-  const [offers, setOffers] = useState<OffersSummary | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [state, setState] = useState<import("@fep/shared").AppState | null>(null);
   const [currentPerson, setCurrentPerson] = useState<Person | null>(null);
   const [busy, setBusy] = useState(false);
+  const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchState()
-      .then((s) => {
-        setHousehold(s.household);
-        setOffers(s.offers);
-        setState("ready");
-      })
-      .catch((e) => {
-        setError(String(e));
-        setState("ready");
-      });
+      .then((s) => setState(s))
+      .catch((e) => setError(String(e)))
+      .finally(() => setLoading(false));
   }, []);
 
   // Ansichtsidentität: ohne Login, im Browser bewahrt (prd.md > Identität).
   useEffect(() => {
-    if (!household) return;
+    const persons = state?.household?.persons ?? [];
     const stored = localStorage.getItem(STORAGE_KEY);
-    const found = household.persons.find((p) => p.id === stored) ?? household.persons[0] ?? null;
-    setCurrentPerson(found);
-  }, [household]);
+    setCurrentPerson(persons.find((p) => p.id === stored) ?? persons[0] ?? null);
+  }, [state?.household]);
 
   useEffect(() => {
     if (currentPerson) localStorage.setItem(STORAGE_KEY, currentPerson.id);
@@ -48,8 +41,7 @@ export default function App() {
     setBusy(true);
     setError(null);
     try {
-      const s = await seedDemoHousehold();
-      setHousehold(s.household);
+      setState(await seedDemoHousehold());
     } catch (e) {
       setError(String(e));
     } finally {
@@ -57,9 +49,22 @@ export default function App() {
     }
   }
 
-  if (state === "loading") return <div className="first-start">Lädt …</div>;
+  /** Der Kernel (Slice 4): Plan generieren, State komplett ersetzen. */
+  async function runGenerate(store: Store, allowNoOffers: boolean) {
+    setGenerating(true);
+    setError(null);
+    try {
+      setState(await generatePlan(store, allowNoOffers));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setGenerating(false);
+    }
+  }
 
-  if (error) {
+  if (loading) return <div className="first-start">Lädt …</div>;
+
+  if (error && !state) {
     return (
       <div className="first-start">
         <h1>Hoppla.</h1>
@@ -69,14 +74,16 @@ export default function App() {
     );
   }
 
-  if (!household) return <FirstStart onDemo={startDemo} busy={busy} />;
+  if (!state?.household) return <FirstStart onDemo={startDemo} busy={busy} />;
 
   return (
     <Main
-      household={household}
-      offers={offers}
+      state={state}
       current={currentPerson}
       onSelectPerson={setCurrentPerson}
+      generating={generating}
+      generateError={error}
+      onGenerate={runGenerate}
     />
   );
 }

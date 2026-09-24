@@ -18,5 +18,14 @@ export function migrate(): void {
       activity_profile TEXT,
       complete INTEGER NOT NULL DEFAULT 1
     );
+
+    -- Genau ein aktueller Wochenplan (Regenerieren ersetzt ihn — spec.md > Core Journey 6).
+    CREATE TABLE IF NOT EXISTS week_plan (
+      id INTEGER PRIMARY KEY CHECK (id = 1),
+      week_of TEXT NOT NULL,
+      store TEXT NOT NULL,
+      payload TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    );
   `);
 }

@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+// Reihenfolge ist hier Abhängigkeitsordnung — AppState (alles-umfassend) steht zuletzt.
+
 /** Rollenklasse — die einzige Personenangabe, die später den Server Richtung LLM verlässt (Kontextvertrag). */
 export const RoleClass = z.enum(["Erwachsener", "Jugendlicher", "Kind"]);
 export type RoleClass = z.infer<typeof RoleClass>;
@@ -101,14 +103,6 @@ export const RefreshOffersResponse = z.object({
 });
 export type RefreshOffersResponse = z.infer<typeof RefreshOffersResponse>;
 
-/** GET /api/state — der komplette Stand beim Öffnen der App. */
-export const AppState = z.object({
-  household: Household.nullable(),
-  /** Angebots-Lage für die Kopfzeile — null = ehrlich „keine aktuellen Angebote". */
-  offers: OffersSummary.nullable().default(null),
-});
-export type AppState = z.infer<typeof AppState>;
-
 // ─── Planner: Wochenplan-Generierung (spec.md > llm/planner.ts, context-contract.ts) ───
 
 export const MealSlot = z.enum(["Frühstück", "Mittag", "Abendessen"]);
@@ -139,6 +133,55 @@ export const PlannerOutput = z.object({
   missingInfo: z.array(z.string()),
 });
 export type PlannerOutput = z.infer<typeof PlannerOutput>;
+
+// ─── Wochenplan (spec.md > Data Model > week_plan) ───
+
+/** Gespeicherte Mahlzeit — Personen als GUID-Liste, übersetzt aus dem Planner-Output. */
+export const StoredMeal = z.object({
+  slot: MealSlot,
+  recipeId: z.string().min(1),
+  servings: z.number().int().positive(),
+  /** GUIDs der Mitesser (PlannerMeal.personRefs, unverändert persistiert). */
+  persons: z.array(z.string().uuid()).min(1),
+  quick: z.boolean(),
+});
+export type StoredMeal = z.infer<typeof StoredMeal>;
+
+export const StoredDay = z.object({
+  /** 0 = Montag … 6 = Sonntag */
+  day: z.number().int().min(0).max(6),
+  meals: z.array(StoredMeal),
+});
+export type StoredDay = z.infer<typeof StoredDay>;
+
+/** Ein persistierter Wochenplan — genau einer pro Haushalt; Regenerieren ersetzt ihn. */
+export const WeekPlan = z.object({
+  /** Montag der Planwoche, ISO-Datum. */
+  weekOf: z.string().refine((v) => !Number.isNaN(Date.parse(v)), "kein ISO-Datum"),
+  store: Store,
+  basedOnOffers: z.number().int().nonnegative(),
+  /** Datum der Angebotslage — null = Plan ohne aktuelle Angebote (ehrlich markiert). */
+  offersDated: z.string().nullable(),
+  days: z.array(StoredDay).min(7).max(7),
+  /** Miss-Log des Planner-Laufs — Transparenz statt Magie. */
+  missingInfo: z.array(z.string()).default([]),
+});
+export type WeekPlan = z.infer<typeof WeekPlan>;
+
+/** POST /api/plan/generate */
+export const GeneratePlanRequest = z.object({
+  store: Store,
+  /** Ohne Angebots-Snapshot trotzdem planen (Plan wird ehrlich markiert). */
+  allowNoOffers: z.boolean().default(false),
+});
+export type GeneratePlanRequest = z.infer<typeof GeneratePlanRequest>;
+
+/** Fehlertexte der API für den typisierten Client. */
+export const ApiError = z.object({
+  error: z.string(),
+  code: z.string().optional(),
+});
+export type ApiError = z.infer<typeof ApiError>;
 
 // ─── Rezept-Pool & Nährwerte (spec.md > data/recipes.json, data/nutrition.json) ───
 
@@ -186,3 +229,39 @@ export type NutritionEntry = z.infer<typeof NutritionEntry>;
 
 export const NutritionTable = z.record(z.string(), NutritionEntry);
 export type NutritionTable = z.infer<typeof NutritionTable>;
+
+// ─── GET /api/state — der komplette Stand beim Öffnen der App ───
+
+/** Leichte Rezept-Projektion für UI (Chips/Next-Meal) — ohne Zutaten/Mengen. */
+export const RecipeSummary = z.object({
+  id: z.string(),
+  title: z.string(),
+  quick: z.boolean(),
+  tags: z.array(RecipeTag),
+});
+export type RecipeSummary = z.infer<typeof RecipeSummary>;
+
+export const NextMeal = z.object({
+  day: z.number().int().min(0).max(6),
+  slot: MealSlot,
+  recipeId: z.string(),
+  title: z.string(),
+  servings: z.number().int().positive(),
+  personCount: z.number().int().positive(),
+  quick: z.boolean(),
+});
+export type NextMeal = z.infer<typeof NextMeal>;
+
+export const AppState = z.object({
+  household: Household.nullable(),
+  /** Angebots-Lage für die Kopfzeile — null = ehrlich „keine aktuellen Angebote". */
+  offers: OffersSummary.nullable().default(null),
+  recipes: z.array(RecipeSummary).default([]),
+  weekPlan: WeekPlan.nullable().default(null),
+  /** Server-seitig berechnet (spec.md > Core Journey 5) — kein zweiter LLM-Aufruf. */
+  nextMeal: NextMeal.nullable().default(null),
+  /** Meal-Prep-Status: wie viele Mahlzeiten der Woche zeitlich schon hinter uns liegen. */
+  mealsPrepared: z.number().int().nonnegative().default(0),
+  mealsTotal: z.number().int().nonnegative().default(0),
+});
+export type AppState = z.infer<typeof AppState>;

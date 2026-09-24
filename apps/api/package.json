@@ -9,7 +9,9 @@
     "start": "node --env-file-if-exists=../../.env dist/server.js",
     "planner:smoke": "tsx --env-file-if-exists=../../.env scripts/smoke.ts",
     "offers:fetch": "tsx scripts/fetch-offers.ts",
-    "offers:validate": "tsx scripts/validate-data.ts"
+    "offers:validate": "tsx scripts/validate-data.ts",
+    "plan:assert": "tsx scripts/assert-plan.ts",
+    "test": "vitest run"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.128.0",
@@ -21,6 +23,7 @@
   "devDependencies": {
     "@types/node": "^22.10.0",
     "tsx": "^4.19.0",
-    "typescript": "^5.6.0"
+    "typescript": "^5.6.0",
+    "vitest": "^3.0.0"
   }
 }

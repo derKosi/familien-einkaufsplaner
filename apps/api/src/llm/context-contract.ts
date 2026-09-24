@@ -1,4 +1,4 @@
-import type { Person, Store } from "@fep/shared";
+import type { ConstraintTag, Person, Store } from "@fep/shared";
 
 /**
  * LLM-Kontextvertrag (spec.md > llm/context-contract.ts):
@@ -11,7 +11,7 @@ import type { Person, Store } from "@fep/shared";
 export interface ContractPerson {
   personRef: string;
   roleClass: Person["roleClass"];
-  constraints: string[];
+  constraints: ConstraintTag[];
   calorieGoal: number | null;
 }
 
