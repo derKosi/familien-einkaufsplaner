@@ -54,8 +54,8 @@ Vier Oberflächen, keine weiteren:
 
 - Eine Woche, erzeugt aus dem konfigurierbaren Mahlzeitenmuster des Haushalts. Defaults pro Haushaltstyp; E33-Default: werktags Frühstück (to go) + Abendessen für alle, Eltern zusätzlich Mittag (to go), samstags nur Mittag, sonntags alle drei Mahlzeiten.
 - Der Plan respektiert: Personen-Einschränkungen, Kalorienziele inkl. Verbrauchsschätzung, Abwechslung (nicht jeden Tag dasselbe), „schnell kochbar"-Kennzeichnung für Werktage.
-- **Gemeinsame Gerichte bleiben der Normalfall (Checkpoint-Entscheidung):** Das Basisgericht richtet sich nach dem Tisch, nicht nach der stärksten Einschränkung — Abweichungen (z. B. eine vegetarische Portion, Sahne durch Haferdrink ersetzt) stehen als konkrete Anpassung pro Person am Gericht. Nicht der ganze Tisch isst vegetarisch, nur weil eine Person es ist.
-- Mahlzeiten werden beim Zubereiten abgehakt — manuell, weil es beim Kochen auch mal schiefgeht; der Zähler zählt nur Abgehaktes und startet mit jedem neuen Plan bei null.
+- **Gemeinsame Gerichte bleiben der Normalfall (Checkpoint-Entscheidung):** Das Basisgericht richtet sich nach dem Tisch, nicht nach der stärksten Einschränkung — Abweichungen (z. B. eine vegetarische Portion, Sahne durch Haferdrink ersetzt) stehen als konkrete Anpassung pro Person am Gericht. Nicht der ganze Tisch isst vegetarisch, nur weil eine Person es ist. **Allergien sind die Ausnahme:** Was im Gericht steckt (Erdnüsse in der Erdnussbutter), lässt sich hinterher nicht entfernen — allergische Personen bekommen ein Basisgericht, das das Allergen von sich aus nicht enthält; Anpassungen genügen dort nicht.
+- Der Essens-Zähler ist eine Hilfe, kein Knast (Checkpoint): Vergangene Slots gelten automatisch als gegessen, lassen sich aber jederzeit ab- oder anhaken — die Korrektur gewinnt. Mit jedem neuen Plan startet alles bei null.
 - Regenerieren ist möglich (neue Angebote → neuer Plan), ersetzt aber sichtbar den bestehenden Plan.
 - **Planen und Einkaufen sind entkoppelte Rollen:** Lune plant am Mittwoch, Verso kauft donnerstagmorgens ein — der Profil-Umschalter macht beide Sichten möglich, ohne zweite Logins.
 

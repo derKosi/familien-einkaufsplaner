@@ -26,6 +26,12 @@ function todayIndex(): number {
   return jsDay === 0 ? 6 : jsDay - 1;
 }
 
+/** Grobzeit je Slot — passt zur Server-Logik (weeklogic). */
+function isPastSlot(slot: string): boolean {
+  const hour: Record<string, number> = { Frühstück: 10, Mittag: 14, Abendessen: 20 };
+  return new Date().getHours() >= hour[slot];
+}
+
 const STORE_LABEL: Record<Store, string> = {
   penny: "Penny",
   "aldi-sued": "Aldi Süd",
@@ -168,12 +174,14 @@ export function Main({ state, current, onSelectPerson, generating, generateError
                     {dayPlan?.meals.map((meal, j) => (
                       <span
                         key={j}
-                        className={`meal-chip ${meal.prepared ? "chip-prepared" : ""}`}
+                        className={`meal-chip ${meal.prepared === "ja" || (meal.prepared === "auto" && i === today && isPastSlot(meal.slot)) ? "chip-prepared" : ""}`}
                         title={`${meal.slot}: ${title(meal.recipeId)}`}
                       >
                         <b>{SLOT_CHIP[meal.slot]}</b> {title(meal.recipeId)}
                         {meal.quick && <i className="quick-dot">⚡</i>}
-                        {meal.prepared && <i className="prepared-dot">✓</i>}
+                        {(meal.prepared === "ja" || (meal.prepared === "auto" && i === today && isPastSlot(meal.slot))) && (
+                          <i className="prepared-dot">✓</i>
+                        )}
                       </span>
                     ))}
                   </div>

@@ -28,4 +28,12 @@ export function migrate(): void {
       created_at TEXT NOT NULL
     );
   `);
+
+  // Bestehende Datenbanken auf neue Spalten heben (CREATE IF NOT EXISTS reicht dafür nicht).
+  const personCols = (db.prepare("PRAGMA table_info(person)").all() as Array<{ name: string }>).map(
+    (c) => c.name,
+  );
+  if (!personCols.includes("allergies")) {
+    db.exec("ALTER TABLE person ADD COLUMN allergies TEXT NOT NULL DEFAULT '[]'");
+  }
 }

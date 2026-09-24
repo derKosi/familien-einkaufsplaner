@@ -16,9 +16,9 @@ const GUSTAV = "33333333-4333-4333-8333-333333333333";
 const MAELLE = "44444444-4444-4444-8444-444444444444";
 
 const persons: Person[] = [
-  { id: LUNE, name: "Lune", roleClass: "Erwachsener", colorPair: "salbei", constraints: [], calorieGoal: null, activityProfile: null, complete: true },
-  { id: GUSTAV, name: "Gustav", roleClass: "Erwachsener", colorPair: "himmel", constraints: ["milchfrei"], calorieGoal: null, activityProfile: null, complete: true },
-  { id: MAELLE, name: "Maelle", roleClass: "Jugendlicher", colorPair: "lavendel", constraints: ["vegetarisch"], calorieGoal: null, activityProfile: null, complete: true },
+  { id: LUNE, name: "Lune", roleClass: "Erwachsener", colorPair: "salbei", constraints: [], allergies: [], calorieGoal: null, activityProfile: null, complete: true },
+  { id: GUSTAV, name: "Gustav", roleClass: "Erwachsener", colorPair: "himmel", constraints: ["milchfrei"], allergies: [], calorieGoal: null, activityProfile: null, complete: true },
+  { id: MAELLE, name: "Maelle", roleClass: "Jugendlicher", colorPair: "lavendel", constraints: ["vegetarisch"], allergies: [], calorieGoal: null, activityProfile: null, complete: true },
 ];
 
 const recipeTags = new Map<string, string[]>([
@@ -108,6 +108,27 @@ describe("Planregeln: Constraints", () => {
     });
   });
 
+  it("Allergien sind NICHT per Anpassung gedeckt (Erdnussbutter-Regel)", () => {
+    const allergicGustav = { ...persons[1], allergies: ["milchfrei" as const] };
+    const adaptedPlan: WeekPlanT = WeekPlan.parse({
+      ...validPlan,
+      days: [
+        meal(0, "Abendessen", "bolognese", [LUNE, GUSTAV], {
+          adaptations: [{ personRef: GUSTAV, note: "Sahne → Haferdrink" }],
+        }),
+        ...validPlan.days.slice(1),
+      ],
+    });
+    const violations = checkPlanConstraints(adaptedPlan, [persons[0], allergicGustav, persons[2]], recipeTags);
+    expect(violations).toContainEqual({
+      personId: GUSTAV,
+      constraint: "milchfrei",
+      day: 0,
+      slot: "Abendessen",
+      recipeId: "bolognese",
+    });
+  });
+
   it("deckt eine konkrete Anpassung den Verstoß (gemeinsames Gericht bleibt)", () => {
     const adaptedPlan: WeekPlanT = WeekPlan.parse({
       ...validPlan,
@@ -151,16 +172,19 @@ describe("Wochenlogik", () => {
     expect(next?.recipeId).toBe("bolognese");
   });
 
-  it("Vorbereitet-Zähler: nur explizit Abgehaktes zählt", () => {
+  it("Essens-Zähler: auto fragt die Uhr, ja/nein gewinnt", () => {
+    const tuesdayNoon = new Date(2026, 8, 22, 12, 0);
     const withChecks: WeekPlanT = WeekPlan.parse({
       ...validPlan,
       days: validPlan.days.map((d, i) => ({
         ...d,
-        meals: d.meals.map((m) => ({ ...m, prepared: i < 2 })),
+        meals: d.meals.map((m) => ({ ...m, prepared: i === 0 ? "ja" : i === 1 ? "nein" : "auto" })),
       })),
     });
-    expect(countPreparedMeals(withChecks)).toBe(2);
-    expect(countPreparedMeals(validPlan)).toBe(0);
+    // Tag 0: „ja" zählt (1). Tag 1: Mittag liegt zeitlich hinter 12:00, aber „nein" gewinnt (0).
+    // Tag 2+: auto — alle Slots liegen in der Zukunft (0).
+    expect(countPreparedMeals(withChecks, tuesdayNoon)).toBe(1);
+    expect(countPreparedMeals(validPlan, tuesdayNoon)).toBe(1); // nur Montag-Abendessen (auto, vergangen)
   });
 });
 

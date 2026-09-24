@@ -11,7 +11,10 @@ import type { ConstraintTag, Person, Store } from "@fep/shared";
 export interface ContractPerson {
   personRef: string;
   roleClass: Person["roleClass"];
+  /** Weiche Einschränkungen — per Anpassung am Basisgericht lösbar. */
   constraints: ConstraintTag[];
+  /** Harte Allergien — das Basisgericht muss sie erfüllen, keine Anpassung. */
+  allergies: ConstraintTag[];
   calorieGoal: number | null;
 }
 
@@ -41,6 +44,7 @@ export function contractPerson(person: Person): ContractPerson {
     personRef: person.id,
     roleClass: person.roleClass,
     constraints: person.constraints,
+    allergies: person.allergies,
     calorieGoal: person.calorieGoal,
   };
 }

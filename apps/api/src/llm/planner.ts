@@ -56,8 +56,9 @@ Regeln:
 - Der weekPattern listet jede geplante Mahlzeit als Eintrag {day, slot, personRefs} — erzeuge für JEDEN Eintrag genau eine Mahlzeit im Plan, und keine zusätzlich.
 - Nutze AUSSCHLIESSLICH Rezepte mit den angegebenen recipeIds.
 - Die personRefs einer geplanten Mahlzeit übernimmst du; die servings entsprechen der Personenzahl (Jugendliche zählen 0.75, kaufmännisch aufgerundet).
-- GEMEINSAME GERICHTE SOLLLEN DER NORMALFALL SEIN: Wähle als Basisgern das, was für die Gruppe am besten passt — auch fleisch- oder milchhaltige Hauptgerichte. Löst eine Person ihre Einschränkung (vegetarisch, milchfrei, …) NICHT per Anpassung (adaptations) mit personRef und einer kurzen konkreten Kochanweisung (z. B. "Hackfleisch-Anteil separat; für diese Portion Linsen einkochen", "Sahne → Haferdrink, Käse weglassen"). Mache NICHT den ganzen Tisch vegetarisch, nur weil eine Person es ist.
-- Abwechslung: kein Rezept doppelt innerhalb von 3 aufeinanderfolgenden Tagen; wechsle auch bei Frühstück und Mittag durch.
+- GEMEINSAME GERICHTE SOLLLEN DER NORMALFALL SEIN: Wähle als Basisgericht das, was für die Gruppe am besten passt — auch fleisch- oder milchhaltige Hauptgerichte. Löst eine Person ihre Einschränkung (vegetarisch, milchfrei, …) NICHT per Anpassung (adaptations) mit personRef und einer kurzen konkreten Kochanweisung (z. B. "Hackfleisch-Anteil separat; für diese Portion Linsen einkochen", "Sahne → Haferdrink, Käse weglassen"). Mache NICHT den ganzen Tisch vegetarisch, nur weil eine Person es ist.
+- ALLERGIEN (Feld allergies) sind NICHT per Anpassung lösbar — man kann Zutaten nicht nachträglich aus einem Gericht entfernen. Für allergische Personen wählst du ein Basisgericht, das das Allergen von sich aus nicht enthält, oder planst die Mahlzeit ohne sie.
+- Abwechslung gilt pro Gericht, nicht pro Zutat: Komponenten (vorgekochtes Hähnchen, Reis, Soße) dürfen in mehreren Gerichten wiederkehren (Meal-Prep), und Reste-Warm-up eines Gerichts ist erlaubt — dann größer geplante Portionen nutzen und das Feld quick setzen. Frisch gekochte Hauptgerichte selbst sollen wechseln: kein identisches Gericht innerhalb von 3 aufeinanderfolgenden Tagen.
 - Bevorzuge bei der Auswahl Rezepte, die viele aktuelle Angebote (offers) abdecken.
 - Zeige im Feld missingInfo, welche Informationen dir für eine bessere Planung fehlen (leeres Array, wenn nichts fehlt).
 
@@ -105,9 +106,10 @@ function validateAgainstPool(plan: PlannerOutputT, context: PlannerContext): str
 
 /**
  * Fachliche Prüfung (spec.md > planner.ts): jede Mahlzeit gegen die Constraints
- * aller Mitesser. Ein Basisgericht, das eine Einschränkung verletzt, ist okay,
- * wenn genau für die betroffene Person eine Anpassung (adaptations) steht —
- * gemeinsame Gerichte schlagen Restriktion (Checkpoint-Entscheidung).
+ * aller Mitesser. Weiche Einschränkungen dürfen per Anpassung gedeckt werden
+ * (Checkpoint: gemeinsame Gerichte schlagen Restriktion). **Allergien nicht** —
+ * „du kannst die Erdnüsse nicht später aus der Erdnussbutter rausnehmen": das
+ * Basisgericht muss allergenfrei sein, Adaptationen gelten dort nicht.
  * Fehlermeldung enthält nur GUIDs — der Kontextvertrag gilt auch im Retry-Text.
  */
 function validateConstraints(plan: PlannerOutputT, context: PlannerContext): string | null {
@@ -118,6 +120,11 @@ function validateConstraints(plan: PlannerOutputT, context: PlannerContext): str
       const tags = tagsById.get(meal.recipeId) ?? [];
       for (const ref of meal.personRefs) {
         const person = personById.get(ref);
+        for (const allergy of person?.allergies ?? []) {
+          if (!recipeSatisfies(tags, allergy)) {
+            return `Tag ${day.day} ${meal.slot}: Person ${ref} hat eine ALLERGIE gegen "${allergy}". Eine Anpassung reicht hier NICHT — wähle ein Basisgericht, das "${allergy}" von sich aus erfüllt, oder plane die Mahlzeit ohne diese Person.`;
+          }
+        }
         for (const constraint of person?.constraints ?? []) {
           if (recipeSatisfies(tags, constraint)) continue;
           const adapted = meal.adaptations.some((a) => a.personRef === ref);

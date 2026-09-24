@@ -76,7 +76,7 @@ export async function registerPlanRoutes(app: FastifyInstance): Promise<void> {
           persons: meal.personRefs,
           quick: meal.quick,
           adaptations: meal.adaptations,
-          prepared: false,
+          prepared: "auto",
         })),
       })),
       missingInfo: plan.missingInfo,
@@ -110,7 +110,7 @@ export async function registerPlanRoutes(app: FastifyInstance): Promise<void> {
       return reply.code(404).send({ error: "Diese Mahlzeit gibt es im Plan nicht.", code: "no_meal" });
     }
 
-    meal.prepared = body.data.prepared;
+    meal.prepared = body.data.prepared ? "ja" : "nein";
     saveWeekPlan(plan);
     return getState() satisfies AppState;
   });

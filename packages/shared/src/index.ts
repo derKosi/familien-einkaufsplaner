@@ -19,7 +19,13 @@ export const Person = z.object({
   name: z.string().min(1),
   roleClass: RoleClass,
   colorPair: ColorPair,
+  /** Weiche Einschränkungen (Unverträglichkeit/Präferenz) — per Anpassung am Basisgericht lösbar. */
   constraints: z.array(ConstraintTag).default([]),
+  /**
+   * Harte Allergien (Checkpoint „Erdnussbutter"): lassen sich am fertigen Gericht
+   * NICHT rausnehmen — das Basisgericht muss das schon erfüllen, keine Anpassung.
+   */
+  allergies: z.array(ConstraintTag).default([]),
   /** Optionales Tages-Kalorienziel; der Plan rechnet es ein, die UI zeigt es dezent. */
   calorieGoal: z.number().int().positive().nullable().default(null),
   /** Freitext aus dem Onboarding (Beruf/Alltag) — verlässt den Server nie (PII-Filter). */
@@ -128,7 +134,7 @@ export const PlannerMeal = z.object({
   servings: z.number().int().positive(),
   /** Schnellkochbar für Werktage (prd.md > Wochenplan). */
   quick: z.boolean(),
-  /** Nur wenn das Basisgericht eine Einschränkung verletzt — sonst leer. */
+  /** Nur wenn das Basisgericht eine weiche Einschränkung verletzt — sonst leer. */
   adaptations: z.array(MealAdaptation).default([]),
 });
 export type PlannerMeal = z.infer<typeof PlannerMeal>;
@@ -150,6 +156,18 @@ export type PlannerOutput = z.infer<typeof PlannerOutput>;
 
 // ─── Wochenplan (spec.md > Data Model > week_plan) ───
 
+/**
+ * Zubereitungs-/Essens-Status (Checkpoint-Runde 2): „auto" lässt die Uhrzeit
+ * entscheiden (Vergangenes gilt als gegessen — Vorschlag, kein Knast), „ja"/
+ * „nein" ist die manuelle Korrektur, die gewinnt. Alte Pläne mit true/false
+ * werden beim Laden überführt.
+ */
+export const PreparedState = z.preprocess(
+  (v) => (v === true ? "ja" : v === false ? "nein" : v ?? "auto"),
+  z.enum(["auto", "ja", "nein"]),
+);
+export type PreparedState = z.infer<typeof PreparedState>;
+
 /** Gespeicherte Mahlzeit — Personen als GUID-Liste, übersetzt aus dem Planner-Output. */
 export const StoredMeal = z.object({
   slot: MealSlot,
@@ -159,8 +177,7 @@ export const StoredMeal = z.object({
   persons: z.array(z.string().uuid()).min(1),
   quick: z.boolean(),
   adaptations: z.array(MealAdaptation).default([]),
-  /** Vom Kochen abgehakt (Checkpoint: „es kann ja was schief gehen") — Regenerieren setzt zurück. */
-  prepared: z.boolean().default(false),
+  prepared: PreparedState.default("auto"),
 });
 export type StoredMeal = z.infer<typeof StoredMeal>;
 

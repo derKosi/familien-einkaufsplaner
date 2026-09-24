@@ -93,14 +93,17 @@ export function computeNextMeal(
 }
 
 /**
- * Zubereitungsstatus: nur explizit Abgehaktes zählt (Checkpoint-Entscheidung —
- * „es kann ja was schief gehen"). Die Slot-Zeit bleibt Next-Meal-Logik.
+ * Essens-Zähler (Checkpoint-Runde 2): „auto" fragt die Uhrzeit (Vergangenes gilt
+ * als gegessen — ein Vorschlag, korrigierbar), „ja"/„nein" ist die manuelle
+ * Entscheidung und gewinnt.
  */
-export function countPreparedMeals(plan: WeekPlan): number {
+export function countPreparedMeals(plan: WeekPlan, now: Date): number {
+  const current = nowTick(now);
   let count = 0;
   for (const day of plan.days) {
     for (const meal of day.meals) {
-      if (meal.prepared) count++;
+      if (meal.prepared === "ja") count++;
+      else if (meal.prepared === "auto" && mealTick(day.day, meal.slot) < current) count++;
     }
   }
   return count;

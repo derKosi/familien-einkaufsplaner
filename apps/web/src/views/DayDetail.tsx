@@ -9,6 +9,14 @@ interface Props {
 
 const DAYS = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"];
 const SLOT_ORDER = ["Frühstück", "Mittag", "Abendessen"] as const;
+/** Gleiche Grobzeiten wie server-seitig (weeklogic) — für den auto-Vorschlag. */
+const SLOT_HOUR: Record<string, number> = { Frühstück: 10, Mittag: 14, Abendessen: 20 };
+
+function timePassed(day: number, slot: string): boolean {
+  const jsDay = new Date().getDay();
+  const today = jsDay === 0 ? 6 : jsDay - 1;
+  return day * 24 + SLOT_HOUR[slot] < today * 24 + new Date().getHours();
+}
 
 const TAG_LABEL: Record<string, string> = {
   vegetarisch: "vegetarisch",
@@ -45,8 +53,9 @@ export function DayDetail({ state, day, onBack, onTogglePrepared }: Props) {
       <div className="day-detail-meals">
         {meals.map((meal, i) => {
           const r = recipe(meal.recipeId);
+          const checked = meal.prepared === "ja" || (meal.prepared === "auto" && timePassed(day, meal.slot));
           return (
-            <article key={i} className={`meal-card ${meal.prepared ? "prepared" : ""}`}>
+            <article key={i} className={`meal-card ${checked ? "prepared" : ""}`}>
               <div className="meal-card-head">
                 <div>
                   <div className="meal-card-slot">{meal.slot}</div>
@@ -55,13 +64,13 @@ export function DayDetail({ state, day, onBack, onTogglePrepared }: Props) {
                     {meal.quick && <span className="quick-flag"> · schnell kochbar</span>}
                   </h3>
                 </div>
-                <label className="prepared-toggle">
+                <label className="prepared-toggle" title="Vorschlag aus der Uhrzeit — abwählen korrigiert (kein Knast).">
                   <input
                     type="checkbox"
-                    checked={meal.prepared}
+                    checked={checked}
                     onChange={(e) => onTogglePrepared(day, meal.slot, e.target.checked)}
                   />
-                  zubereitet
+                  gegessen
                 </label>
               </div>
               <div className="meal-card-persons">

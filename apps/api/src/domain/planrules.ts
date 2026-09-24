@@ -30,9 +30,9 @@ export interface PlanViolation {
 
 /**
  * Prüft jeden Plan-Tag gegen die Constraints aller beteiligten Personen.
- * Eine Verletzung durch das Basisgericht ist okay, wenn für die Person eine
- * Anpassung existiert (Checkpoint: Anpassung schlägt Restriktion) — gezählt
- * werden nur ungedeckte Verstöße.
+ * Weiche Einschränkungen: Verstoß gedeckt, wenn eine Anpassung für die Person
+ * existiert (Checkpoint: Anpassung schlägt Restriktion). **Allergien nie** —
+ * das Basisgericht muss sie erfüllen („Erdnussbutter-Regel").
  */
 export function checkPlanConstraints(
   plan: WeekPlan,
@@ -56,6 +56,17 @@ export function checkPlanConstraints(
             violations.push({
               personId,
               constraint,
+              day: day.day,
+              slot: meal.slot,
+              recipeId: meal.recipeId,
+            });
+          }
+        }
+        for (const allergy of person.allergies) {
+          if (!recipeSatisfies(tags, allergy)) {
+            violations.push({
+              personId,
+              constraint: allergy,
               day: day.day,
               slot: meal.slot,
               recipeId: meal.recipeId,

@@ -9,11 +9,13 @@ import { generateWeekPlan, PlanClient, PlannerError } from "../src/llm/planner.j
  */
 
 const GUSTAV = "33333333-4333-4333-8333-333333333333";
+const ALLERGIKER = "55555555-5555-4555-8555-555555555555";
 
 const context: PlannerContext = {
   weekPattern: [{ day: 0, slot: "Abendessen", personRefs: [GUSTAV] }],
   persons: [
-    { personRef: GUSTAV, roleClass: "Erwachsener", constraints: ["milchfrei"], calorieGoal: null },
+    { personRef: GUSTAV, roleClass: "Erwachsener", constraints: ["milchfrei"], allergies: [], calorieGoal: null },
+    { personRef: ALLERGIKER, roleClass: "Erwachsener", constraints: [], allergies: ["milchfrei"], calorieGoal: null },
   ],
   recipes: [
     { id: "kaese-omelett", title: "Käse-Omelett", tags: ["vegetarisch"], quick: true, servingsBase: 1 },
@@ -22,7 +24,7 @@ const context: PlannerContext = {
   offers: [],
 };
 
-function planJson(violatingDay: number, violatingRecipe: string, okRecipe: string, adaptOnDay?: number): string {
+function planJson(violatingDay: number, violatingRecipe: string, okRecipe: string, adaptOnDay?: number, adaptFor = GUSTAV, refs = [GUSTAV, ALLERGIKER]): string {
   return JSON.stringify({
     days: Array.from({ length: 7 }, (_, day) => ({
       day,
@@ -30,11 +32,11 @@ function planJson(violatingDay: number, violatingRecipe: string, okRecipe: strin
         {
           slot: "Abendessen",
           recipeId: day === violatingDay ? violatingRecipe : okRecipe,
-          personRefs: [GUSTAV],
-          servings: 1,
+          personRefs: refs,
+          servings: 2,
           quick: true,
           ...(day === adaptOnDay
-            ? { adaptations: [{ personRef: GUSTAV, note: "Sahne → Haferdrink, ohne Butter" }] }
+            ? { adaptations: [{ personRef: adaptFor, note: "Sahne → Haferdrink, ohne Butter" }] }
             : {}),
         },
       ],
@@ -77,14 +79,33 @@ describe("Planner-Retry bei Constraint-Verstoß", () => {
     expect(calls[1][0]).toContain(GUSTAV);
   });
 
-  it("Basisgericht mit Anpassung besteht ohne Retry (gemeinsames Gericht bleibt)", async () => {
+  it("Weiche Einschränkung: Basisgericht mit Anpassung besteht ohne Retry", async () => {
     const calls: string[][] = [];
     const { plan, attempts } = await generateWeekPlan(
-      scriptedClient([planJson(0, "kaese-omelett", "linsen-dal", 0)], calls),
+      scriptedClient([planJson(0, "kaese-omelett", "linsen-dal", 0, GUSTAV, [GUSTAV])], calls),
       context,
     );
     expect(attempts).toHaveLength(0);
     expect(plan.days[0].meals[0].adaptations).toHaveLength(1);
+  });
+
+  it("Allergie: Anpassung genügt NICHT — Retry verlangt allergenfreies Basisgericht", async () => {
+    const calls: string[][] = [];
+    // Versuch 1: kaese-omelett für den Allergiker „mit Anpassung" — gilt nicht.
+    // Versuch 2: linsen-dal (von sich aus milchfrei) — besteht.
+    const { plan, attempts } = await generateWeekPlan(
+      scriptedClient(
+        [
+          planJson(0, "kaese-omelett", "linsen-dal", 0, ALLERGIKER),
+          planJson(-1, "kaese-omelett", "linsen-dal"),
+        ],
+        calls,
+      ),
+      context,
+    );
+    expect(plan.days[0].meals[0].recipeId).toBe("linsen-dal");
+    expect(attempts).toHaveLength(1);
+    expect(calls[1][0]).toContain("ALLERGIE");
   });
 
   it("durchgehend untaugliche Antworten → PlannerError nach 3 Versuchen", async () => {

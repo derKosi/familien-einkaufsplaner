@@ -14,6 +14,7 @@ interface PersonRow {
   role_class: string;
   color_pair: string;
   constraints: string;
+  allergies: string | null;
   calorie_goal: number | null;
   activity_profile: string | null;
   complete: number;
@@ -26,6 +27,7 @@ function rowToPerson(row: PersonRow): Person {
     roleClass: row.role_class,
     colorPair: row.color_pair,
     constraints: JSON.parse(row.constraints),
+    allergies: row.allergies ? JSON.parse(row.allergies) : [],
     calorieGoal: row.calorie_goal,
     activityProfile: row.activity_profile,
     complete: row.complete === 1,
@@ -49,7 +51,7 @@ export function getState(): AppState {
   const planView = weekPlan
     ? {
         nextMeal: computeNextMeal(weekPlan, (id) => loadRecipes().find((r) => r.id === id)?.title, new Date()),
-        mealsPrepared: countPreparedMeals(weekPlan),
+        mealsPrepared: countPreparedMeals(weekPlan, new Date()),
         mealsTotal: weekPlan.days.reduce((n, d) => n + d.meals.length, 0),
       }
     : { nextMeal: null, mealsPrepared: 0, mealsTotal: 0 };
