@@ -264,6 +264,59 @@ export type NutritionEntry = z.infer<typeof NutritionEntry>;
 export const NutritionTable = z.record(z.string(), NutritionEntry);
 export type NutritionTable = z.infer<typeof NutritionTable>;
 
+// ─── Einkaufsliste (spec.md > aggregation.ts, prd.md > Einkaufsliste) ───
+
+/**
+ * Kaufgebinde einer Zutat (Checkpoint: „genug für die Rezepte, aber verderbliches
+ * nicht viel zu viel"): Packungsgröße, Verderblichkeits-Flag, Grundpreis, und für
+ * Stück-rechnende Zutaten das Gramm-Äquivalent.
+ */
+export const PurchaseEntry = z.object({
+  packAmount: z.number().positive(),
+  packUnit: z.enum(["g", "ml", "Stück"]),
+  perishable: z.boolean().default(false),
+  /** Grundpreis der Packung — Angebotspreise überschreiben. */
+  priceCents: z.number().int().nonnegative(),
+  /** Gramm je Stück, wenn Rezepte in Stück rechnen und das Gebinde in g/ml sein kann. */
+  gramsPerUnit: z.number().positive().optional(),
+});
+export type PurchaseEntry = z.infer<typeof PurchaseEntry>;
+
+export const PurchaseTable = z.record(z.string(), PurchaseEntry);
+export type PurchaseTable = z.infer<typeof PurchaseTable>;
+
+/** Eine Listen-Position: Bedarf, Kaufmenge am Gebinde, Reste-Hinweis, Preis. */
+export const ListItem = z.object({
+  /** Stabiler Schlüssel = Zutaten-Schlüssel (Abhak überlebt Neuberechnung). */
+  id: z.string().min(1),
+  department: Department,
+  product: z.string().min(1),
+  /** Summe der Rezept-Bedarfe, menschlich lesbar („145 g", „3 Stück"). */
+  needed: z.string(),
+  /** Was tatsächlich gekauft wird, am Gebinde aufgerundet („1× 500 g"). */
+  purchase: z.string(),
+  packs: z.number().int().positive(),
+  priceCents: z.number().int().nonnegative(),
+  /** Angebots-Treffer (Badge + Preis aus dem Snapshot). */
+  offer: z.boolean().default(false),
+  offerProduct: z.string().nullable().default(null),
+  /** Differenz Kaufmenge − Bedarf; bei Verderblichem mit Nachrücker-Idee verknüpfbar. */
+  leftover: z.string().nullable().default(null),
+  leftoverIsStock: z.boolean().default(false),
+  /** Rezept-Vorschläge, die den Rest verwerten (Rezept-Nachrücker, Checkpoint). */
+  leftoverUses: z.array(z.object({ recipeId: z.string(), title: z.string(), uses: z.string() })).default([]),
+  checked: z.boolean().default(false),
+  kcal: z.number().nonnegative().default(0),
+});
+export type ListItem = z.infer<typeof ListItem>;
+
+/** kcal-Wochenbilanz je Person — aus Planbeteiligung gerechnet, dezent angezeigt. */
+export const PersonCalories = z.object({
+  personId: z.string(),
+  weekKcal: z.number().nonnegative(),
+});
+export type PersonCalories = z.infer<typeof PersonCalories>;
+
 // ─── GET /api/state — der komplette Stand beim Öffnen der App ───
 
 /** Leichte Rezept-Projektion für UI (Chips/Next-Meal/DayDetail) — Zutaten bleiben draußen. */
@@ -299,5 +352,9 @@ export const AppState = z.object({
   /** Meal-Prep-Status: wie viele Mahlzeiten der Woche zeitlich schon hinter uns liegen. */
   mealsPrepared: z.number().int().nonnegative().default(0),
   mealsTotal: z.number().int().nonnegative().default(0),
+  /** Deterministisch aus Plan × Rezepten gerechnet (spec.md > aggregation.ts). */
+  shoppingList: z.array(z.lazy(() => ListItem)).default([]),
+  /** kcal-Wochenbilanz je Person (Planbeteiligung) — Anzeige dezent (Slice 8). */
+  personCalories: z.array(z.lazy(() => PersonCalories)).default([]),
 });
 export type AppState = z.infer<typeof AppState>;

@@ -1,8 +1,15 @@
 import { useEffect, useState } from "react";
 import type { Person, Store } from "@fep/shared";
-import { fetchState, generatePlan, seedDemoHousehold, setMealPrepared } from "./lib/api.js";
+import {
+  fetchState,
+  generatePlan,
+  seedDemoHousehold,
+  setListItemChecked,
+  setMealPrepared,
+} from "./lib/api.js";
 import { FirstStart } from "./views/FirstStart.js";
 import { Main } from "./views/Main.js";
+import { ShoppingList } from "./views/ShoppingList.js";
 
 const STORAGE_KEY = "fep.current-person";
 
@@ -11,6 +18,7 @@ export default function App() {
   const [state, setState] = useState<import("@fep/shared").AppState | null>(null);
   const [currentPerson, setCurrentPerson] = useState<Person | null>(null);
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
+  const [showList, setShowList] = useState(false);
   const [busy, setBusy] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -85,7 +93,26 @@ export default function App() {
     }
   }
 
+  /** Abhak in der Liste — bleibt über Neuladen hinweg gespeichert. */
+  async function toggleChecked(itemId: string, checked: boolean) {
+    try {
+      setState(await setListItemChecked(itemId, checked));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    }
+  }
+
   if (!state?.household) return <FirstStart onDemo={startDemo} busy={busy} />;
+
+  if (showList) {
+    return (
+      <ShoppingList
+        state={state}
+        onBack={() => setShowList(false)}
+        onToggleChecked={toggleChecked}
+      />
+    );
+  }
 
   return (
     <Main
@@ -98,6 +125,7 @@ export default function App() {
       selectedDay={selectedDay}
       onSelectDay={setSelectedDay}
       onTogglePrepared={togglePrepared}
+      onShowList={() => setShowList(true)}
     />
   );
 }

@@ -6,6 +6,8 @@ import { offersSummary } from "./offers/store.js";
 import { loadWeekPlan } from "./plan-repo.js";
 import { loadRecipes, recipesSummary } from "./domain/recipes.js";
 import { computeNextMeal, countPreparedMeals } from "./domain/weeklogic.js";
+import { buildShoppingList } from "./domain/aggregation.js";
+import { checkedItems } from "./list-repo.js";
 
 interface PersonRow {
   id: string;
@@ -56,11 +58,23 @@ export function getState(): AppState {
       }
     : { nextMeal: null, mealsPrepared: 0, mealsTotal: 0 };
 
+  // Liste: deterministisch neu gerechnet, Abhak aus der Persistenz darübergelegt.
+  const checks = checkedItems();
+  const listView = weekPlan
+    ? (() => {
+        const { list, personCalories } = buildShoppingList(weekPlan, new Date());
+        return {
+          shoppingList: list.map((row) => ({ ...row, checked: checks.has(row.id) })),
+          personCalories,
+        };
+      })()
+    : { shoppingList: [], personCalories: [] };
+
   const householdRow = db.prepare("SELECT id, name FROM household LIMIT 1").get() as
     | { id: string; name: string }
     | undefined;
   if (!householdRow) {
-    return AppState.parse({ household: null, offers, recipes, ...planView });
+    return AppState.parse({ household: null, offers, recipes, ...planView, ...listView });
   }
 
   const personRows = db
@@ -77,6 +91,7 @@ export function getState(): AppState {
     recipes,
     weekPlan,
     ...planView,
+    ...listView,
   });
 }
 

@@ -68,6 +68,7 @@ Vier Oberflächen, keine weiteren:
 ### Einkaufsliste
 
 - Automatisch aus den Rezepten der Woche aggregiert: gleiche Zutaten über mehrere Rezepte werden zu einer Position zusammengefasst („500 g Hackfleisch" statt 2× 250 g).
+- **Am realen Kaufgebinde rechnen (Checkpoint-Entscheidung):** Die Liste kauft Sahne im 200-ml-Becher und Hackfleisch im 500-g-Pack, nicht die exakte Rezeptmenge — der Rest wird ausgewiesen: verderblich mit Nachrücker-Rezepten inkl. konkreter Mengen („120 ml übrig → Kartoffel-Auflauf nutzt 100 ml für 2 Portionen"), haltbar als Vorrat.
 - Menge, Preis, Angebots-Badge; Gruppierung nach Ladenabteilung; Abhaken mit Fortschritt für den realen Einkauf.
 
 ### Angebots-Basis

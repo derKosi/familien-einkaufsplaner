@@ -36,3 +36,11 @@ export function setMealPrepared(day: number, slot: string, prepared: boolean): P
     body: JSON.stringify({ day, slot, prepared }),
   });
 }
+
+/** PATCH /api/shopping-list/:itemId — Abhak im Einkauf (spec.md > Core Journey 4). */
+export function setListItemChecked(itemId: string, checked: boolean): Promise<AppState> {
+  return request<AppState>(`/api/shopping-list/${encodeURIComponent(itemId)}`, {
+    method: "PATCH",
+    body: JSON.stringify({ checked }),
+  });
+}

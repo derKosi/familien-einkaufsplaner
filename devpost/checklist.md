@@ -49,7 +49,7 @@ Build mode: fast
   Learner check: Plan generieren und gegen die Prüfkriterien lesen: Isst Maelle vegetarisch, Gustav milchfrei? Wirkt die Woche abwechslungsreich — oder doppelt sich was?
   Commit: `Generate weekly meal plan from real offers via validated LLM`
 
-- [ ] **5. Einkaufsliste: aggregiert, abteilungsweise, abhakbar**
+- [x] **5. Einkaufsliste: aggregiert, abteilungsweise, abhakbar**
   Becomes usable: Einkaufslisten-Button → Liste gruppiert nach Ladenabteilungen, Mengen aus den Wochenrezepten aggregiert, Preise + Angebots-Badges, Abhaken bleibt persistiert.
   Why now: Die Liste ist die Auszahlung des Kerns („was × wieviel × Preis“) und steht komplett auf deterministischer Rechnung — die Tests beweisen das PRD-Versprechen „nachrechenbar“.
   PRD ref: `prd.md > Features and Behavior > Einkaufsliste`, `prd.md > What "Working" Looks Like` (Cool-Moment)
@@ -130,3 +130,5 @@ Activity mode: [offen]
   2. **Meal-Prep-Logik im Prompt:** Wiederholung gilt pro Gericht, nicht pro Zutat — Komponenten (vorgekochtes Hähnchen, Reis) dürfen mehrfach auftreten, Reste-Warm-up ist erlaubt (größere Portion, quick-Flag); frisch gekochte Hauptgerichte wechseln weiterhin (kein identisches Gericht < 3 Tage).
   3. **Essens-Zähler: Hilfe statt Knast:** `prepared` ist jetzt `auto | ja | nein` (alte true/false-Pläne laden weiter). „auto" fragt die Uhrzeit (vergangene Slots gelten als gegessen), „ja"/„nein" ist die manuelle Korrektur und gewinnt. Regenerieren setzt auf auto zurück.
   Build-Nebenbefund: `tsc` hatte trotz Fehlern emitted (`noEmitOnError` fehlte) — jetzt hartes Build-Versagen bei Typfehlern, `demo-seed.ts` nachgezogen.
+- **Checkpoint-Runde 3 — Einkaufsliste mit Mengen-Intelligenz (Lerner-Entscheidung):** „Achte auf Einkaufsgrößen vs. Rezeptgrößen … genug für die Rezepte, aber verderbliches nicht viel zu viel. Deswegen auch der Rezept-Nachrücker, da waren fast nie Mengen mit drin." Neues `data/purchase.json` (45 Kaufgebinder: Packungsgröße, Verderblichkeits-Flag, Grundpreis, Gramm-Äquivalente für Stück-Zutaten). `aggregation.ts` rechnet Bedarf am Gebinde hoch, weist Reste aus — verderblich mit **Rezept-Nachrückern inkl. konkreter Mengen** („160 ml übrig → Kartoffel-Gemüse-Auflauf nutzt 100 ml für 2 Portionen"), haltbar als Vorrat. Angebots-Matching per Token-Match (Angebotspreis ersetzt Packungspreis — Näherung, dokumentiert). Abhak persistiert in `list_item`, Regenerieren leert sie (neue Woche, neuer Stand). kcal-Wochenbilanz je Person aus Planbeteiligung gerechnet (Anzeige dezent in Slice 8). Beweise: 8 Vitest-Fälle (u. a. der 500-g-Hackfleisch-Fall), Live-Liste aus dem echten Plan: 36 Positionen, 285,39 €, 4 echte Angebots-Treffer, Abhak-Roundtrip per curl.
+- **Backlog angelegt (Lerner-Entscheidung „nicht komplett fallen lassen"):** `devpost/backlog.md` — Planungswerkbank, Favoriten, Rezept-Tiefe, Person-Level-Kalorienkorrektur, Mobile-Feinschliff; mit Kostenabschätzung und Entscheidungsregel (erst PoC-Demo, dann bewerten).

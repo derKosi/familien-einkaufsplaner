@@ -12,6 +12,7 @@ interface Props {
   selectedDay: number | null;
   onSelectDay: (day: number | null) => void;
   onTogglePrepared: (day: number, slot: string, prepared: boolean) => void;
+  onShowList: () => void;
 }
 
 const DAYS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
@@ -67,7 +68,7 @@ function OffersNote({ state }: { state: AppState }) {
  * Hauptbildschirm (prd.md > Screens and Layout): Kopfzeile mit Ladenwahl und
  * Angebots-Indikator, Next-Meal-Hero, Wochenstreifen mit Mahlzeiten-Chips.
  */
-export function Main({ state, current, onSelectPerson, generating, generateError, onGenerate, selectedDay, onSelectDay, onTogglePrepared }: Props) {
+export function Main({ state, current, onSelectPerson, generating, generateError, onGenerate, selectedDay, onSelectDay, onTogglePrepared, onShowList }: Props) {
   const today = todayIndex();
   const title = (id: string) => state.recipes.find((r) => r.id === id)?.title ?? id;
   const plan = state.weekPlan;
@@ -107,6 +108,16 @@ export function Main({ state, current, onSelectPerson, generating, generateError
               : "ohne aktuelle Angebote geplant"
             : ""}
         </span>
+        {plan && (
+          <button className="list-cta" onClick={onShowList}>
+            Einkaufsliste
+            {state.shoppingList.length > 0 && (
+              <span className="list-cta-meta">
+                {" "}· {state.shoppingList.filter((l) => l.checked).length}/{state.shoppingList.length}
+              </span>
+            )}
+          </button>
+        )}
       </section>
 
       {generateError && (

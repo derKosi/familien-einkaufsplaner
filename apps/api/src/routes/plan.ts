@@ -8,6 +8,7 @@ import { latestOfferSnapshot } from "../offers/store.js";
 import { plannerRecipes } from "../domain/recipes.js";
 import { defaultWeekPattern, mondayOf } from "../domain/weeklogic.js";
 import { loadWeekPlan, saveWeekPlan } from "../plan-repo.js";
+import { clearChecked, setChecked } from "../list-repo.js";
 
 /**
  * Der Kernel (spec.md > Core Journey 2, prd.md > Wochenplan): Laden wählen →
@@ -82,7 +83,19 @@ export async function registerPlanRoutes(app: FastifyInstance): Promise<void> {
       missingInfo: plan.missingInfo,
     });
     saveWeekPlan(weekPlan);
+    clearChecked(); // neue Woche, neuer Haken-Stand (prd.md > Wochenplan: ersetzt sichtbar)
 
+    return getState() satisfies AppState;
+  });
+
+  /** Abhak in der Liste (spec.md > Core Journey 4): Schlüssel ist der Zutaten-Schlüssel. */
+  app.patch("/api/shopping-list/:itemId", async (request, reply) => {
+    const { itemId } = request.params as { itemId: string };
+    const body = z.object({ checked: z.boolean() }).safeParse(request.body);
+    if (!body.success) {
+      return reply.code(400).send({ error: "Ungültiger Request-Body.", code: "bad_request" });
+    }
+    setChecked(decodeURIComponent(itemId), body.data.checked);
     return getState() satisfies AppState;
   });
 

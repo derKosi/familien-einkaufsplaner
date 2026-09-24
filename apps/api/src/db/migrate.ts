@@ -27,6 +27,12 @@ export function migrate(): void {
       payload TEXT NOT NULL,
       created_at TEXT NOT NULL
     );
+
+    -- Abhak der Liste: Schlüssel ist der Zutaten-Schlüssel; Regenerieren leert die Tabelle.
+    CREATE TABLE IF NOT EXISTS list_item (
+      item TEXT PRIMARY KEY,
+      checked INTEGER NOT NULL DEFAULT 0
+    );
   `);
 
   // Bestehende Datenbanken auf neue Spalten heben (CREATE IF NOT EXISTS reicht dafür nicht).

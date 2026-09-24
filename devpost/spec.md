@@ -77,7 +77,7 @@ Implementiert `prd.md > Wochenplan`.
 Lerner-Anstoß (PII-Minimierung), Ausgestaltung Agent-Empfehlung, im Spec festgehalten.
 
 ### `apps/api/src/domain/aggregation.ts` — der Rechner
-Deterministisch: aggregiert Zutaten der Wochenrezepte zu Listenpositionen (Grammaturen summieren, Stück aufpacken: „2× Zucchini"), zieht Preise + Angebots-Badges aus dem Snapshot, gruppiert nach Abteilung, rechnet kcal aus `data/nutrition.json`. Hier liegen die Vitest-Tests, denn „nachrechenbar" ist eine Prüfkriterium-Anforderung.
+Deterministisch: aggregiert Zutaten der Wochenrezepte zu Listenpositionen (Grammaturen summieren, Stück aufpacken), richtet den Bedarf am **Kaufgebinde** hoch (`data/purchase.json`: Packungsgröße, Verderblichkeits-Flag, Grundpreis — Checkpoint-Entscheidung „genug kaufen, Verderbliches nicht überkaufen"), weist Restmengen aus und schlägt dazu **Rezept-Nachrücker** mit konkreten Mengen vor. Preise + Angebots-Badges aus dem Snapshot (Angebotspreis ersetzt den Packungspreis bei Token-Match), Gruppierung nach Abteilung, kcal aus `data/nutrition.json` plus Wochenbilanz je Person aus Planbeteiligung. Vitest-Tests beweisen Nachrechenbarkeit („500 g Hackfleisch aus zwei Rezepten").
 Implementiert `prd.md > Einkaufsliste`.
 
 ### `apps/api/src/offers/store.ts` — die Angebotsnaht
@@ -120,7 +120,8 @@ familien-einkaufsplaner/
 │   ├── app.db                    # SQLite
 │   ├── offers/                   # 2026-09-23_aldi-sued.json, 2026-09-23_lidl.json …
 │   ├── recipes.json              # kuratierter Pool (~24)
-│   └── nutrition.json            # kcal je Zutat
+│   ├── nutrition.json            # kcal je Zutat
+│   └── purchase.json             # Kaufgebinder, Verderblichkeit, Grundpreise
 ├── docker/                       # Dockerfile, compose.yaml (Mount data/)
 ├── devpost/                      # Learning-Workspace (scope, prd, spec …)
 ├── .env.example                  # ohne Geheimnis; .env bleibt ge-ignored
