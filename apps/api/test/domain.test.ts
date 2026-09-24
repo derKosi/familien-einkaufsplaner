@@ -5,7 +5,7 @@ import {
   type Person,
   type WeekPlan as WeekPlanT,
 } from "@fep/shared";
-import { checkPlanConstraints, recipeSatisfies } from "../src/domain/planrules.js";
+import { checkPlanConstraints, countAdaptations, recipeSatisfies } from "../src/domain/planrules.js";
 import { computeNextMeal, countPreparedMeals, defaultWeekPattern } from "../src/domain/weeklogic.js";
 
 // Beweis-Stücke (checklist.md Slice 4 Verify): Schema-Validierung, Constraint-Regeln,
@@ -27,10 +27,16 @@ const recipeTags = new Map<string, string[]>([
   ["kaese-omelett", ["vegetarisch", "schnell"]], // Käse → nicht milchfrei
 ]);
 
-function meal(day: number, slot: "Frühstück" | "Mittag" | "Abendessen", recipeId: string, persons: string[]) {
+function meal(
+  day: number,
+  slot: "Frühstück" | "Mittag" | "Abendessen",
+  recipeId: string,
+  persons: string[],
+  extra: Record<string, unknown> = {},
+) {
   return {
     day,
-    meals: [{ slot, recipeId, servings: persons.length, persons, quick: false }],
+    meals: [{ slot, recipeId, servings: persons.length, persons, quick: false, ...extra }],
   };
 }
 
@@ -87,7 +93,7 @@ describe("Planregeln: Constraints", () => {
     expect(violations).toEqual([]);
   });
 
-  it("findet den Verstoß, wenn Maelle an Bolognese-Tisch landet", () => {
+  it("findet den Verstoß, wenn Maelle ohne Anpassung an Bolognese-Tisch landet", () => {
     const badPlan: WeekPlanT = WeekPlan.parse({
       ...validPlan,
       days: [meal(0, "Abendessen", "bolognese", [LUNE, MAELLE]), ...validPlan.days.slice(1)],
@@ -100,6 +106,20 @@ describe("Planregeln: Constraints", () => {
       slot: "Abendessen",
       recipeId: "bolognese",
     });
+  });
+
+  it("deckt eine konkrete Anpassung den Verstoß (gemeinsames Gericht bleibt)", () => {
+    const adaptedPlan: WeekPlanT = WeekPlan.parse({
+      ...validPlan,
+      days: [
+        meal(0, "Abendessen", "bolognese", [LUNE, MAELLE], {
+          adaptations: [{ personRef: MAELLE, note: "Hackfleisch separat — für diese Portion Linsen" }],
+        }),
+        ...validPlan.days.slice(1),
+      ],
+    });
+    expect(checkPlanConstraints(adaptedPlan, persons, recipeTags)).toEqual([]);
+    expect(countAdaptations(adaptedPlan)).toBe(1);
   });
 });
 
@@ -131,9 +151,16 @@ describe("Wochenlogik", () => {
     expect(next?.recipeId).toBe("bolognese");
   });
 
-  it("Vorbereitet-Zähler: Dienstagmittag liegt nur Montag-Abendessen hinter uns", () => {
-    const count = countPreparedMeals(validPlan, new Date(2026, 8, 22, 12, 0));
-    expect(count).toBe(1);
+  it("Vorbereitet-Zähler: nur explizit Abgehaktes zählt", () => {
+    const withChecks: WeekPlanT = WeekPlan.parse({
+      ...validPlan,
+      days: validPlan.days.map((d, i) => ({
+        ...d,
+        meals: d.meals.map((m) => ({ ...m, prepared: i < 2 })),
+      })),
+    });
+    expect(countPreparedMeals(withChecks)).toBe(2);
+    expect(countPreparedMeals(validPlan)).toBe(0);
   });
 });
 

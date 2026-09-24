@@ -92,13 +92,15 @@ export function computeNextMeal(
   };
 }
 
-/** Meal-Prep-Status: Mahlzeiten der Woche, deren Slot-Zeit schon vorbei ist. */
-export function countPreparedMeals(plan: WeekPlan, now: Date): number {
-  const current = nowTick(now);
+/**
+ * Zubereitungsstatus: nur explizit Abgehaktes zählt (Checkpoint-Entscheidung —
+ * „es kann ja was schief gehen"). Die Slot-Zeit bleibt Next-Meal-Logik.
+ */
+export function countPreparedMeals(plan: WeekPlan): number {
   let count = 0;
   for (const day of plan.days) {
     for (const meal of day.meals) {
-      if (mealTick(day.day, meal.slot) < current) count++;
+      if (meal.prepared) count++;
     }
   }
   return count;

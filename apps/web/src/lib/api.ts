@@ -28,3 +28,11 @@ export function generatePlan(store: Store, allowNoOffers = false): Promise<AppSt
     body: JSON.stringify({ store, allowNoOffers }),
   });
 }
+
+/** PATCH /api/plan/meal — Abhak beim Kochen (Checkpoint: „es kann ja was schief gehen"). */
+export function setMealPrepared(day: number, slot: string, prepared: boolean): Promise<AppState> {
+  return request<AppState>("/api/plan/meal", {
+    method: "PATCH",
+    body: JSON.stringify({ day, slot, prepared }),
+  });
+}

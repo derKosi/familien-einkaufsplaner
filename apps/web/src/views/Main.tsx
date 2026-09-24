@@ -11,6 +11,7 @@ interface Props {
   onGenerate: (store: Store, allowNoOffers: boolean) => void;
   selectedDay: number | null;
   onSelectDay: (day: number | null) => void;
+  onTogglePrepared: (day: number, slot: string, prepared: boolean) => void;
 }
 
 const DAYS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
@@ -60,7 +61,7 @@ function OffersNote({ state }: { state: AppState }) {
  * Hauptbildschirm (prd.md > Screens and Layout): Kopfzeile mit Ladenwahl und
  * Angebots-Indikator, Next-Meal-Hero, Wochenstreifen mit Mahlzeiten-Chips.
  */
-export function Main({ state, current, onSelectPerson, generating, generateError, onGenerate, selectedDay, onSelectDay }: Props) {
+export function Main({ state, current, onSelectPerson, generating, generateError, onGenerate, selectedDay, onSelectDay, onTogglePrepared }: Props) {
   const today = todayIndex();
   const title = (id: string) => state.recipes.find((r) => r.id === id)?.title ?? id;
   const plan = state.weekPlan;
@@ -127,7 +128,7 @@ export function Main({ state, current, onSelectPerson, generating, generateError
       />
 
       {selectedDay !== null ? (
-        <DayDetail state={state} day={selectedDay} onBack={() => onSelectDay(null)} />
+        <DayDetail state={state} day={selectedDay} onBack={() => onSelectDay(null)} onTogglePrepared={onTogglePrepared} />
       ) : (
         <>
           {state.nextMeal ? (
@@ -139,7 +140,10 @@ export function Main({ state, current, onSelectPerson, generating, generateError
                 {state.nextMeal.quick && <span className="quick-flag">schnell kochbar</span>}
               </div>
               <div className="prepared-count">
-                {state.mealsPrepared} von {state.mealsTotal} Mahlzeiten vorbereitet
+                {state.mealsPrepared} von {state.mealsTotal} Mahlzeiten zubereitet
+                <button className="link-btn" onClick={() => onSelectDay(state.nextMeal!.day)}>
+                  Tag ansehen
+                </button>
               </div>
             </section>
           ) : (
@@ -164,11 +168,12 @@ export function Main({ state, current, onSelectPerson, generating, generateError
                     {dayPlan?.meals.map((meal, j) => (
                       <span
                         key={j}
-                        className={`meal-chip slot-${meal.slot}`}
+                        className={`meal-chip ${meal.prepared ? "chip-prepared" : ""}`}
                         title={`${meal.slot}: ${title(meal.recipeId)}`}
                       >
                         <b>{SLOT_CHIP[meal.slot]}</b> {title(meal.recipeId)}
                         {meal.quick && <i className="quick-dot">⚡</i>}
+                        {meal.prepared && <i className="prepared-dot">✓</i>}
                       </span>
                     ))}
                   </div>

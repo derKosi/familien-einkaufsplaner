@@ -28,7 +28,12 @@ export interface PlanViolation {
   recipeId: string;
 }
 
-/** Prüft jeden Plan-Tag gegen die Constraints aller beteiligten Personen. */
+/**
+ * Prüft jeden Plan-Tag gegen die Constraints aller beteiligten Personen.
+ * Eine Verletzung durch das Basisgericht ist okay, wenn für die Person eine
+ * Anpassung existiert (Checkpoint: Anpassung schlägt Restriktion) — gezählt
+ * werden nur ungedeckte Verstöße.
+ */
 export function checkPlanConstraints(
   plan: WeekPlan,
   persons: Person[],
@@ -45,7 +50,9 @@ export function checkPlanConstraints(
         const person = byId.get(personId);
         if (!person) continue;
         for (const constraint of person.constraints) {
-          if (!recipeSatisfies(tags, constraint)) {
+          if (recipeSatisfies(tags, constraint)) continue;
+          const adapted = meal.adaptations.some((a) => a.personRef === personId);
+          if (!adapted) {
             violations.push({
               personId,
               constraint,
@@ -59,4 +66,9 @@ export function checkPlanConstraints(
     }
   }
   return violations;
+}
+
+/** Anzahl der Mahlzeiten, die per Anpassung an gemeinsamen Gerichten teilnehmen. */
+export function countAdaptations(plan: WeekPlan): number {
+  return plan.days.reduce((n, d) => n + d.meals.filter((m) => m.adaptations.length > 0).length, 0);
 }

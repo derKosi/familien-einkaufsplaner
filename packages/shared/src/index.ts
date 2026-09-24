@@ -108,6 +108,18 @@ export type RefreshOffersResponse = z.infer<typeof RefreshOffersResponse>;
 export const MealSlot = z.enum(["Frühstück", "Mittag", "Abendessen"]);
 export type MealSlot = z.infer<typeof MealSlot>;
 
+/**
+ * Anpassung für eine Person am Basisgericht (Checkpoint-Entscheidung):
+ * Gemeinsame Gerichte bleiben der Normalfall — Einschränkungen löst der Plan
+ * über konkrete Zubereitungs-Anpassungen, nicht durch Restriktion für alle.
+ */
+export const MealAdaptation = z.object({
+  personRef: z.string().uuid(),
+  /** Konkrete Abwandlung, z. B. „Käse nur auf die anderen Portionen". */
+  note: z.string().min(3).max(140),
+});
+export type MealAdaptation = z.infer<typeof MealAdaptation>;
+
 /** Eine Mahlzeit im Plan — Personen nur als GUID-Referenz (Kontextvertrag: keine Namen). */
 export const PlannerMeal = z.object({
   slot: MealSlot,
@@ -116,6 +128,8 @@ export const PlannerMeal = z.object({
   servings: z.number().int().positive(),
   /** Schnellkochbar für Werktage (prd.md > Wochenplan). */
   quick: z.boolean(),
+  /** Nur wenn das Basisgericht eine Einschränkung verletzt — sonst leer. */
+  adaptations: z.array(MealAdaptation).default([]),
 });
 export type PlannerMeal = z.infer<typeof PlannerMeal>;
 
@@ -144,6 +158,9 @@ export const StoredMeal = z.object({
   /** GUIDs der Mitesser (PlannerMeal.personRefs, unverändert persistiert). */
   persons: z.array(z.string().uuid()).min(1),
   quick: z.boolean(),
+  adaptations: z.array(MealAdaptation).default([]),
+  /** Vom Kochen abgehakt (Checkpoint: „es kann ja was schief gehen") — Regenerieren setzt zurück. */
+  prepared: z.boolean().default(false),
 });
 export type StoredMeal = z.infer<typeof StoredMeal>;
 
@@ -232,12 +249,14 @@ export type NutritionTable = z.infer<typeof NutritionTable>;
 
 // ─── GET /api/state — der komplette Stand beim Öffnen der App ───
 
-/** Leichte Rezept-Projektion für UI (Chips/Next-Meal) — ohne Zutaten/Mengen. */
+/** Leichte Rezept-Projektion für UI (Chips/Next-Meal/DayDetail) — Zutaten bleiben draußen. */
 export const RecipeSummary = z.object({
   id: z.string(),
   title: z.string(),
   quick: z.boolean(),
   tags: z.array(RecipeTag),
+  /** Kurz-Anleitung für die Tagesansicht (Checkpoint: „Zubereitung nirgends sichtbar"). */
+  steps: z.array(z.string()),
 });
 export type RecipeSummary = z.infer<typeof RecipeSummary>;
 

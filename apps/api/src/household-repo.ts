@@ -49,7 +49,7 @@ export function getState(): AppState {
   const planView = weekPlan
     ? {
         nextMeal: computeNextMeal(weekPlan, (id) => loadRecipes().find((r) => r.id === id)?.title, new Date()),
-        mealsPrepared: countPreparedMeals(weekPlan, new Date()),
+        mealsPrepared: countPreparedMeals(weekPlan),
         mealsTotal: weekPlan.days.reduce((n, d) => n + d.meals.length, 0),
       }
     : { nextMeal: null, mealsPrepared: 0, mealsTotal: 0 };

@@ -9,7 +9,7 @@
  */
 import {
   checkPlanConstraints,
-  recipeSatisfies,
+  countAdaptations,
 } from "../src/domain/planrules.js";
 import { AppState, type Person } from "@fep/shared";
 
@@ -45,23 +45,22 @@ for (const v of violations) {
   console.error(`    Tag ${v.day} ${v.slot}: ${who} (${v.constraint}) an ${v.recipeId}`);
 }
 
-// Die Demo-Constraints explizit beim Namen (checklist-Formulierung):
+// Die Demo-Constraints explizit beim Namen (checklist-Formulierung) — unter der
+// Anpassungs-Semantik gilt: gedeckt = Basisgericht passt ODER Anpassung für die Person.
 const maelle = persons.find((p) => p.name === "Maelle");
 const gustav = persons.find((p) => p.name === "Gustav");
-if (maelle) {
-  const allVeg = plan.days
-    .flatMap((d) => d.meals)
-    .filter((m) => m.persons.includes(maelle.id))
-    .every((m) => recipeSatisfies(recipeTags.get(m.recipeId) ?? [], "vegetarisch"));
-  check(allVeg, "Maelles Mahlzeiten sind durchgehend vegetarisch");
-}
-if (gustav) {
-  const allMf = plan.days
-    .flatMap((d) => d.meals)
-    .filter((m) => m.persons.includes(gustav.id))
-    .every((m) => recipeSatisfies(recipeTags.get(m.recipeId) ?? [], "milchfrei"));
-  check(allMf, "Gustavs Mahlzeiten sind durchgehend milchfrei");
-}
+check(
+  maelle && violations.filter((v) => v.personId === maelle.id).length === 0,
+  "Maelles Mahlzeiten sind durchgehend vegetarisch (Basis oder Anpassung)",
+);
+check(
+  gustav && violations.filter((v) => v.personId === gustav.id).length === 0,
+  "Gustavs Mahlzeiten sind durchgehend milchfrei (Basis oder Anpassung)",
+);
+check(
+  countAdaptations(plan) > 0 || persons.every((p) => p.constraints.length === 0),
+  `Anpassungen vorhanden, wo das Basisgericht einschränkt (${countAdaptations(plan)} Mahlzeiten mit Anpassung)`,
+);
 
 const quickCount = plan.days.flatMap((d) => d.meals).filter((m) => m.quick).length;
 check(quickCount > 0, `schnell-kochbar-Flags gesetzt (${quickCount} Mahlzeiten)`);

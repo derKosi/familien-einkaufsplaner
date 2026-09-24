@@ -69,7 +69,7 @@ Endpoints: `GET /api/state`, `POST /api/household/demo`, `POST /api/persons`, `P
 Implementiert `prd.md > Features and Behavior` (alle Bereiche).
 
 ### `apps/api/src/llm/planner.ts` — der Kopf
-Baut den Kontext (Personen, Muster, Rezept-Pool, aktuelle Angebote), ruft Claude mit fester Antwortstruktur, validiert mit zod (max. 2 kontrollierte Retries mit Fehlermeldung im Kontext), schreibt den validierten Plan. Aufgaben laut Lerner-Entscheidung: Rezeptauswahl, Allergie-/Constraint-Check, Wochenplanzusammenstellung, Portionierung.
+Baut den Kontext (Personen, Muster, Rezept-Pool, aktuelle Angebote), ruft Claude mit fester Antwortstruktur, validiert mit zod (max. 2 kontrollierte Retries mit Fehlermeldung im Kontext — inkl. Constraint-Prüfung: Verstoß ohne Anpassung geht als Fehlerkontext zurück), schreibt den validierten Plan. Aufgaben: Rezeptauswahl, Allergie-/Constraint-Check per **Anpassung statt Restriktion** (Checkpoint-Entscheidung: Basisgericht für den Tisch, konkrete Abwandlung pro Person), Wochenplanzusammenstellung, Portionierung.
 Implementiert `prd.md > Wochenplan`.
 
 ### `apps/api/src/llm/context-contract.ts` — der PII-Filter
@@ -94,7 +94,7 @@ Erfüllt `prd.md > States and Boundaries` (Persistenz).
 
 ## Data Model
 
-Datenfluss: **Herkunft** — Personen/Muster: Nutzereingabe im Onboarding; Angebote: datierte Snapshots (Build/Agent, später Fetcher); Rezepte: kuratierte Datei; Plan: LLM-Ausgabe nach Validierung; Liste: deterministisch aus Plan×Rezepten. **Speicher** — alles in SQLite unter `data/app.db`; Snapshots/Rezepte/Nährwerte als JSON-Dateien daneben. **Transport** — REST/JSON, Typen aus `packages/shared`. **Rückkehr** — beim Wiederöffnen lädt `GET /api/state` den kompletten Stand: Haushalt, letzter Plan, Liste samt Abhak-Status. Kernobjekte (zod): `Person { id, name, role, colorPair, constraints[], calorieGoal?, activityProfile? }`, `Offer { id, store, product, amount, priceCents, wasOffer: boolean, department }`, `WeekPlan { weekOf, store, days[7] { meals[] { slot, recipeId, servings, persons[] , quick?: boolean } }, basedOnOffers: number, offersDated }`, `ListItem { id, department, product, amount, priceCents?, offer?: boolean, checked }`.
+Datenfluss: **Herkunft** — Personen/Muster: Nutzereingabe im Onboarding; Angebote: datierte Snapshots (Build/Agent, später Fetcher); Rezepte: kuratierte Datei; Plan: LLM-Ausgabe nach Validierung; Liste: deterministisch aus Plan×Rezepten. **Speicher** — alles in SQLite unter `data/app.db`; Snapshots/Rezepte/Nährwerte als JSON-Dateien daneben. **Transport** — REST/JSON, Typen aus `packages/shared`. **Rückkehr** — beim Wiederöffnen lädt `GET /api/state` den kompletten Stand: Haushalt, letzter Plan, Liste samt Abhak-Status. Kernobjekte (zod): `Person { id, name, role, colorPair, constraints[], calorieGoal?, activityProfile? }`, `Offer { id, store, product, amount, priceCents, wasOffer: boolean, department }`, `WeekPlan { weekOf, store, days[7] { meals[] { slot, recipeId, servings, persons[], quick?, adaptations[] { personRef, note }, prepared } }, basedOnOffers: number, offersDated }` — `prepared` setzt `PATCH /api/plan/meal` (Schlüssel day+slot), Regenerieren setzt es zurück., `ListItem { id, department, product, amount, priceCents?, offer?: boolean, checked }`.
 
 ## File Structure
 

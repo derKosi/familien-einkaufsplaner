@@ -56,13 +56,13 @@ Regeln:
 - Der weekPattern listet jede geplante Mahlzeit als Eintrag {day, slot, personRefs} — erzeuge für JEDEN Eintrag genau eine Mahlzeit im Plan, und keine zusätzlich.
 - Nutze AUSSCHLIESSLICH Rezepte mit den angegebenen recipeIds.
 - Die personRefs einer geplanten Mahlzeit übernimmst du; die servings entsprechen der Personenzahl (Jugendliche zählen 0.75, kaufmännisch aufgerundet).
-- Respektiere die constraints jeder beteiligten Person (z. B. vegetarisch: kein Fleisch, milchfrei: keine Milchprodukte) in den gewählten Rezepten.
-- Abwechslung: kein Rezept doppelt innerhalb von 3 aufeinanderfolgenden Tagen.
+- GEMEINSAME GERICHTE SOLLLEN DER NORMALFALL SEIN: Wähle als Basisgern das, was für die Gruppe am besten passt — auch fleisch- oder milchhaltige Hauptgerichte. Löst eine Person ihre Einschränkung (vegetarisch, milchfrei, …) NICHT per Anpassung (adaptations) mit personRef und einer kurzen konkreten Kochanweisung (z. B. "Hackfleisch-Anteil separat; für diese Portion Linsen einkochen", "Sahne → Haferdrink, Käse weglassen"). Mache NICHT den ganzen Tisch vegetarisch, nur weil eine Person es ist.
+- Abwechslung: kein Rezept doppelt innerhalb von 3 aufeinanderfolgenden Tagen; wechsle auch bei Frühstück und Mittag durch.
 - Bevorzuge bei der Auswahl Rezepte, die viele aktuelle Angebote (offers) abdecken.
 - Zeige im Feld missingInfo, welche Informationen dir für eine bessere Planung fehlen (leeres Array, wenn nichts fehlt).
 
 Antworte AUSSCHLIESSLICH mit JSON (kein Markdown, keine Erklärung) in dieser Struktur:
-{"days":[{"day":0,"meals":[{"slot":"Frühstück","recipeId":"…","personRefs":["…"],"servings":4,"quick":true}]}],"missingInfo":[]}
+{"days":[{"day":0,"meals":[{"slot":"Frühstück","recipeId":"…","personRefs":["…"],"servings":4,"quick":true,"adaptations":[{"personRef":"…","note":"…"}]}]}],"missingInfo":[]}
 (7 Tage, Tag 0–6.)${errorBlock}
 
 Kontext (JSON):
@@ -105,8 +105,10 @@ function validateAgainstPool(plan: PlannerOutputT, context: PlannerContext): str
 
 /**
  * Fachliche Prüfung (spec.md > planner.ts): jede Mahlzeit gegen die Constraints
- * aller Mitesser. Fehlermeldung enthält nur GUIDs — der Kontextvertrag gilt auch
- * im Retry-Text.
+ * aller Mitesser. Ein Basisgericht, das eine Einschränkung verletzt, ist okay,
+ * wenn genau für die betroffene Person eine Anpassung (adaptations) steht —
+ * gemeinsame Gerichte schlagen Restriktion (Checkpoint-Entscheidung).
+ * Fehlermeldung enthält nur GUIDs — der Kontextvertrag gilt auch im Retry-Text.
  */
 function validateConstraints(plan: PlannerOutputT, context: PlannerContext): string | null {
   const tagsById = new Map(context.recipes.map((r) => [r.id, r.tags]));
@@ -117,8 +119,10 @@ function validateConstraints(plan: PlannerOutputT, context: PlannerContext): str
       for (const ref of meal.personRefs) {
         const person = personById.get(ref);
         for (const constraint of person?.constraints ?? []) {
-          if (!recipeSatisfies(tags, constraint)) {
-            return `Tag ${day.day} ${meal.slot}: Person ${ref} hat Constraint "${constraint}", Rezept "${meal.recipeId}" verletzt das. Setze sie auf ein geeignetes Rezept oder plane das Gericht ohne sie.`;
+          if (recipeSatisfies(tags, constraint)) continue;
+          const adapted = meal.adaptations.some((a) => a.personRef === ref);
+          if (!adapted) {
+            return `Tag ${day.day} ${meal.slot}: Rezept "${meal.recipeId}" verletzt "${constraint}" von Person ${ref}. Plane entweder eine kurze konkrete Anpassung (adaptations, personRef ${ref}) oder wähle ein geeignetes Gericht.`;
           }
         }
       }

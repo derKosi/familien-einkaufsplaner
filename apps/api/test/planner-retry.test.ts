@@ -22,7 +22,7 @@ const context: PlannerContext = {
   offers: [],
 };
 
-function planJson(violatingDay: number, violatingRecipe: string, okRecipe: string): string {
+function planJson(violatingDay: number, violatingRecipe: string, okRecipe: string, adaptOnDay?: number): string {
   return JSON.stringify({
     days: Array.from({ length: 7 }, (_, day) => ({
       day,
@@ -33,6 +33,9 @@ function planJson(violatingDay: number, violatingRecipe: string, okRecipe: strin
           personRefs: [GUSTAV],
           servings: 1,
           quick: true,
+          ...(day === adaptOnDay
+            ? { adaptations: [{ personRef: GUSTAV, note: "Sahne → Haferdrink, ohne Butter" }] }
+            : {}),
         },
       ],
     })),
@@ -72,6 +75,16 @@ describe("Planner-Retry bei Constraint-Verstoß", () => {
     // Der Retry-Text nennt die Verletzung — mit GUID, ohne Namen (Kontextvertrag).
     expect(calls[1][0]).toContain("milchfrei");
     expect(calls[1][0]).toContain(GUSTAV);
+  });
+
+  it("Basisgericht mit Anpassung besteht ohne Retry (gemeinsames Gericht bleibt)", async () => {
+    const calls: string[][] = [];
+    const { plan, attempts } = await generateWeekPlan(
+      scriptedClient([planJson(0, "kaese-omelett", "linsen-dal", 0)], calls),
+      context,
+    );
+    expect(attempts).toHaveLength(0);
+    expect(plan.days[0].meals[0].adaptations).toHaveLength(1);
   });
 
   it("durchgehend untaugliche Antworten → PlannerError nach 3 Versuchen", async () => {

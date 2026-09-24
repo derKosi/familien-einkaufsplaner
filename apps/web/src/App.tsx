@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { Person, Store } from "@fep/shared";
-import { fetchState, generatePlan, seedDemoHousehold } from "./lib/api.js";
+import { fetchState, generatePlan, seedDemoHousehold, setMealPrepared } from "./lib/api.js";
 import { FirstStart } from "./views/FirstStart.js";
 import { Main } from "./views/Main.js";
 
@@ -76,6 +76,15 @@ export default function App() {
     );
   }
 
+  /** Abhak beim Kochen — Persistenz passiert server-seitig im Wochenplan. */
+  async function togglePrepared(day: number, slot: string, prepared: boolean) {
+    try {
+      setState(await setMealPrepared(day, slot, prepared));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    }
+  }
+
   if (!state?.household) return <FirstStart onDemo={startDemo} busy={busy} />;
 
   return (
@@ -88,6 +97,7 @@ export default function App() {
       onGenerate={runGenerate}
       selectedDay={selectedDay}
       onSelectDay={setSelectedDay}
+      onTogglePrepared={togglePrepared}
     />
   );
 }

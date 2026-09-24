@@ -17,13 +17,14 @@ export function loadRecipes(): Recipe[] {
   return cache;
 }
 
-/** Leichte Projektion für die UI (AppState.recipes) — Titel + Flags, keine Mengen. */
+/** Leichte Projektion für die UI (AppState.recipes) — inkl. Kurz-Anleitung. */
 export function recipesSummary(): RecipeSummary[] {
   return loadRecipes().map((r) => ({
     id: r.id,
     title: r.title,
     quick: r.tags.includes("schnell"),
     tags: r.tags,
+    steps: r.steps,
   }));
 }
 
