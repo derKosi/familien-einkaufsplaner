@@ -33,7 +33,7 @@ function PricePanel({ recipeId, servings }: { recipeId: string; servings: number
 
   return (
     <details className="recipe-steps price-panel">
-      <summary>Zutaten &amp; Preise</summary>
+      <summary>Zutaten &amp; Preise (für {servings} Portion{servings === 1 ? "" : "en"})</summary>
       {!prices && <p className="lead">Rechnet …</p>}
       {prices && (
         <table className="price-table">
@@ -99,7 +99,9 @@ export function DayDetail({ state, day, onBack, onTogglePrepared, onAddEvent, on
 
   return (
     <section className="day-detail" aria-label={`Tagesdetail ${DAYS[day]}`}>
-      <button className="link-btn" onClick={onBack}>← Zurück zur Woche</button>
+      <div className="day-back">
+        <button className="link-btn" onClick={onBack}>← Woche</button>
+      </div>
       <h2>{DAYS[day]}{exempt && <span className="exempt-label"> · ausgesetzt</span>}</h2>
 
       <div className="day-tools">

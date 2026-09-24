@@ -1,0 +1,14 @@
+node_modules
+**/dist
+**/node_modules
+data/app.db
+data/app.db-shm
+data/app.db-wal
+data/app.db-journal
+.env
+.env.*
+.git
+.claude
+agent
+devpost
+/tmp

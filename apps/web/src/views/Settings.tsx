@@ -1,4 +1,6 @@
+import { useState } from "react";
 import type { AppState, HouseholdSettings, MealSlot } from "@fep/shared";
+import { applyAppearance, loadAppearance, saveAppearance, type Appearance, type FontSizePref, type MotionPref, type ThemePref } from "../theme/theme.js";
 
 interface Props {
   state: AppState;
@@ -51,11 +53,47 @@ export function Settings({ state, onBack, onSaveSettings, onToggleComplete }: Pr
   }
 
   const dayOptions = DAYS.map((label, i) => ({ label, value: i }));
+  const [look, setLook] = useState<Appearance>(loadAppearance);
+  function setLookPartial(patch: Partial<Appearance>) {
+    const next = { ...look, ...patch };
+    setLook(next);
+    saveAppearance(next);
+    applyAppearance(next);
+  }
 
   return (
     <div className="main settings">
       <button className="link-btn" onClick={onBack}>← Zurück zur Woche</button>
       <h2>Einstellungen</h2>
+
+      <section className="settings-block">
+        <h3>Darstellung</h3>
+        <div className="form-row">
+          <span className="form-label">Farbschema:</span>
+          {([["system", "System"], ["light", "Hell"], ["dark", "Dunkel"]] as Array<[ThemePref, string]>).map(([v, label]) => (
+            <label key={v} className="radio-chip">
+              <input type="radio" name="theme" checked={look.theme === v} onChange={() => setLookPartial({ theme: v })} />
+              {label}
+            </label>
+          ))}
+        </div>
+        <div className="form-row">
+          <span className="form-label">Schrift:</span>
+          {([["normal", "normal"], ["large", "groß"]] as Array<[FontSizePref, string]>).map(([v, label]) => (
+            <label key={v} className="radio-chip">
+              <input type="radio" name="fontsize" checked={look.fontsize === v} onChange={() => setLookPartial({ fontsize: v })} />
+              {label}
+            </label>
+          ))}
+          <span className="form-label">Animation:</span>
+          {([["system", "System"], ["reduced", "wenig"]] as Array<[MotionPref, string]>).map(([v, label]) => (
+            <label key={v} className="radio-chip">
+              <input type="radio" name="motion" checked={look.motion === v} onChange={() => setLookPartial({ motion: v })} />
+              {label}
+            </label>
+          ))}
+        </div>
+      </section>
 
       <section className="settings-block">
         <h3>Budget</h3>

@@ -79,7 +79,7 @@ Build mode: fast
   Learner check: Eigenen Haushalt anlegen, eine Person mit Skip anlegen, sie später in den Einstellungen vervollständigen, Wochenmuster ändern und neu planen.
   Commit: `Own-household onboarding with skip/later and settings`
 
-- [ ] **8. Feinschliff + Auslieferung: Light/Dark/System, Optionen, Docker-Demo**
+- [x] **8. Feinschliff + Auslieferung: Light/Dark/System, Optionen, Docker-Demo**
   Becomes usable: Die App erfüllt den Look-and-Feel-Vertrag (Light/Dark/System, große-Schrift-Option, wenig Animation, Prospekt-Nüchternheit, dezent bei Kalorien) und `docker compose up` liefert die Demo auf `:8080`.
   Why now: Polish nach Verhalten, nicht davor — und der Docker-Weg ist der Demo-Aufnahmepfad aus dem Spec, also der letzte Baustein.
   PRD ref: `prd.md > Look and Feel`, `prd.md > What "Working" Looks Like` (komplett)
@@ -143,3 +143,10 @@ Activity mode: [offen]
 - **Slice 7 Live-Fund — PII-Guard-Fehlalarm:** Testperson „Max" + Angebotsprodukt „MAXI…" → substring-basierte PII-Prüfung warf fälschlich 500er. Prüfung auf Wortgrenzen umgestellt (`\b`-Regex); Regression im Live-Loop bestanden (Generate mit „Max" → 200, 7 Tage).
 - **Checkpoint-Runde 6 (nach Slice 6) — Tagesansicht-UX:** Die Tagesansicht gefällt noch nicht (Layout, Zurück-Bedienung, aufklappbares Panel, Mengen-Anzeige) — Lerner-Entscheidung: **Aufwertung in den Slice-8-Look-and-Feel-Pass** verschoben, dort mit Redesign der Tagesansicht.
 - **Wegwerf-DB-Verifikationsmuster:** Slice-7-Flow lief gegen `FEP_DATA_DIR=/tmp/fep-test-data` (Kopien der JSON-Datenkataloge inklusive) — der Demo-Haushalt blieb unberührt; Muster für künftige Flow-Tests.
+- **Slice 8 umgesetzt entlang der Look-and-Feel-Vertrags + Checkpoint-Notizen:**
+  - **Theming:** Light/Dark/System über `data-theme` am Wurzel-Element (`theme.ts`, localStorage, matchMedia-Listener für System); Dark-Palette mit entsättigten Personen-Pastellen. **Große-Schrift-Option** (`data-fontsize="large"` → zoom 1.15) und **„wenig Animation“** (`data-motion="reduced"` + `prefers-reduced-motion`) — alles in den Einstellungen unter „Darstellung“.
+  - **Kalorien dezent** (PRD-Tonalität): Zeile unter dem Profil-Umschalter — „~X kcal diese Woche · Ziel Y kcal/Tag“, nur wenn Ziel gesetzt.
+  - **Tagesansicht-Redesign (Checkpoint-Runde 6):** klebriger Zurück-Kopf („← Woche“), schlankere Karten-Hierarchie, Preis-Panel mit Portionszahl im Titel.
+  - **Mobile-Nachreich:** Muster-Tabelle scrollt, Listenzeilen umbrechen, Topbar stapelt.
+  - **Docker-Demo:** Multi-Stage-freier Single-Stage-Build (`docker/Dockerfile`, node:22-alpine), SPA-Serving durch den API-Container (`FEP_WEB_DIST` + Notfound-Fallback auf index.html), `compose.yaml` am Root mit `data/`-Mount und optionalem `.env`. Fund im Container-Build: `tsconfig.base.json` fehlte im COPY-Set (extends-Auflösung schlug fehl) — nachgetragen. Verify: `docker compose up --build` → :8080, SPA 200, State 200 (Haushalt, 70 Angebote, 39 Listenzeilen), Route-Fallback 200, `data-theme`-Regeln im gebauten CSS.
+- **Rezept-Tiefe (Zeiten/Reihenfolgen) bleibt Backlog-Item 3** — bewusst nicht in diesen Slice gezogen, Content-Pass nach dem finalen Review bewerten.

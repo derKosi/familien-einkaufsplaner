@@ -18,6 +18,7 @@ import { Main } from "./views/Main.js";
 import { Onboarding } from "./views/Onboarding.js";
 import { Settings } from "./views/Settings.js";
 import { ShoppingList } from "./views/ShoppingList.js";
+import { applyAppearance, loadAppearance, watchSystemTheme } from "./theme/theme.js";
 
 const STORAGE_KEY = "fep.current-person";
 
@@ -38,6 +39,12 @@ export default function App() {
       .then((s) => setState(s))
       .catch((e) => setError(String(e)))
       .finally(() => setLoading(false));
+  }, []);
+
+  // Darstellung (spec.md > Look and Feel): Theme/Schrift/Animation aus localStorage.
+  useEffect(() => {
+    applyAppearance(loadAppearance());
+    watchSystemTheme(loadAppearance);
   }, []);
 
   // Ansichtsidentität: ohne Login, im Browser bewahrt (prd.md > Identität).

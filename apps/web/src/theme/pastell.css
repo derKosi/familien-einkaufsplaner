@@ -1,5 +1,6 @@
 /* Pastell-Paare (Main + Akzent) — eine Kombination pro Person.
-   Der Profil-Umschalter setzt data-person auf <body>, die Variablen färben die Ansicht. */
+   Der Profil-Umschalter setzt data-person, das Theme-System data-theme
+   (theme.ts) — Light ist Referenz, Dark bekommt eigene, entsättigte Paare. */
 
 :root {
   --paper: #faf7f2;
@@ -7,6 +8,7 @@
   --muted: #6b655c;
   --line: #e4ddd1;
   --card: #ffffff;
+  --warn: #9a6700;
   --person-main: #e9eef5;
   --person-accent: #43618e;
 }
@@ -16,7 +18,41 @@
 [data-person="lavendel"]{ --person-main: #efe9f8; --person-accent: #6b4fa3; }
 [data-person="himmel"]  { --person-main: #e7f0f8; --person-accent: #3f6f9e; }
 
+/* Dark (spec.md > Look and Feel: eigenes Custom-Property-System, kein Framework) */
+[data-theme="dark"] {
+  --paper: #171614;
+  --ink: #ece7de;
+  --muted: #a39a8d;
+  --line: #35322c;
+  --card: #211f1c;
+  --warn: #d9a94a;
+  --person-main: #232622;
+  --person-accent: #9db8d9;
+}
+[data-theme="dark"][data-person="salbei"]  { --person-main: #232b24; --person-accent: #9cc2a1; }
+[data-theme="dark"][data-person="aprikot"] { --person-main: #302822; --person-accent: #d99a67; }
+[data-theme="dark"][data-person="lavendel"]{ --person-main: #28232f; --person-accent: #b39adb; }
+[data-theme="dark"][data-person="himmel"]  { --person-main: #222930; --person-accent: #82b3e0; }
+
 * { box-sizing: border-box; }
+
+/* Große-Schrift-Option (spec.md: als Wurzel-Klasse) */
+:root[data-fontsize="large"] body { zoom: 1.15; }
+
+/* „Wenig Animation“-Option + Systempräferenz (spec.md > Look and Feel) */
+:root[data-motion="reduced"] *,
+:root[data-motion="reduced"] *::before,
+:root[data-motion="reduced"] *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
 
 body {
   margin: 0;

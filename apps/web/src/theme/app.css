@@ -188,14 +188,11 @@ button.primary:disabled { opacity: 0.6; cursor: default; }
 /* Tagesdetail (Checkpoint-Feedback: klickbare Tage, wer isst was) */
 .day-detail { margin-top: 6px; }
 .day-detail h2 {
-  margin: 10px 0 14px;
+  margin: 6px 0 10px;
   font-size: 26px;
   letter-spacing: -0.01em;
-  padding-bottom: 8px;
-  border-bottom: 3px solid var(--person-accent);
-  display: inline-block;
 }
-.day-detail > .link-btn { color: var(--person-accent); }
+.day-back-title { font-size: 13px; color: var(--muted); }
 .day-detail-meals { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
 .meal-card {
   background: color-mix(in srgb, var(--person-main) 45%, var(--card));
@@ -349,7 +346,29 @@ button.primary:disabled { opacity: 0.6; cursor: default; }
 .event-cost { color: var(--muted); font-size: 13px; }
 .portion-meta { color: var(--muted); }
 
-/* Zutaten-Preis-Panel (Checkpoint-Runde 5) */
+/* Dezente Kalorienzeile (prd.md > Tonalität: kein Banner) */
+.calorie-note { color: var(--muted); font-size: 12.5px; margin: -12px 0 12px; font-variant-numeric: tabular-nums; }
+
+/* Tagesansicht: Zurück-Kopf klebrig und klar (Checkpoint-Runde 6) */
+.day-detail .day-back {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  backdrop-filter: blur(4px);
+  padding: 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.day-detail .day-back .link-btn { color: var(--person-accent); font-weight: 700; }
+
+/* Mobile: Tabellen ausweichen statt aufreißen */
+@media (max-width: 640px) {
+  .pattern-table { display: block; overflow-x: auto; }
+  .list-row { flex-wrap: wrap; }
+  .list-price { margin-left: 27px; }
+}
 .price-panel table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13px; }
 .price-panel th { text-align: left; color: var(--muted); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.05em; padding: 3px 6px 3px 0; }
 .price-panel td { padding: 3px 6px 3px 0; border-top: 1px solid var(--line); font-variant-numeric: tabular-nums; }

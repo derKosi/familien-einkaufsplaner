@@ -150,6 +150,17 @@ export function Main({ state, current, onSelectPerson, generating, generateError
         onSelect={onSelectPerson}
       />
 
+      {current && (() => {
+        const cal = state.personCalories.find((p) => p.personId === current.id);
+        if (!cal) return null;
+        return (
+          <div className="calorie-note">
+            {current.name}: ~{cal.weekKcal.toLocaleString("de-DE")} kcal diese Woche
+            {current.calorieGoal ? ` · Ziel ${current.calorieGoal.toLocaleString("de-DE")} kcal/Tag` : ""}
+          </div>
+        );
+      })()}
+
       {selectedDay !== null ? (
         <DayDetail
           state={state}
