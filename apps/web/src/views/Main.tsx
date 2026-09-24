@@ -1,5 +1,6 @@
 import type { AppState, Person, Store } from "@fep/shared";
 import { PersonSwitcher } from "../components/PersonSwitcher.js";
+import { DayDetail } from "./DayDetail.js";
 
 interface Props {
   state: AppState;
@@ -8,6 +9,8 @@ interface Props {
   generating: boolean;
   generateError: string | null;
   onGenerate: (store: Store, allowNoOffers: boolean) => void;
+  selectedDay: number | null;
+  onSelectDay: (day: number | null) => void;
 }
 
 const DAYS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
@@ -57,7 +60,7 @@ function OffersNote({ state }: { state: AppState }) {
  * Hauptbildschirm (prd.md > Screens and Layout): Kopfzeile mit Ladenwahl und
  * Angebots-Indikator, Next-Meal-Hero, Wochenstreifen mit Mahlzeiten-Chips.
  */
-export function Main({ state, current, onSelectPerson, generating, generateError, onGenerate }: Props) {
+export function Main({ state, current, onSelectPerson, generating, generateError, onGenerate, selectedDay, onSelectDay }: Props) {
   const today = todayIndex();
   const title = (id: string) => state.recipes.find((r) => r.id === id)?.title ?? id;
   const plan = state.weekPlan;
@@ -123,47 +126,58 @@ export function Main({ state, current, onSelectPerson, generating, generateError
         onSelect={onSelectPerson}
       />
 
-      {state.nextMeal ? (
-        <section className="next-meal" aria-label="Nächstes Essen">
-          <div className="next-meal-kicker">Nächstes Essen · Tag {DAYS[state.nextMeal.day]} · {state.nextMeal.slot}</div>
-          <h2>{state.nextMeal.title}</h2>
-          <div className="next-meal-meta">
-            für {state.nextMeal.servings} Portionen ({state.nextMeal.personCount} Personen)
-            {state.nextMeal.quick && <span className="quick-flag">schnell kochbar</span>}
-          </div>
-          <div className="prepared-count">
-            {state.mealsPrepared} von {state.mealsTotal} Mahlzeiten vorbereitet
-          </div>
-        </section>
+      {selectedDay !== null ? (
+        <DayDetail state={state} day={selectedDay} onBack={() => onSelectDay(null)} />
       ) : (
-        <section className="next-meal empty">
-          <b>Noch kein Wochenplan.</b>
-          <span>Wähle einen Laden und plane die erste Woche.</span>
-        </section>
-      )}
-
-      <section className="week-strip" aria-label="Wochenplan">
-        {DAYS.map((day, i) => {
-          const dayPlan = plan?.days.find((d) => d.day === i);
-          return (
-            <div key={day} className={`day-card ${i === today ? "today" : ""}`}>
-              <div className="day-name">{day}</div>
-              <div className="day-meals">
-                {dayPlan?.meals.map((meal, j) => (
-                  <span
-                    key={j}
-                    className={`meal-chip slot-${meal.slot}`}
-                    title={`${meal.slot}: ${title(meal.recipeId)}`}
-                  >
-                    <b>{SLOT_CHIP[meal.slot]}</b> {title(meal.recipeId)}
-                    {meal.quick && <i className="quick-dot">⚡</i>}
-                  </span>
-                ))}
+        <>
+          {state.nextMeal ? (
+            <section className="next-meal" aria-label="Nächstes Essen">
+              <div className="next-meal-kicker">Nächstes Essen · Tag {DAYS[state.nextMeal.day]} · {state.nextMeal.slot}</div>
+              <h2>{state.nextMeal.title}</h2>
+              <div className="next-meal-meta">
+                für {state.nextMeal.servings} Portionen ({state.nextMeal.personCount} Personen)
+                {state.nextMeal.quick && <span className="quick-flag">schnell kochbar</span>}
               </div>
-            </div>
-          );
-        })}
-      </section>
+              <div className="prepared-count">
+                {state.mealsPrepared} von {state.mealsTotal} Mahlzeiten vorbereitet
+              </div>
+            </section>
+          ) : (
+            <section className="next-meal empty">
+              <b>Noch kein Wochenplan.</b>
+              <span>Wähle einen Laden und plane die erste Woche.</span>
+            </section>
+          )}
+
+          <section className="week-strip" aria-label="Wochenplan">
+            {DAYS.map((day, i) => {
+              const dayPlan = plan?.days.find((d) => d.day === i);
+              return (
+                <button
+                  key={day}
+                  className={`day-card ${i === today ? "today" : ""}`}
+                  onClick={() => onSelectDay(i)}
+                  title={`${day} im Detail ansehen`}
+                >
+                  <div className="day-name">{day}</div>
+                  <div className="day-meals">
+                    {dayPlan?.meals.map((meal, j) => (
+                      <span
+                        key={j}
+                        className={`meal-chip slot-${meal.slot}`}
+                        title={`${meal.slot}: ${title(meal.recipeId)}`}
+                      >
+                        <b>{SLOT_CHIP[meal.slot]}</b> {title(meal.recipeId)}
+                        {meal.quick && <i className="quick-dot">⚡</i>}
+                      </span>
+                    ))}
+                  </div>
+                </button>
+              );
+            })}
+          </section>
+        </>
+      )}
     </div>
   );
 }

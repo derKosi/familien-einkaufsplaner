@@ -10,6 +10,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [state, setState] = useState<import("@fep/shared").AppState | null>(null);
   const [currentPerson, setCurrentPerson] = useState<Person | null>(null);
+  const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -53,6 +54,7 @@ export default function App() {
   async function runGenerate(store: Store, allowNoOffers: boolean) {
     setGenerating(true);
     setError(null);
+    setSelectedDay(null); // neuer Plan → zurück in die Wochenansicht
     try {
       setState(await generatePlan(store, allowNoOffers));
     } catch (e) {
@@ -84,6 +86,8 @@ export default function App() {
       generating={generating}
       generateError={error}
       onGenerate={runGenerate}
+      selectedDay={selectedDay}
+      onSelectDay={setSelectedDay}
     />
   );
 }
