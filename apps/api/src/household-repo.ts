@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { AppState, Household, Person } from "@fep/shared";
+import { AppState, Household, HouseholdSettings, Person, type HouseholdSettings as HouseholdSettingsT } from "@fep/shared";
 import { db } from "./db/sqlite.js";
 import { DEMO_HOUSEHOLD_NAME, demoPersons } from "./demo-seed.js";
 import { offersSummary } from "./offers/store.js";
@@ -45,6 +45,18 @@ export function loadPersons(): Person[] {
   return rows.map(rowToPerson);
 }
 
+/** Einstellungen des Haushalts — Kontext für Planner und Vorschläge. */
+export function loadSettings(): HouseholdSettingsT {
+  const row = db.prepare("SELECT settings FROM household LIMIT 1").get() as
+    | { settings: string | null }
+    | undefined;
+  return row ? rowToSettings(row) : HouseholdSettings.parse({});
+}
+
+function rowToSettings(row: { settings: string | null }): HouseholdSettingsT {
+  return HouseholdSettings.parse(row.settings ? JSON.parse(row.settings) : {});
+}
+
 /** Ein fester Haushalt im PoC — die erste (einzige) Zeile gilt. */
 export function getState(): AppState {
   const offers = offersSummary();
@@ -79,7 +91,7 @@ export function getState(): AppState {
       })()
     : { shoppingList: [], personCalories: [] };
 
-  const householdRow = db.prepare("SELECT id, name FROM household LIMIT 1").get() as
+  const householdRow = db.prepare("SELECT id, name, settings FROM household LIMIT 1").get() as
     | { id: string; name: string }
     | undefined;
   if (!householdRow) {
@@ -95,6 +107,7 @@ export function getState(): AppState {
       id: householdRow.id,
       name: householdRow.name,
       persons: personRows.map(rowToPerson),
+      settings: rowToSettings(householdRow as unknown as { settings: string | null }),
     }),
     offers,
     recipes,
@@ -131,5 +144,54 @@ export function seedDemoHousehold(): AppState {
     throw e;
   }
 
+  return getState();
+}
+
+/** Zwei-Wege-Erststart, eigener Haushalt: leer anlegen, Personen folgen einzeln. */
+export function createHousehold(name: string): AppState {
+  if (getState().household) throw new Error("Haushalt existiert bereits.");
+  const id = randomUUID();
+  db.prepare("INSERT INTO household (id, name, settings) VALUES (?, ?, NULL)").run(id, name);
+  return getState();
+}
+
+/** Person-für-Person-Onboarding: komplette oder bewusst unvollständige Personen. */
+export function addPerson(person: Person): AppState {
+  const householdRow = db.prepare("SELECT id FROM household LIMIT 1").get() as { id: string } | undefined;
+  if (!householdRow) throw new Error("Kein Haushalt vorhanden.");
+  db.prepare(`
+    INSERT INTO person (id, household_id, name, role_class, color_pair, constraints, allergies, calorie_goal, activity_profile, complete)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    person.id, householdRow.id, person.name, person.roleClass, person.colorPair,
+    JSON.stringify(person.constraints), JSON.stringify(person.allergies),
+    person.calorieGoal, person.activityProfile, person.complete ? 1 : 0,
+  );
+  return getState();
+}
+
+export function updatePerson(id: string, person: Person): AppState {
+  db.prepare(`
+    UPDATE person SET name = ?, role_class = ?, color_pair = ?, constraints = ?, allergies = ?,
+      calorie_goal = ?, activity_profile = ?, complete = ?
+    WHERE id = ?
+  `).run(
+    person.name, person.roleClass, person.colorPair,
+    JSON.stringify(person.constraints), JSON.stringify(person.allergies),
+    person.calorieGoal, person.activityProfile, person.complete ? 1 : 0, id,
+  );
+  return getState();
+}
+
+/** Einstellungen (Slice 7): Budget, Geräte, Koch-Level, Tage, Wochenmuster. */
+export function updateSettings(patch: Partial<HouseholdSettingsT>): AppState {
+  const householdRow = db.prepare("SELECT settings FROM household LIMIT 1").get() as
+    | { settings: string | null }
+    | undefined;
+  if (!householdRow) throw new Error("Kein Haushalt vorhanden.");
+  const merged = HouseholdSettings.parse({ ...rowToSettings(householdRow), ...patch });
+  db.prepare("UPDATE household SET settings = ? WHERE id = (SELECT id FROM household LIMIT 1)").run(
+    JSON.stringify(merged),
+  );
   return getState();
 }

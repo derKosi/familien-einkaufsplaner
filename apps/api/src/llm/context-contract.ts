@@ -25,14 +25,27 @@ export interface PatternEntry {
   personRefs: string[];
 }
 
+export interface ContractHousehold {
+  /** 1 = knapp, 2 = normal, 3 = großzügig — gewichtet Gerichte-/Vorschlagswahl. */
+  budget: number;
+  freezer: boolean;
+  /** Koch-Level 1–3 — Rezepte darüber vermeiden („ganze Hühner"). */
+  skillLevel: number;
+  /** Tage, an denen frisch gekocht wird — quick-Flags und Frische danach planen. */
+  cookDays: number[];
+}
+
 export interface PlannerContext {
   weekPattern: PatternEntry[];
   persons: ContractPerson[];
+  household: ContractHousehold;
   recipes: Array<{
     id: string;
     title: string;
     tags: string[];
     quick: boolean;
+    skill: number;
+    equipment: string[];
     servingsBase: number;
   }>;
   offers: Array<{ store: Store; product: string; amount: string; priceCents: number }>;
@@ -53,17 +66,21 @@ export function contractPerson(person: Person): ContractPerson {
 export function buildPlannerContext(input: {
   weekPattern: PatternEntry[];
   persons: Person[];
+  household: ContractHousehold;
   recipes: PlannerContext["recipes"];
   offers: PlannerContext["offers"];
 }): PlannerContext {
   const context: PlannerContext = {
     weekPattern: input.weekPattern,
     persons: input.persons.map(contractPerson),
+    household: input.household,
     recipes: input.recipes.map((r) => ({
       id: r.id,
       title: r.title,
       tags: r.tags,
       quick: r.quick,
+      skill: r.skill,
+      equipment: r.equipment,
       servingsBase: r.servingsBase,
     })),
     offers: input.offers,
@@ -72,11 +89,16 @@ export function buildPlannerContext(input: {
   return context;
 }
 
-/** Harte Prüfung: keine Namen und keine Aktivitäts-Freitexte im Kontext. */
+/**
+ * Harte Prüfung: keine Namen und keine Aktivitäts-Freitexte im Kontext.
+ * Auf Wortgrenzen geprüft (Live-Fund: „Max" ⊂ „Maxi"-Produkt war ein Fehlalarm)
+ * — Namen sind case-sensitive exakt als eigenes Wort verboten.
+ */
 export function assertNoPii(context: PlannerContext, persons: Person[]): void {
   const serialized = JSON.stringify(context);
+  const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   for (const person of persons) {
-    if (serialized.includes(person.name)) {
+    if (new RegExp(`\\b${escape(person.name)}\\b`).test(serialized)) {
       throw new Error(`PII-Verstoß: Name "${person.name}" ist im Kontext gelandet.`);
     }
     if (person.activityProfile && serialized.includes(person.activityProfile)) {

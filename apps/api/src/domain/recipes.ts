@@ -25,6 +25,8 @@ export function recipesSummary(): Array<Omit<RecipeSummary, "portionPriceCents" 
     quick: r.tags.includes("schnell"),
     tags: r.tags,
     steps: r.steps,
+    skill: r.skill,
+    equipment: r.equipment,
   }));
 }
 
@@ -39,6 +41,8 @@ export function plannerRecipes() {
     title: r.title,
     tags: r.tags,
     quick: r.tags.includes("schnell"),
+    skill: r.skill,
+    equipment: r.equipment,
     servingsBase: 1,
   }));
 }

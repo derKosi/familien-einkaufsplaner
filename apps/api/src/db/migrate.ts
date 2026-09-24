@@ -48,4 +48,10 @@ export function migrate(): void {
   if (!personCols.includes("allergies")) {
     db.exec("ALTER TABLE person ADD COLUMN allergies TEXT NOT NULL DEFAULT '[]'");
   }
+  const houseCols = (db.prepare("PRAGMA table_info(household)").all() as Array<{ name: string }>).map(
+    (c) => c.name,
+  );
+  if (!houseCols.includes("settings")) {
+    db.exec("ALTER TABLE household ADD COLUMN settings TEXT");
+  }
 }

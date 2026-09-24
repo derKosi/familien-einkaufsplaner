@@ -354,8 +354,9 @@ export function recipeOfferProducts(recipeId: string): string[] {
 /**
  * Event-Vorschläge (prd.md > Events & Ausnahmen): Rezepte mit den stärksten
  * Angebots-Treffern zuerst — mit Portionspreis und kcal (Checkpoint-Wunsch).
+ * Budget 1 sortiert preisgünstig zuerst (Slice 7, Einstellungen).
  */
-export function eventSuggestions(limit = 4) {
+export function eventSuggestions(limit = 4, budget = 2) {
   return loadRecipes()
     .map((r) => ({
       recipeId: r.id,
@@ -369,6 +370,7 @@ export function eventSuggestions(limit = 4) {
         b.offerProducts.length - a.offerProducts.length ||
         a.portionPriceCents - b.portionPriceCents,
     )
+    .sort((a, b) => (budget === 1 ? a.portionPriceCents - b.portionPriceCents : 0))
     .slice(0, limit);
 }
 

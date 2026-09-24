@@ -1,16 +1,22 @@
 import { useEffect, useState } from "react";
-import type { Person, Store } from "@fep/shared";
+import type { HouseholdSettings, Person, Store } from "@fep/shared";
 import {
+  addPerson,
   createEvent,
+  createHousehold,
   fetchState,
   generatePlan,
+  saveSettings,
   seedDemoHousehold,
   setExemptDays,
   setListItemChecked,
   setMealPrepared,
+  updatePerson,
 } from "./lib/api.js";
 import { FirstStart } from "./views/FirstStart.js";
 import { Main } from "./views/Main.js";
+import { Onboarding } from "./views/Onboarding.js";
+import { Settings } from "./views/Settings.js";
 import { ShoppingList } from "./views/ShoppingList.js";
 
 const STORAGE_KEY = "fep.current-person";
@@ -21,6 +27,8 @@ export default function App() {
   const [currentPerson, setCurrentPerson] = useState<Person | null>(null);
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [showList, setShowList] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [onboarding, setOnboarding] = useState(false);
   const [busy, setBusy] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -124,7 +132,40 @@ export default function App() {
     }
   }
 
-  if (!state?.household) return <FirstStart onDemo={startDemo} busy={busy} />;
+  if (!state?.household) {
+    return onboarding ? (
+      <Onboarding
+        state={state ?? ({ household: null } as never)}
+        onCreateHousehold={(name) => {
+          setBusy(true);
+          createHousehold(name).then(setState).catch((e) => setError(String(e))).finally(() => setBusy(false));
+        }}
+        onAddPerson={(p) => {
+          setBusy(true);
+          addPerson(p).then(setState).catch((e) => setError(String(e))).finally(() => setBusy(false));
+        }}
+        onDone={() => setOnboarding(false)}
+        busy={busy}
+      />
+    ) : (
+      <FirstStart onDemo={startDemo} busy={busy} onOwn={() => setOnboarding(true)} />
+    );
+  }
+
+  if (showSettings) {
+    return (
+      <Settings
+        state={state}
+        onBack={() => setShowSettings(false)}
+        onSaveSettings={(patch) => {
+          saveSettings(patch).then(setState).catch((e) => setError(String(e)));
+        }}
+        onToggleComplete={(personId, complete) => {
+          updatePerson(personId, { complete }).then(setState).catch((e) => setError(String(e)));
+        }}
+      />
+    );
+  }
 
   if (showList) {
     return (
@@ -150,6 +191,7 @@ export default function App() {
       onShowList={() => setShowList(true)}
       onAddEvent={addEvent}
       onSetExempt={changeExempt}
+      onShowSettings={() => setShowSettings(true)}
     />
   );
 }

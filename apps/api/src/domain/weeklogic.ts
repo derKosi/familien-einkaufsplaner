@@ -50,6 +50,20 @@ export function mondayOf(date: Date): string {
   return d.toISOString().slice(0, 10);
 }
 
+/**
+ * Wochenstart am Einkaufstag (Slice 7, Lerner-Wunsch „daran orientieren"):
+ * Datum des Einkaufstags in der Woche von `date` — oder Montag, wenn kein
+ * Einkaufstag gesetzt ist.
+ */
+export function shoppingWeekStart(date: Date, shoppingDay: number | null): string {
+  if (shoppingDay === null) return mondayOf(date);
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const jsDay = d.getUTCDay() || 7;
+  const current = jsDay - 1; // 0 = Montag … 6 = Sonntag
+  d.setUTCDate(d.getUTCDate() - (current - shoppingDay));
+  return d.toISOString().slice(0, 10);
+}
+
 /** Numerischer „Zeitstempel“ einer Mahlzeit: Tag × 24 + Slot-Stunde. */
 function mealTick(day: number, slot: MealSlot): number {
   return day * 24 + SLOT_HOUR[slot];

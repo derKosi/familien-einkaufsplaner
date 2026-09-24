@@ -12,10 +12,10 @@ import {
 } from "@fep/shared";
 import { buildPlannerContext, type PatternEntry } from "../llm/context-contract.js";
 import { generateWeekPlan, PlannerError, realPlanClient } from "../llm/planner.js";
-import { loadPersons, getState } from "../household-repo.js";
+import { loadPersons, loadSettings, getState } from "../household-repo.js";
 import { latestOfferSnapshot } from "../offers/store.js";
 import { plannerRecipes } from "../domain/recipes.js";
-import { defaultWeekPattern, mondayOf } from "../domain/weeklogic.js";
+import { defaultWeekPattern, mondayOf, shoppingWeekStart } from "../domain/weeklogic.js";
 import { loadWeekPlan, saveWeekPlan } from "../plan-repo.js";
 import { clearChecked, setChecked } from "../list-repo.js";
 import { addEvent, clearEvents } from "../event-repo.js";
@@ -52,10 +52,17 @@ export async function registerPlanRoutes(app: FastifyInstance): Promise<void> {
       });
     }
 
-    const pattern: PatternEntry[] = defaultWeekPattern(persons);
+    const settings = loadSettings();
+    const pattern: PatternEntry[] = settings.pattern ?? defaultWeekPattern(persons);
     const context = buildPlannerContext({
       weekPattern: pattern,
       persons,
+      household: {
+        budget: settings.budget,
+        freezer: settings.freezer,
+        skillLevel: settings.skillLevel,
+        cookDays: settings.cookDays,
+      },
       recipes: plannerRecipes(),
       offers: (snapshot?.offers ?? []).map((o) => ({
         store: o.store,
@@ -76,7 +83,7 @@ export async function registerPlanRoutes(app: FastifyInstance): Promise<void> {
     }
 
     const weekPlan = WeekPlan.parse({
-      weekOf: mondayOf(new Date()),
+      weekOf: shoppingWeekStart(new Date(), settings.shoppingDay),
       store,
       basedOnOffers: snapshot?.offers.length ?? 0,
       offersDated: snapshot?.fetchedAt ?? null,
@@ -101,9 +108,9 @@ export async function registerPlanRoutes(app: FastifyInstance): Promise<void> {
     return getState() satisfies AppState;
   });
 
-  /** Vorschläge aus dem aktuellen Angebot — mit Portionspreis und kcal (Checkpoint-Wunsch). */
+  /** Vorschläge aus dem aktuellen Angebot — mit Portionspreis und kcal, budget-gewichtet. */
   app.get("/api/plan/event-suggestions", async () =>
-    EventSuggestionsResponse.parse({ suggestions: eventSuggestions() }),
+    EventSuggestionsResponse.parse({ suggestions: eventSuggestions(4, loadSettings().budget) }),
   );
 
   /** Aufklappbares Zutaten-Preis-Panel (Checkpoint: „pro Portion oder gesamt"). */

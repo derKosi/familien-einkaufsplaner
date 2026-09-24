@@ -15,6 +15,7 @@ interface Props {
   onShowList: () => void;
   onAddEvent: (day: number, personCount: number, dishHint: string | null) => void;
   onSetExempt: (days: number[]) => void;
+  onShowSettings: () => void;
 }
 
 const DAYS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
@@ -70,7 +71,7 @@ function OffersNote({ state }: { state: AppState }) {
  * Hauptbildschirm (prd.md > Screens and Layout): Kopfzeile mit Ladenwahl und
  * Angebots-Indikator, Next-Meal-Hero, Wochenstreifen mit Mahlzeiten-Chips.
  */
-export function Main({ state, current, onSelectPerson, generating, generateError, onGenerate, selectedDay, onSelectDay, onTogglePrepared, onShowList, onAddEvent, onSetExempt }: Props) {
+export function Main({ state, current, onSelectPerson, generating, generateError, onGenerate, selectedDay, onSelectDay, onTogglePrepared, onShowList, onAddEvent, onSetExempt, onShowSettings }: Props) {
   const today = todayIndex();
   const title = (id: string) => state.recipes.find((r) => r.id === id)?.title ?? id;
   const plan = state.weekPlan;
@@ -120,6 +121,9 @@ export function Main({ state, current, onSelectPerson, generating, generateError
             )}
           </button>
         )}
+        <button className="ghost-btn" onClick={onShowSettings} title="Einstellungen: Budget, Küche, Wochenmuster">
+          ⚙ Einstellungen
+        </button>
       </section>
 
       {generateError && (

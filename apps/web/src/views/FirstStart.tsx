@@ -1,14 +1,14 @@
 interface Props {
   onDemo: () => void;
+  onOwn: () => void;
   busy: boolean;
 }
 
 /**
- * Erststart: der Zwei-Wege-Einstieg (prd.md > The Core Journey, Schritt 1).
- * Der eigene-Haushalt-Pfad kommt mit dem Onboarding-Slice; bis dahin zeigt dieser
- * Screen nur den Weg, der wirklich funktioniert.
+ * Erststart: der Zwei-Wege-Einstieg (prd.md > The Core Journey, Schritt 1) —
+ * Demo-Familie oder eigener Haushalt mit Person-für-Person-Onboarding (Slice 7).
  */
-export function FirstStart({ onDemo, busy }: Props) {
+export function FirstStart({ onDemo, onOwn, busy }: Props) {
   return (
     <div className="first-start">
       <span className="chip">Familien-Einkaufsplaner</span>
@@ -17,7 +17,10 @@ export function FirstStart({ onDemo, busy }: Props) {
         Aus den echten Wochenangeboten eines Discounters wird ein Essensplan für den
         ganzen Haushalt — mit Einkaufsliste inklusive Mengen für einen einzigen Einkauf.
       </p>
-      <button className="primary" onClick={onDemo} disabled={busy}>
+      <button className="primary" onClick={onOwn}>
+        Eigenen Haushalt anlegen
+      </button>
+      <button className="ghost-btn" onClick={onDemo} disabled={busy}>
         {busy ? "Haushalt wird angelegt …" : "Mit Demo-Familie testen"}
       </button>
       <p className="hint">

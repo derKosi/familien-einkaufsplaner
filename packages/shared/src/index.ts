@@ -10,6 +10,38 @@ export type RoleClass = z.infer<typeof RoleClass>;
 export const ConstraintTag = z.enum(["vegetarisch", "milchfrei", "vegan", "glutenfrei"]);
 export type ConstraintTag = z.infer<typeof ConstraintTag>;
 
+// Mahlzeiten-Slots früh definiert — das Wochenmuster (Einstellungen) braucht sie.
+export const MealSlot = z.enum(["Frühstück", "Mittag", "Abendessen"]);
+export type MealSlot = z.infer<typeof MealSlot>;
+
+/** Eintrag des Wochenmusters: wer isst an welchem Tag welche Slot-Mahlzeit. */
+export const PatternEntry = z.object({
+  /** 0 = Montag … 6 = Sonntag */
+  day: z.number().int().min(0).max(6),
+  slot: MealSlot,
+  personRefs: z.array(z.string().uuid()),
+});
+export type PatternEntry = z.infer<typeof PatternEntry>;
+
+/**
+ * Haushalts-Einstellungen (Slice 7, angereichert durch Checkpoint-Feedback):
+ * Budget-Münzen, Geräte (Tiefkühlfach), Koch-Level, Einkaufs-/Kochtage,
+ * und das editierbare Wochenmuster (null = guter Typ-Default).
+ */
+export const HouseholdSettings = z.object({
+  /** 1 = knapp, 2 = normal, 3 = großzügig — gewichtet Vorschlags-Sortierung. */
+  budget: z.number().int().min(1).max(3).default(2),
+  freezer: z.boolean().default(true),
+  /** 1 = Student-küche-tauglich, 3 = souverän (ganze Hühner). */
+  skillLevel: z.number().int().min(1).max(3).default(2),
+  /** 0 = Montag … 6 = Sonntag; null = Wochenstart bleibt Montag. */
+  shoppingDay: z.number().int().min(0).max(6).nullable().default(null),
+  /** Tage, an denen (frisch) gekocht wird — Kontext für den Planner. */
+  cookDays: z.array(z.number().int().min(0).max(6)).default([]),
+  pattern: z.array(PatternEntry).nullable().default(null),
+});
+export type HouseholdSettings = z.infer<typeof HouseholdSettings>;
+
 /** Pastell-Paar (Main + Akzent) — identifiziert die Person in der Ansicht. */
 export const ColorPair = z.enum(["salbei", "aprikot", "lavendel", "himmel"]);
 export type ColorPair = z.infer<typeof ColorPair>;
@@ -39,6 +71,7 @@ export const Household = z.object({
   id: z.string().uuid(),
   name: z.string().min(1),
   persons: z.array(Person),
+  settings: HouseholdSettings,
 });
 export type Household = z.infer<typeof Household>;
 
@@ -110,9 +143,6 @@ export const RefreshOffersResponse = z.object({
 export type RefreshOffersResponse = z.infer<typeof RefreshOffersResponse>;
 
 // ─── Planner: Wochenplan-Generierung (spec.md > llm/planner.ts, context-contract.ts) ───
-
-export const MealSlot = z.enum(["Frühstück", "Mittag", "Abendessen"]);
-export type MealSlot = z.infer<typeof MealSlot>;
 
 /**
  * Anpassung für eine Person am Basisgericht (Checkpoint-Entscheidung):
@@ -317,6 +347,10 @@ export const Recipe = z.object({
   ingredients: z.array(RecipeIngredient).min(1),
   /** Kurz-Anleitung, 2–4 Schritte (PoC-Tiefe). */
   steps: z.array(z.string()).min(1),
+  /** Koch-Aufwand 1 (Student-tauglich) bis 3 (souverän) — Checkpoint „ganze Hühner". */
+  skill: z.number().int().min(1).max(3).default(2),
+  /** Nötige Ausstattung — ohne Tiefkühlfach keine TK-Rezepte (Einstellungen). */
+  equipment: z.array(z.enum(["Ofen", "Tiefkühl"])).default([]),
 });
 export type Recipe = z.infer<typeof Recipe>;
 
@@ -404,6 +438,9 @@ export const RecipeSummary = z.object({
   tags: z.array(RecipeTag),
   /** Kurz-Anleitung für die Tagesansicht (Checkpoint: „Zubereitung nirgends sichtbar"). */
   steps: z.array(z.string()),
+  /** Koch-Aufwand 1–3 und nötige Ausstattung (Slice 7, Einstellungen). */
+  skill: z.number().int().min(1).max(3),
+  equipment: z.array(z.enum(["Ofen", "Tiefkühl"])),
   /** „Etwa"-Preis je Portion: anteilige Packungskosten (Checkpoint-Wunsch). */
   portionPriceCents: z.number().int(),
   kcalPerPortion: z.number().int(),
