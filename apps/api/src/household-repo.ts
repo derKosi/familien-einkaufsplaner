@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { AppState, Household, Person } from "@fep/shared";
 import { db } from "./db/sqlite.js";
 import { DEMO_HOUSEHOLD_NAME, demoPersons } from "./demo-seed.js";
+import { offersSummary } from "./offers/store.js";
 
 interface PersonRow {
   id: string;
@@ -30,10 +31,11 @@ function rowToPerson(row: PersonRow): Person {
 
 /** Ein fester Haushalt im PoC — die erste (einzige) Zeile gilt. */
 export function getState(): AppState {
+  const offers = offersSummary();
   const householdRow = db.prepare("SELECT id, name FROM household LIMIT 1").get() as
     | { id: string; name: string }
     | undefined;
-  if (!householdRow) return { household: null };
+  if (!householdRow) return AppState.parse({ household: null, offers });
 
   const personRows = db
     .prepare("SELECT * FROM person WHERE household_id = ? ORDER BY rowid")
@@ -45,6 +47,7 @@ export function getState(): AppState {
       name: householdRow.name,
       persons: personRows.map(rowToPerson),
     }),
+    offers,
   });
 }
 

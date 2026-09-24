@@ -63,6 +63,7 @@ button.primary:disabled { opacity: 0.6; cursor: default; }
 
 .household-name { font-size: 20px; font-weight: 700; }
 .offers-note { color: var(--muted); font-size: 13px; }
+.offers-note.missing { color: var(--warn, #9a6700); }
 
 .person-switcher {
   display: flex;

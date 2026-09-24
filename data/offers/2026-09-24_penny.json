@@ -1,0 +1,638 @@
+{
+  "store": "penny",
+  "week": "2026-39",
+  "fetchedAt": "2026-09-24T11:32:11.661Z",
+  "source": "https://www.penny.de/.rest/offers/by-category (Penny Angebots-API, Kategorie-Abzug)",
+  "offers": [
+    {
+      "id": "a95da38e-6bfb-4ac4-a2d3-681a4dbcc6e4",
+      "store": "penny",
+      "product": "SNICKERS Schokoriegel*",
+      "amount": "je 10 x 50 g",
+      "priceCents": 399,
+      "listPriceCents": 579,
+      "department": "Aktionen"
+    },
+    {
+      "id": "e3a12706-d0ed-4d6c-b164-f7e60ec7b681",
+      "store": "penny",
+      "product": "TWIX Schokoriegel*",
+      "amount": "je 10 x 50 g",
+      "priceCents": 399,
+      "listPriceCents": 579,
+      "department": "Aktionen"
+    },
+    {
+      "id": "2a70cb25-ccbc-497d-87dd-ba75512935c3",
+      "store": "penny",
+      "product": "GRÜNLÄNDER Käse­scheiben*",
+      "amount": "je 156 g",
+      "priceCents": 179,
+      "listPriceCents": 299,
+      "department": "Aktionen"
+    },
+    {
+      "id": "a19bef55-eb13-42ab-86c6-945e3c5171fc",
+      "store": "penny",
+      "product": "Deutsche Möhren*",
+      "amount": "je 2-kg-Beutel",
+      "priceCents": 119,
+      "listPriceCents": null,
+      "department": "Aktionen"
+    },
+    {
+      "id": "89490c5b-4244-415c-a529-49f5f21f15ed",
+      "store": "penny",
+      "product": "DR. OETKER Ristorante Pizza",
+      "amount": "je 2 x 320 g",
+      "priceCents": 349,
+      "listPriceCents": null,
+      "department": "Aktionen"
+    },
+    {
+      "id": "d62f329b-4a28-485a-8fcb-e556636e458d",
+      "store": "penny",
+      "product": "DR. OETKER Bistro Flammkuchen*",
+      "amount": "je 2 x 265 g",
+      "priceCents": 349,
+      "listPriceCents": null,
+      "department": "Aktionen"
+    },
+    {
+      "id": "7ba8e785-1386-4849-bc76-80b411ebb4d8",
+      "store": "penny",
+      "product": "GRANINI Trinkgenuss*",
+      "amount": "je 1 l",
+      "priceCents": 149,
+      "listPriceCents": null,
+      "department": "Aktionen"
+    },
+    {
+      "id": "cd837250-f883-4020-b56c-16716cf5a76a",
+      "store": "penny",
+      "product": "GRANINI Selection*",
+      "amount": "je 0,75 l",
+      "priceCents": 149,
+      "listPriceCents": null,
+      "department": "Aktionen"
+    },
+    {
+      "id": "f436aff2-7de7-4cca-9739-fec108a967d2",
+      "store": "penny",
+      "product": "CHIQUITA Bananen*",
+      "amount": "je kg",
+      "priceCents": 199,
+      "listPriceCents": null,
+      "department": "Obst & Gemüse"
+    },
+    {
+      "id": "7cd3bb8c-9853-44e6-abcb-2d7b533602b5",
+      "store": "penny",
+      "product": "Kaktusfeige*",
+      "amount": "je 500-g-Schale",
+      "priceCents": 129,
+      "listPriceCents": null,
+      "department": "Obst & Gemüse"
+    },
+    {
+      "id": "e978cc40-7114-4877-b5d3-047b955539e7",
+      "store": "penny",
+      "product": "Mango*",
+      "amount": "je Stück",
+      "priceCents": 100,
+      "listPriceCents": null,
+      "department": "Obst & Gemüse"
+    },
+    {
+      "id": "f10b6f3c-523d-4454-9618-01a31fb6942f",
+      "store": "penny",
+      "product": "Weiße Champignons*",
+      "amount": "je 250-g-Schale",
+      "priceCents": 100,
+      "listPriceCents": null,
+      "department": "Obst & Gemüse"
+    },
+    {
+      "id": "d2067c37-e679-440e-b30d-ef8ed0426fce",
+      "store": "penny",
+      "product": "Deutscher Kohlrabi*",
+      "amount": "je Stück",
+      "priceCents": 44,
+      "listPriceCents": null,
+      "department": "Obst & Gemüse"
+    },
+    {
+      "id": "d5e52834-ab8e-417d-b552-0f2fb123b3b9",
+      "store": "penny",
+      "product": "SIMPLY SUNNY Pistazien",
+      "amount": "je 100 g",
+      "priceCents": 299,
+      "listPriceCents": null,
+      "department": "Obst & Gemüse"
+    },
+    {
+      "id": "bd142eba-9071-4c11-b986-e6d87932d611",
+      "store": "penny",
+      "product": "MÜHLENHOF Frisches Puten-Gulasch*",
+      "amount": "je 500-g-Packung",
+      "priceCents": 444,
+      "listPriceCents": null,
+      "department": "Fleisch & Wurst"
+    },
+    {
+      "id": "bd065dd7-6236-44dc-b349-7e60e0614caa",
+      "store": "penny",
+      "product": "MÜHLENHOF Frische Schweine-Schinkenschnitzel*",
+      "amount": "je 700-g-Packung",
+      "priceCents": 499,
+      "listPriceCents": null,
+      "department": "Fleisch & Wurst"
+    },
+    {
+      "id": "f9a64a4f-de5b-41f7-b08d-bc1e7cdddcb0",
+      "store": "penny",
+      "product": "MÜHLENHOF Frische Puten-Medaillons",
+      "amount": "je 400-g-Packung",
+      "priceCents": 399,
+      "listPriceCents": null,
+      "department": "Fleisch & Wurst"
+    },
+    {
+      "id": "f4eba3c9-7349-4bdb-9dd1-b8e79eeeb753",
+      "store": "penny",
+      "product": "MÜHLENHOFFrisches Schweine-Hintereisbein*",
+      "amount": "je kg",
+      "priceCents": 299,
+      "listPriceCents": null,
+      "department": "Fleisch & Wurst"
+    },
+    {
+      "id": "194ea778-294d-4d97-adf1-86ea64b22bc8",
+      "store": "penny",
+      "product": "MÜHLENHOF Frischer Kasseler-Lachsbraten*",
+      "amount": "je kg",
+      "priceCents": 599,
+      "listPriceCents": null,
+      "department": "Fleisch & Wurst"
+    },
+    {
+      "id": "b3627584-ecb2-40bd-8154-4a0341e96e2c",
+      "store": "penny",
+      "product": "TILLMAN’S Frische Schweine-Schnitten*",
+      "amount": "je 1.000-g-Packung",
+      "priceCents": 599,
+      "listPriceCents": null,
+      "department": "Fleisch & Wurst"
+    },
+    {
+      "id": "8310bad7-7ea7-48f8-8723-ee9610aabd7c",
+      "store": "penny",
+      "product": "TILLMAN’S Frische Cevapcici kroatische Art*",
+      "amount": "je 500-g-Packung",
+      "priceCents": 349,
+      "listPriceCents": null,
+      "department": "Fleisch & Wurst"
+    },
+    {
+      "id": "fbaf132e-6a35-4bc1-b530-f8e30668ab67",
+      "store": "penny",
+      "product": "MÜHLENHOFAufschnitt XXL*",
+      "amount": "je 250 g",
+      "priceCents": 119,
+      "listPriceCents": null,
+      "department": "Fleisch & Wurst"
+    },
+    {
+      "id": "71b5b2f2-71c9-4bd4-bc6f-c6e09619c252",
+      "store": "penny",
+      "product": "MÜHLENHOF Delikatess Pommersche Leberwurst*",
+      "amount": "je 175 g",
+      "priceCents": 99,
+      "listPriceCents": null,
+      "department": "Fleisch & Wurst"
+    },
+    {
+      "id": "94573576-4c75-4769-9de7-0e421d49de5e",
+      "store": "penny",
+      "product": "HERTA Geflügel-Kochschinken*",
+      "amount": "je 140 g",
+      "priceCents": 199,
+      "listPriceCents": null,
+      "department": "Fleisch & Wurst"
+    },
+    {
+      "id": "0dd5b379-c98c-4734-b0ef-08e8084df863",
+      "store": "penny",
+      "product": "RÜGENWALDER Original Rügenwürmer*",
+      "amount": "je 100 g",
+      "priceCents": 129,
+      "listPriceCents": null,
+      "department": "Fleisch & Wurst"
+    },
+    {
+      "id": "179db878-0743-42f8-8923-96f51a505720",
+      "store": "penny",
+      "product": "MARTEN Salami-Sticks*",
+      "amount": "je 200 g",
+      "priceCents": 299,
+      "listPriceCents": null,
+      "department": "Fleisch & Wurst"
+    },
+    {
+      "id": "e2a840a5-9cf4-46ef-bcfa-ad207fe8714d",
+      "store": "penny",
+      "product": "MENKEN Mettenden*",
+      "amount": "je 600 g",
+      "priceCents": 444,
+      "listPriceCents": null,
+      "department": "Fleisch & Wurst"
+    },
+    {
+      "id": "b9f2f6e7-7612-402f-8849-0e08b6715b68",
+      "store": "penny",
+      "product": "DREISTERN Fleischgerichte*",
+      "amount": "je 400 g",
+      "priceCents": 349,
+      "listPriceCents": null,
+      "department": "Fleisch & Wurst"
+    },
+    {
+      "id": "c9325d7a-ef19-4a26-bd5a-ed68e275dc95",
+      "store": "penny",
+      "product": "KERRYGOLD Butter*",
+      "amount": "je 250 g",
+      "priceCents": 179,
+      "listPriceCents": 329,
+      "department": "Kühlregal"
+    },
+    {
+      "id": "9313e186-ee26-4f4c-88ee-e144b39f4fcd",
+      "store": "penny",
+      "product": "KERRYGOLD Extra*",
+      "amount": "je 250 g",
+      "priceCents": 179,
+      "listPriceCents": 329,
+      "department": "Kühlregal"
+    },
+    {
+      "id": "37f891cd-d8a5-4638-bf16-27081613a814",
+      "store": "penny",
+      "product": "SANELLA Streichfett*",
+      "amount": "je 400 g",
+      "priceCents": 139,
+      "listPriceCents": null,
+      "department": "Kühlregal"
+    },
+    {
+      "id": "21a3a18f-4a46-4fdf-af9a-c7d2926a6f85",
+      "store": "penny",
+      "product": "BAUER Cheestrings*",
+      "amount": "je 4 x 20 g",
+      "priceCents": 199,
+      "listPriceCents": null,
+      "department": "Kühlregal"
+    },
+    {
+      "id": "adf5f025-74ee-47b9-a266-f56f2253cb12",
+      "store": "penny",
+      "product": "PATROS Hirtenkäse Kräuter",
+      "amount": "je 150 g",
+      "priceCents": 179,
+      "listPriceCents": null,
+      "department": "Kühlregal"
+    },
+    {
+      "id": "67a5559b-2a6a-49d5-bd81-e8728bc0a8c5",
+      "store": "penny",
+      "product": "PATROS Hirtenkäse Natur",
+      "amount": "je 180 g",
+      "priceCents": 179,
+      "listPriceCents": null,
+      "department": "Kühlregal"
+    },
+    {
+      "id": "215d1c0a-87fc-4134-a099-62d79caff8fe",
+      "store": "penny",
+      "product": "MIREE Frischkäse*",
+      "amount": "je 150 g",
+      "priceCents": 111,
+      "listPriceCents": null,
+      "department": "Kühlregal"
+    },
+    {
+      "id": "3d4c2aae-2a38-4f6f-96c2-035878b5768e",
+      "store": "penny",
+      "product": "ROUGETTE Ofenkäse*",
+      "amount": "je 320 g",
+      "priceCents": 399,
+      "listPriceCents": null,
+      "department": "Kühlregal"
+    },
+    {
+      "id": "145441fd-6894-4625-b609-7b785ae6fcef",
+      "store": "penny",
+      "product": "MÖVENPICK Feinjoghurt*",
+      "amount": "je 150 g",
+      "priceCents": 69,
+      "listPriceCents": null,
+      "department": "Kühlregal"
+    },
+    {
+      "id": "daaf3af9-f317-43e5-a4e7-c9b134385ab4",
+      "store": "penny",
+      "product": "ZOTT Monte*",
+      "amount": "je 4 x 100 g",
+      "priceCents": 149,
+      "listPriceCents": null,
+      "department": "Kühlregal"
+    },
+    {
+      "id": "204c2e6e-df78-4e02-9daa-9997c9dcb715",
+      "store": "penny",
+      "product": "DANONE Fruchtzwerge XXL*",
+      "amount": "je 6 x 100 g",
+      "priceCents": 289,
+      "listPriceCents": null,
+      "department": "Kühlregal"
+    },
+    {
+      "id": "ef4db238-151b-4781-b114-531d355887c0",
+      "store": "penny",
+      "product": "RAMA Cremefine*",
+      "amount": "je 250 ml",
+      "priceCents": 99,
+      "listPriceCents": null,
+      "department": "Kühlregal"
+    },
+    {
+      "id": "6a35a2d1-d85b-413c-be82-bd1eeaea9e17",
+      "store": "penny",
+      "product": "TRUE FUITS Smoothie",
+      "amount": "je 250 ml",
+      "priceCents": 229,
+      "listPriceCents": null,
+      "department": "Kühlregal"
+    },
+    {
+      "id": "69f3569d-ec49-4d96-bd1a-0657c405b6bd",
+      "store": "penny",
+      "product": "PENNY READY Brotaufstrich*",
+      "amount": "je 150 g",
+      "priceCents": 139,
+      "listPriceCents": null,
+      "department": "Kühlregal"
+    },
+    {
+      "id": "11853074-b189-40fd-96ad-e87550017fb8",
+      "store": "penny",
+      "product": "POPP Brotaufstrich*",
+      "amount": "je 150 g",
+      "priceCents": 189,
+      "listPriceCents": null,
+      "department": "Kühlregal"
+    },
+    {
+      "id": "e288206c-9f89-47d7-b72f-8de454d6365c",
+      "store": "penny",
+      "product": "BERIDA Graved Lachs*",
+      "amount": "je 200 g",
+      "priceCents": 399,
+      "listPriceCents": null,
+      "department": "Kühlregal"
+    },
+    {
+      "id": "a20452a2-7254-40b7-b38f-bfa287f7275a",
+      "store": "penny",
+      "product": "WELL WELL Tofu*",
+      "amount": "je 360 g",
+      "priceCents": 179,
+      "listPriceCents": null,
+      "department": "Kühlregal"
+    },
+    {
+      "id": "8f4f5cdf-b496-4e4a-846a-e18916ffc2d9",
+      "store": "penny",
+      "product": "BEN & JERRY’S Eisbecher*",
+      "amount": "je 465 ml",
+      "priceCents": 399,
+      "listPriceCents": null,
+      "department": "Kühlregal"
+    },
+    {
+      "id": "018ce93f-7ccd-4272-ac24-6ecb12fe170e",
+      "store": "penny",
+      "product": "IGLO Fischstäbchen*",
+      "amount": "je 450 g",
+      "priceCents": 299,
+      "listPriceCents": 489,
+      "department": "Kühlregal"
+    },
+    {
+      "id": "0bbd5b54-fd83-42a9-a49b-ecee7a65becd",
+      "store": "penny",
+      "product": "IGLO Backfisch-Stäbchen*",
+      "amount": "je 364 g",
+      "priceCents": 299,
+      "listPriceCents": 489,
+      "department": "Kühlregal"
+    },
+    {
+      "id": "cf31b4f2-780e-467e-85fd-66efd8cfa34b",
+      "store": "penny",
+      "product": "BALLANTINE’S Finest Blended Scotch Whisky*",
+      "amount": "je 0,7 l",
+      "priceCents": 1199,
+      "listPriceCents": 1549,
+      "department": "Getränke"
+    },
+    {
+      "id": "40fef077-82c3-4a61-8f77-1ac64ed03d5e",
+      "store": "penny",
+      "product": "COCA-COLA*",
+      "amount": "je 1,5 l",
+      "priceCents": 129,
+      "listPriceCents": null,
+      "department": "Getränke"
+    },
+    {
+      "id": "d373be12-4296-4616-b68c-c6f8851fd259",
+      "store": "penny",
+      "product": "MONSTER Energy-Drink*",
+      "amount": "je 0,5 l",
+      "priceCents": 99,
+      "listPriceCents": null,
+      "department": "Getränke"
+    },
+    {
+      "id": "ca031036-54d3-4908-9ea3-8bc9101b69b2",
+      "store": "penny",
+      "product": "FRIEDRICHSHÖHE Sekt*",
+      "amount": "je 0,75 l",
+      "priceCents": 299,
+      "listPriceCents": null,
+      "department": "Getränke"
+    },
+    {
+      "id": "cbb03bea-1548-48d4-ba36-c47f49b8968b",
+      "store": "penny",
+      "product": "ROTKÄPPCHEN Sekt*",
+      "amount": "je 0,75 l",
+      "priceCents": 499,
+      "listPriceCents": null,
+      "department": "Getränke"
+    },
+    {
+      "id": "dc909a50-d196-40ee-970c-8e9365bd3ed9",
+      "store": "penny",
+      "product": "JIM BEAM Alkoholisches Mischgetränk*",
+      "amount": "je 0,33 l",
+      "priceCents": 199,
+      "listPriceCents": null,
+      "department": "Getränke"
+    },
+    {
+      "id": "e3a2fbb6-77a4-4011-8b3f-d97eb49c3058",
+      "store": "penny",
+      "product": "-196 Double Peach*",
+      "amount": "je 0,33 l",
+      "priceCents": 199,
+      "listPriceCents": null,
+      "department": "Getränke"
+    },
+    {
+      "id": "37e8b303-b7ec-42a6-bdf3-bd82cce9eda9",
+      "store": "penny",
+      "product": "ALPENSCHNAPS Spirituose*",
+      "amount": "je 0,5 l",
+      "priceCents": 699,
+      "listPriceCents": null,
+      "department": "Getränke"
+    },
+    {
+      "id": "e2dead38-cddf-48ab-8a82-c339c247287b",
+      "store": "penny",
+      "product": "LEIBNIZ Kekse*",
+      "amount": "je 165 g",
+      "priceCents": 199,
+      "listPriceCents": 379,
+      "department": "Süßwaren"
+    },
+    {
+      "id": "d29b6200-6efb-4e70-92c5-ecbcce3f18fc",
+      "store": "penny",
+      "product": "CORNY Proteinriegel*",
+      "amount": "je 4 x 25 g",
+      "priceCents": 179,
+      "listPriceCents": null,
+      "department": "Süßwaren"
+    },
+    {
+      "id": "0aeda46d-39cb-41c0-a57e-d60b526f55c5",
+      "store": "penny",
+      "product": "LOACKER Maxi Napolitaner*",
+      "amount": "je 167,5 g",
+      "priceCents": 189,
+      "listPriceCents": null,
+      "department": "Süßwaren"
+    },
+    {
+      "id": "da80e623-126b-4e85-b44e-f80382248740",
+      "store": "penny",
+      "product": "WRIGLEY’S Extra XL*",
+      "amount": "je 75 Stück",
+      "priceCents": 349,
+      "listPriceCents": null,
+      "department": "Süßwaren"
+    },
+    {
+      "id": "77d3daa1-dd72-4780-b05e-87d51260e6fd",
+      "store": "penny",
+      "product": "TEFAL Pfanne HARD TITANIUM PRO*",
+      "amount": "je Stück ",
+      "priceCents": 2499,
+      "listPriceCents": null,
+      "department": "Grundnahrung"
+    },
+    {
+      "id": "cab3042e-3b40-4da2-9378-918d3fd5b7ba",
+      "store": "penny",
+      "product": "ZENKER Backhelfer HALLOWEEN*",
+      "amount": "je Packung/Stück/Set",
+      "priceCents": 299,
+      "listPriceCents": null,
+      "department": "Grundnahrung"
+    },
+    {
+      "id": "9d3ad17a-3161-45ec-83d3-135ebc76eb6c",
+      "store": "penny",
+      "product": "Doppelwandige Trinkgläser*",
+      "amount": "je 2er-Packung",
+      "priceCents": 499,
+      "listPriceCents": null,
+      "department": "Grundnahrung"
+    },
+    {
+      "id": "747d92af-8a7d-41e3-be91-cfdc92e6f8be",
+      "store": "penny",
+      "product": "Kaffeezubereiter*",
+      "amount": "je Stück",
+      "priceCents": 799,
+      "listPriceCents": null,
+      "department": "Grundnahrung"
+    },
+    {
+      "id": "ab13cb1a-66f1-4092-9d6b-e602f95c496e",
+      "store": "penny",
+      "product": "Teezubereiter*",
+      "amount": "je Stück",
+      "priceCents": 999,
+      "listPriceCents": null,
+      "department": "Grundnahrung"
+    },
+    {
+      "id": "4f45e3a2-612c-43fb-b649-abfbe3b1cb49",
+      "store": "penny",
+      "product": "SODASTREAM Wassersprudler CRYSTAL*",
+      "amount": "je Stück",
+      "priceCents": 6999,
+      "listPriceCents": null,
+      "department": "Grundnahrung"
+    },
+    {
+      "id": "361a8872-9652-4048-9e8e-7a16910cfc67",
+      "store": "penny",
+      "product": "SODASTREAM Glaskaraffen*",
+      "amount": "je 2er-Packung ",
+      "priceCents": 1999,
+      "listPriceCents": null,
+      "department": "Grundnahrung"
+    },
+    {
+      "id": "011094a6-ad5c-4d09-aeab-d90cf81202c3",
+      "store": "penny",
+      "product": "SODASTREAM Getränkesirup*",
+      "amount": "je 440 ml (1 l = 7.93)",
+      "priceCents": 349,
+      "listPriceCents": null,
+      "department": "Grundnahrung"
+    },
+    {
+      "id": "d1921a9b-5265-43c9-8373-bfa8455aa56c",
+      "store": "penny",
+      "product": "Flaschenabtropfhalter*",
+      "amount": "je Stück",
+      "priceCents": 499,
+      "listPriceCents": null,
+      "department": "Grundnahrung"
+    },
+    {
+      "id": "19656c7a-0772-48f6-8888-e4fbe2ace32d",
+      "store": "penny",
+      "product": "NATURGUT Bio-Dattelriegel",
+      "amount": "je 5 x 30 g",
+      "priceCents": 199,
+      "listPriceCents": null,
+      "department": "Obst & Gemüse"
+    }
+  ]
+}

@@ -1,0 +1,423 @@
+{
+  "recipes": [
+    {
+      "id": "spaghetti-bolognese",
+      "title": "Spaghetti Bolognese",
+      "tags": ["milchfrei"],
+      "ingredients": [
+        { "item": "Spaghetti", "amount": 125, "unit": "g", "department": "Grundnahrung" },
+        { "item": "Hackfleisch gemischt", "amount": 125, "unit": "g", "department": "Fleisch & Wurst" },
+        { "item": "Passierte Tomaten", "amount": 150, "unit": "g", "department": "Grundnahrung" },
+        { "item": "Zwiebeln", "amount": 50, "unit": "g", "department": "Obst & Gemüse" },
+        { "item": "Knoblauch", "amount": 8, "unit": "g", "department": "Obst & Gemüse" },
+        { "item": "Öl", "amount": 1, "unit": "EL", "department": "Grundnahrung" }
+      ],
+      "steps": [
+        "Zwiebel und Knoblauch in Öl anschwitzen, Hackfleisch krümelig anbraten.",
+        "Passierte Tomaten zugeben, 20 Minuten köcheln.",
+        "Spaghetti kochen und mit der Soße servieren."
+      ]
+    },
+    {
+      "id": "gemuese-pfanne-mit-feta",
+      "title": "Gemüsepfanne mit Feta",
+      "tags": ["vegetarisch", "schnell"],
+      "ingredients": [
+        { "item": "Paprika", "amount": 0.5, "unit": "Stück", "department": "Obst & Gemüse" },
+        { "item": "Zucchini", "amount": 0.5, "unit": "Stück", "department": "Obst & Gemüse" },
+        { "item": "Champignons", "amount": 80, "unit": "g", "department": "Obst & Gemüse" },
+        { "item": "Feta", "amount": 50, "unit": "g", "department": "Kühlregal" },
+        { "item": "Öl", "amount": 1, "unit": "EL", "department": "Grundnahrung" },
+        { "item": "Knoblauch", "amount": 5, "unit": "g", "department": "Obst & Gemüse" }
+      ],
+      "steps": [
+        "Gemüse in Öl scharf anbraten.",
+        "Feta darüber krümeln und kurz mitbraten.",
+        "Mit Pfeffer abschmecken, direkt aus der Pfanne servieren."
+      ]
+    },
+    {
+      "id": "roter-linsen-dal",
+      "title": "Roter Linsen-Dal",
+      "tags": ["vegetarisch", "vegan", "milchfrei", "schnell"],
+      "ingredients": [
+        { "item": "Rote Linsen", "amount": 90, "unit": "g", "department": "Grundnahrung" },
+        { "item": "Kokosmilch", "amount": 80, "unit": "ml", "department": "Grundnahrung" },
+        { "item": "Tomaten", "amount": 1, "unit": "Stück", "department": "Obst & Gemüse" },
+        { "item": "Zwiebeln", "amount": 40, "unit": "g", "department": "Obst & Gemüse" },
+        { "item": "Gemüsebrühe", "amount": 200, "unit": "ml", "department": "Grundnahrung" },
+        { "item": "Öl", "amount": 1, "unit": "EL", "department": "Grundnahrung" }
+      ],
+      "steps": [
+        "Zwiebel in Öl glasig dünsten, Linsen und Brühe zugeben.",
+        "15 Minuten köcheln, gewürfelte Tomate und Kokosmilch einrühren.",
+        "Mit Salz und Curry abschmecken."
+      ]
+    },
+    {
+      "id": "haehnchen-curry-mit-reis",
+      "title": "Hähnchen-Curry mit Reis",
+      "tags": ["milchfrei", "schnell"],
+      "ingredients": [
+        { "item": "Hähnchenbrust", "amount": 130, "unit": "g", "department": "Fleisch & Wurst" },
+        { "item": "Reis", "amount": 80, "unit": "g", "department": "Grundnahrung" },
+        { "item": "Kokosmilch", "amount": 80, "unit": "ml", "department": "Grundnahrung" },
+        { "item": "Paprika", "amount": 0.5, "unit": "Stück", "department": "Obst & Gemüse" },
+        { "item": "Zwiebeln", "amount": 40, "unit": "g", "department": "Obst & Gemüse" },
+        { "item": "Öl", "amount": 1, "unit": "EL", "department": "Grundnahrung" }
+      ],
+      "steps": [
+        "Hähnchenwürfel in Öl anbraten, Zwiebel und Paprika zugeben.",
+        "Kokosmilch und Curry einrühren, 10 Minuten simmern.",
+        "Mit Reis servieren."
+      ]
+    },
+    {
+      "id": "kartoffel-gemuese-auflauf",
+      "title": "Kartoffel-Gemüse-Auflauf",
+      "tags": ["vegetarisch"],
+      "ingredients": [
+        { "item": "Kartoffeln", "amount": 250, "unit": "g", "department": "Obst & Gemüse" },
+        { "item": "Brokkoli", "amount": 120, "unit": "g", "department": "Obst & Gemüse" },
+        { "item": "Sahne", "amount": 50, "unit": "ml", "department": "Kühlregal" },
+        { "item": "Gouda", "amount": 40, "unit": "g", "department": "Kühlregal" },
+        { "item": "Eier", "amount": 0.5, "unit": "Stück", "department": "Kühlregal" },
+        { "item": "Gemüsebrühe", "amount": 50, "unit": "ml", "department": "Grundnahrung" }
+      ],
+      "steps": [
+        "Kartoffelscheiben 10 Minuten vorkochen.",
+        "Mit Brokkoli in eine Form geben, Sahne-Ei-Brühe darüber, Gouda obendrauf.",
+        "25 Minuten bei 200 °C überbacken."
+      ]
+    },
+    {
+      "id": "penne-arrabbiata",
+      "title": "Penne Arrabbiata",
+      "tags": ["vegetarisch", "vegan", "milchfrei", "schnell"],
+      "ingredients": [
+        { "item": "Penne-Nudeln", "amount": 125, "unit": "g", "department": "Grundnahrung" },
+        { "item": "Passierte Tomaten", "amount": 150, "unit": "g", "department": "Grundnahrung" },
+        { "item": "Knoblauch", "amount": 8, "unit": "g", "department": "Obst & Gemüse" },
+        { "item": "Öl", "amount": 1.5, "unit": "EL", "department": "Grundnahrung" }
+      ],
+      "steps": [
+        "Knoblauch in Öl goldbraun anbraten, passierte Tomaten zugeben.",
+        "5 Minuten köcheln, mit Chili und Salz abschmecken.",
+        "Penne untermischen und servieren."
+      ]
+    },
+    {
+      "id": "chili-sin-carne",
+      "title": "Chili sin Carne",
+      "tags": ["vegetarisch", "vegan", "milchfrei"],
+      "ingredients": [
+        { "item": "Kichererbsen (Dose)", "amount": 120, "unit": "g", "department": "Grundnahrung" },
+        { "item": "Rote Linsen", "amount": 40, "unit": "g", "department": "Grundnahrung" },
+        { "item": "Passierte Tomaten", "amount": 120, "unit": "g", "department": "Grundnahrung" },
+        { "item": "Paprika", "amount": 0.5, "unit": "Stück", "department": "Obst & Gemüse" },
+        { "item": "Zwiebeln", "amount": 40, "unit": "g", "department": "Obst & Gemüse" },
+        { "item": "Reis", "amount": 70, "unit": "g", "department": "Grundnahrung" }
+      ],
+      "steps": [
+        "Zwiebel und Paprika anbraten, Tomaten, Linsen und Kichererbsen zugeben.",
+        "20 Minuten köcheln, mit Kreuzkümmel und Chili würzen.",
+        "Mit Reis servieren."
+      ]
+    },
+    {
+      "id": "bratwurst-mit-erbsenpueree",
+      "title": "Bratwurst mit Erbsenpüree",
+      "tags": ["milchfrei"],
+      "ingredients": [
+        { "item": "Bratwurst", "amount": 1, "unit": "Stück", "department": "Fleisch & Wurst" },
+        { "item": "Kartoffeln", "amount": 200, "unit": "g", "department": "Obst & Gemüse" },
+        { "item": "Erbsen (TK)", "amount": 100, "unit": "g", "department": "Tiefkühl" },
+        { "item": "Öl", "amount": 1, "unit": "EL", "department": "Grundnahrung" },
+        { "item": "Gemüsebrühe", "amount": 50, "unit": "ml", "department": "Grundnahrung" }
+      ],
+      "steps": [
+        "Kartoffeln kochen, mit Erbsen und Brühe pürieren.",
+        "Bratwurst in Öl rundum braten.",
+        "Püree mit Salz und Muskat abschmecken."
+      ]
+    },
+    {
+      "id": "tofu-brokkoli-pfanne",
+      "title": "Tofu-Brokkoli-Pfanne",
+      "tags": ["vegetarisch", "vegan", "milchfrei", "schnell"],
+      "ingredients": [
+        { "item": "Tofu", "amount": 100, "unit": "g", "department": "Kühlregal" },
+        { "item": "Brokkoli", "amount": 150, "unit": "g", "department": "Obst & Gemüse" },
+        { "item": "Sojasauce", "amount": 1.5, "unit": "EL", "department": "Grundnahrung" },
+        { "item": "Knoblauch", "amount": 5, "unit": "g", "department": "Obst & Gemüse" },
+        { "item": "Reis", "amount": 70, "unit": "g", "department": "Grundnahrung" },
+        { "item": "Öl", "amount": 1, "unit": "EL", "department": "Grundnahrung" }
+      ],
+      "steps": [
+        "Tofuwürfel in Öl knusprig braten, beiseitestellen.",
+        "Brokkoli mit Knoblauch anbraten, Tofu und Sojasauce zugeben.",
+        "Mit Reis servieren."
+      ]
+    },
+    {
+      "id": "schweinefilet-champignonsoße",
+      "title": "Schweinefilet mit Champignonsoße",
+      "tags": [],
+      "ingredients": [
+        { "item": "Schweinefilet", "amount": 130, "unit": "g", "department": "Fleisch & Wurst" },
+        { "item": "Champignons", "amount": 100, "unit": "g", "department": "Obst & Gemüse" },
+        { "item": "Sahne", "amount": 40, "unit": "ml", "department": "Kühlregal" },
+        { "item": "Zwiebeln", "amount": 40, "unit": "g", "department": "Obst & Gemüse" },
+        { "item": "Kartoffeln", "amount": 200, "unit": "g", "department": "Obst & Gemüse" },
+        { "item": "Butter", "amount": 10, "unit": "g", "department": "Kühlregal" }
+      ],
+      "steps": [
+        "Filet in Butter braten und ruhen lassen.",
+        "Champignons mit Zwiebeln in der Pfanne schmoren, Sahne zugeben.",
+        "Mit Kartoffeln und Soße servieren."
+      ]
+    },
+    {
+      "id": "gemuese-reis-pfanne-mit-ei",
+      "title": "Gemüse-Reis-Pfanne mit Ei",
+      "tags": ["vegetarisch", "milchfrei", "schnell"],
+      "ingredients": [
+        { "item": "Reis", "amount": 70, "unit": "g", "department": "Grundnahrung" },
+        { "item": "Eier", "amount": 2, "unit": "Stück", "department": "Kühlregal" },
+        { "item": "Karotten", "amount": 80, "unit": "g", "department": "Obst & Gemüse" },
+        { "item": "Erbsen (TK)", "amount": 60, "unit": "g", "department": "Tiefkühl" },
+        { "item": "Sojasauce", "amount": 1, "unit": "EL", "department": "Grundnahrung" },
+        { "item": "Öl", "amount": 1, "unit": "EL", "department": "Grundnahrung" }
+      ],
+      "steps": [
+        "Reis kochen (oder Resteverwertung vom Vortag).",
+        "Karotten und Erbsen anbraten, Reis zugeben, Sojasauce untermischen.",
+        "Verquirlte Eier unterrühren und stocken lassen."
+      ]
+    },
+    {
+      "id": "haehnchen-wraps",
+      "title": "Hähnchen-Wraps",
+      "tags": ["milchfrei", "schnell"],
+      "ingredients": [
+        { "item": "Weizen-Tortillas", "amount": 1.5, "unit": "Stück", "department": "Grundnahrung" },
+        { "item": "Hähnchenbrust", "amount": 110, "unit": "g", "department": "Fleisch & Wurst" },
+        { "item": "Eisbergsalat", "amount": 50, "unit": "g", "department": "Obst & Gemüse" },
+        { "item": "Paprika", "amount": 0.5, "unit": "Stück", "department": "Obst & Gemüse" },
+        { "item": "Tomaten", "amount": 0.5, "unit": "Stück", "department": "Obst & Gemüse" },
+        { "item": "Öl", "amount": 0.5, "unit": "EL", "department": "Grundnahrung" }
+      ],
+      "steps": [
+        "Hähnchenstreifen in Öl braten.",
+        "Tortillas mit Salat, Gemüse und Hähnchen belegen.",
+        "Aufrollen und halbiert servieren."
+      ]
+    },
+    {
+      "id": "kichererbsen-curry",
+      "title": "Kichererbsen-Curry",
+      "tags": ["vegetarisch", "vegan", "milchfrei", "schnell"],
+      "ingredients": [
+        { "item": "Kichererbsen (Dose)", "amount": 120, "unit": "g", "department": "Grundnahrung" },
+        { "item": "Kokosmilch", "amount": 80, "unit": "ml", "department": "Grundnahrung" },
+        { "item": "Tomaten", "amount": 1, "unit": "Stück", "department": "Obst & Gemüse" },
+        { "item": "Zwiebeln", "amount": 40, "unit": "g", "department": "Obst & Gemüse" },
+        { "item": "Spinat", "amount": 50, "unit": "g", "department": "Obst & Gemüse" },
+        { "item": "Reis", "amount": 70, "unit": "g", "department": "Grundnahrung" }
+      ],
+      "steps": [
+        "Zwiebel anbraten, Tomaten und Curry zugeben.",
+        "Kichererbsen und Kokosmilch 10 Minuten simmern, Spinat unterheben.",
+        "Mit Reis servieren."
+      ]
+    },
+    {
+      "id": "gouda-omelett-mit-paprika",
+      "title": "Gouda-Omelett mit Paprika",
+      "tags": ["vegetarisch", "schnell"],
+      "ingredients": [
+        { "item": "Eier", "amount": 3, "unit": "Stück", "department": "Kühlregal" },
+        { "item": "Gouda", "amount": 40, "unit": "g", "department": "Kühlregal" },
+        { "item": "Paprika", "amount": 0.5, "unit": "Stück", "department": "Obst & Gemüse" },
+        { "item": "Butter", "amount": 10, "unit": "g", "department": "Kühlregal" },
+        { "item": "Brot", "amount": 1, "unit": "Stück", "department": "Grundnahrung" }
+      ],
+      "steps": [
+        "Paprikastreifen in Butter anbraten.",
+        "Verquirlte Eier gießen, Käse darüber streuen und stocken lassen.",
+        "Mit Brot servieren."
+      ]
+    },
+    {
+      "id": "spaghetti-aglio-e-olio",
+      "title": "Spaghetti Aglio e Olio",
+      "tags": ["vegetarisch", "vegan", "milchfrei", "schnell"],
+      "ingredients": [
+        { "item": "Spaghetti", "amount": 125, "unit": "g", "department": "Grundnahrung" },
+        { "item": "Knoblauch", "amount": 10, "unit": "g", "department": "Obst & Gemüse" },
+        { "item": "Öl", "amount": 2, "unit": "EL", "department": "Grundnahrung" },
+        { "item": "Tomaten", "amount": 0.5, "unit": "Stück", "department": "Obst & Gemüse" }
+      ],
+      "steps": [
+        "Spaghetti kochen, etwas Nudelwasser beiseitestellen.",
+        "Knoblauchscheiben in Öl sanft braten.",
+        "Nudeln mit etwas Nudelwasser in der Pfanne schwenken."
+      ]
+    },
+    {
+      "id": "garnelen-pfanne",
+      "title": "Garnelen-Pfanne mit Zitronenreis",
+      "tags": ["milchfrei", "schnell"],
+      "ingredients": [
+        { "item": "Garnelen", "amount": 100, "unit": "g", "department": "Kühlregal" },
+        { "item": "Reis", "amount": 80, "unit": "g", "department": "Grundnahrung" },
+        { "item": "Zitrone", "amount": 0.25, "unit": "Stück", "department": "Obst & Gemüse" },
+        { "item": "Knoblauch", "amount": 5, "unit": "g", "department": "Obst & Gemüse" },
+        { "item": "Öl", "amount": 1, "unit": "EL", "department": "Grundnahrung" }
+      ],
+      "steps": [
+        "Reis kochen, Zitronensaft und -abrieb unterheben.",
+        "Garnelen mit Knoblauch 3–4 Minuten in Öl braten.",
+        "Auf dem Reis anrichten."
+      ]
+    },
+    {
+      "id": "linsen-bolognese",
+      "title": "Linsen-Bolognese",
+      "tags": ["vegetarisch", "vegan", "milchfrei"],
+      "ingredients": [
+        { "item": "Spaghetti", "amount": 125, "unit": "g", "department": "Grundnahrung" },
+        { "item": "Rote Linsen", "amount": 70, "unit": "g", "department": "Grundnahrung" },
+        { "item": "Passierte Tomaten", "amount": 150, "unit": "g", "department": "Grundnahrung" },
+        { "item": "Karotten", "amount": 60, "unit": "g", "department": "Obst & Gemüse" },
+        { "item": "Zwiebeln", "amount": 40, "unit": "g", "department": "Obst & Gemüse" },
+        { "item": "Öl", "amount": 1, "unit": "EL", "department": "Grundnahrung" }
+      ],
+      "steps": [
+        "Zwiebel und Karotte anbraten, Linsen und Tomaten zugeben.",
+        "20 Minuten köcheln, bis die Linsen weich sind.",
+        "Mit Spaghetti servieren."
+      ]
+    },
+    {
+      "id": "kartoffelsuppe",
+      "title": "Kartoffelsuppe",
+      "tags": ["vegetarisch", "vegan", "milchfrei"],
+      "ingredients": [
+        { "item": "Kartoffeln", "amount": 250, "unit": "g", "department": "Obst & Gemüse" },
+        { "item": "Karotten", "amount": 60, "unit": "g", "department": "Obst & Gemüse" },
+        { "item": "Zwiebeln", "amount": 40, "unit": "g", "department": "Obst & Gemüse" },
+        { "item": "Gemüsebrühe", "amount": 300, "unit": "ml", "department": "Grundnahrung" },
+        { "item": "Öl", "amount": 1, "unit": "EL", "department": "Grundnahrung" }
+      ],
+      "steps": [
+        "Gemüse in Öl anschwitzen, Brühe zugeben.",
+        "20 Minuten köcheln, grob stampfen oder pürieren.",
+        "Mit Schnittlauch servieren."
+      ]
+    },
+    {
+      "id": "flammkuchen-mit-frischkaese",
+      "title": "Flammkuchen mit Frischkäse und Zwiebeln",
+      "tags": ["vegetarisch"],
+      "ingredients": [
+        { "item": "Mehl", "amount": 90, "unit": "g", "department": "Grundnahrung" },
+        { "item": "Frischkäse", "amount": 60, "unit": "g", "department": "Kühlregal" },
+        { "item": "Zwiebeln", "amount": 50, "unit": "g", "department": "Obst & Gemüse" },
+        { "item": "Kochschinken", "amount": 30, "unit": "g", "department": "Fleisch & Wurst" },
+        { "item": "Öl", "amount": 1, "unit": "EL", "department": "Grundnahrung" }
+      ],
+      "steps": [
+        "Mehl, Öl und Wasser zu einem dünnen Teig ausrollen.",
+        "Frischkäse bestreichen, Zwiebeln und Schinken darauf.",
+        "10 Minuten bei 250 °C backen."
+      ]
+    },
+    {
+      "id": "bunter-tellersalat-mit-feta",
+      "title": "Bunter Tellersalat mit Feta",
+      "tags": ["vegetarisch", "schnell"],
+      "ingredients": [
+        { "item": "Eisbergsalat", "amount": 60, "unit": "g", "department": "Obst & Gemüse" },
+        { "item": "Tomaten", "amount": 1, "unit": "Stück", "department": "Obst & Gemüse" },
+        { "item": "Gurke", "amount": 0.25, "unit": "Stück", "department": "Obst & Gemüse" },
+        { "item": "Feta", "amount": 50, "unit": "g", "department": "Kühlregal" },
+        { "item": "Brot", "amount": 1, "unit": "Stück", "department": "Grundnahrung" },
+        { "item": "Öl", "amount": 1, "unit": "EL", "department": "Grundnahrung" }
+      ],
+      "steps": [
+        "Salat und Gemüse grob zerteilen.",
+        "Feta darüber bröseln, Öl und Essig als Dressing.",
+        "Mit Brot servieren."
+      ]
+    },
+    {
+      "id": "bananen-haferflocken",
+      "title": "Bananen-Haferflocken",
+      "tags": ["vegetarisch", "vegan", "milchfrei", "schnell"],
+      "ingredients": [
+        { "item": "Haferflocken", "amount": 60, "unit": "g", "department": "Grundnahrung" },
+        { "item": "Haferdrink", "amount": 200, "unit": "ml", "department": "Kühlregal" },
+        { "item": "Banane", "amount": 1, "unit": "Stück", "department": "Obst & Gemüse" },
+        { "item": "Vollmilch-Schokolade", "amount": 10, "unit": "g", "department": "Süßwaren" }
+      ],
+      "steps": [
+        "Haferflocken mit Haferdrink aufkochen, 3 Minuten quellen lassen.",
+        "Bananenscheiben darüberlegen.",
+        "Nach Geschmack etwas Schokolade darüber reiben."
+      ]
+    },
+    {
+      "id": "ruehrei-mit-brot",
+      "title": "Rührei mit Brot",
+      "tags": ["vegetarisch", "milchfrei", "schnell"],
+      "ingredients": [
+        { "item": "Eier", "amount": 3, "unit": "Stück", "department": "Kühlregal" },
+        { "item": "Brot", "amount": 2, "unit": "Stück", "department": "Grundnahrung" },
+        { "item": "Tomaten", "amount": 1, "unit": "Stück", "department": "Obst & Gemüse" },
+        { "item": "Öl", "amount": 1, "unit": "EL", "department": "Grundnahrung" }
+      ],
+      "steps": [
+        "Eier verquirlen, salzen und in Öl bei mittlerer Hitze stocken lassen.",
+        "Brot rösten.",
+        "Mit Tomatenscheiben servieren."
+      ]
+    },
+    {
+      "id": "nudel-auflauf-mit-schinken",
+      "title": "Nudelauflauf mit Schinken",
+      "tags": [],
+      "ingredients": [
+        { "item": "Penne-Nudeln", "amount": 110, "unit": "g", "department": "Grundnahrung" },
+        { "item": "Kochschinken", "amount": 50, "unit": "g", "department": "Fleisch & Wurst" },
+        { "item": "Sahne", "amount": 60, "unit": "ml", "department": "Kühlregal" },
+        { "item": "Gouda", "amount": 40, "unit": "g", "department": "Kühlregal" },
+        { "item": "Eier", "amount": 0.5, "unit": "Stück", "department": "Kühlregal" },
+        { "item": "Gemüsebrühe", "amount": 50, "unit": "ml", "department": "Grundnahrung" }
+      ],
+      "steps": [
+        "Nudeln bissfest vorkochen.",
+        "Mit Schinken, Sahne, Ei und Brühe mischen, in die Form geben.",
+        "Mit Käse bestreuen, 25 Minuten bei 200 °C backen."
+      ]
+    },
+    {
+      "id": "gemuese-suppe-mit-nudeln",
+      "title": "Gemüsesuppe mit Nudeln",
+      "tags": ["vegetarisch", "vegan", "milchfrei", "schnell"],
+      "ingredients": [
+        { "item": "Karotten", "amount": 60, "unit": "g", "department": "Obst & Gemüse" },
+        { "item": "Champignons", "amount": 60, "unit": "g", "department": "Obst & Gemüse" },
+        { "item": "Penne-Nudeln", "amount": 50, "unit": "g", "department": "Grundnahrung" },
+        { "item": "Gemüsebrühe", "amount": 350, "unit": "ml", "department": "Grundnahrung" },
+        { "item": "Zwiebeln", "amount": 30, "unit": "g", "department": "Obst & Gemüse" },
+        { "item": "Öl", "amount": 0.5, "unit": "EL", "department": "Grundnahrung" }
+      ],
+      "steps": [
+        "Gemüse in Öl anschwitzen, Brühe zugeben.",
+        "10 Minuten köcheln.",
+        "Nudeln direkt in der Suppe garen."
+      ]
+    }
+  ]
+}

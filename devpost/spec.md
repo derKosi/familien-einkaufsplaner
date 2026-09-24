@@ -55,7 +55,7 @@ Aus `prd.md > Look and Feel` übernommen, in Baubegriffe übersetzt:
 
 - **Theming über CSS-Custom-Properties:** Light/Dark/System via `prefers-color-scheme` + Toggle; große-Schrift-Option als Wurzel-Klasse; `prefers-reduced-motion` respektieren + eigene „wenig Animation"-Option. Kein CSS-Framework — ein kleines eigenes Custom-Property-System ist hier wartbarer als Dependency-Gewicht.
 - **Personen-Pastelle:** pro Person ein Main+Akzent-Paar (definierte Pastell-Palette, 4 Kombis für E33); der Profil-Umschalter tauscht die CSS-Variablen auf `:root`.
-- **Angebots-Badges** dürfen Discounter-Farbzitate (Lidl-Gelb, Aldi-Blau) tragen — sonst nüchtern: Papierweiß/Anthrazit, kompakte Prospekt-Dichte, keine Zier-Animationen.
+- **Angebots-Badges** dürfen Discounter-Farbzitate (Penny-Rot, Lidl-Gelb, Aldi-Blau) tragen — sonst nüchtern: Papierweiß/Anthrazit, kompakte Prospekt-Dichte, keine Zier-Animationen.
 - **Tonalität der Texte:** sachlich, keine Ernährungs-Moral (Kalorien als dezente Zeile pro Person, kein Banner).
 
 ## Components
@@ -81,7 +81,7 @@ Deterministisch: aggregiert Zutaten der Wochenrezepte zu Listenpositionen (Gramm
 Implementiert `prd.md > Einkaufsliste`.
 
 ### `apps/api/src/offers/store.ts` — die Angebotsnaht
-`OfferSource`-Interface: `latest()` liefert den neuesten Snapshot aus `data/offers/*.json` (date-stamp im Dateinamen + `fetchedAt`/`source` im File). `refresh()` scannt erneut (später: echter Fetcher/Cron dahinter). Snapshot-Erzeugung im Build: Agent liest die aktuellen Lidl-/Aldi-Süd-Angebotsseiten und überführt 20–30 reale Aktionen in JSON — echte Daten, Herkunft dokumentiert.
+`OfferSource`: `latest()` liefert den neuesten Snapshot aus `data/offers/*.json` (date-stamp im Dateinamen + `fetchedAt`/`source` im File), `refresh()` scannt erneut. Snapshot-Erzeugung: Build-Zeit-Skript `pnpm offers:fetch` zieht die laufende Woche aus der **Penny-Angebots-API** (REST/JSON) in zod-validierte Snapshots — im ersten Abzug 70 reale Aktionen aus 8 Kategorien (`data/offers/2026-09-24_penny.json`). Kein Abruf zur App-Laufzeit.
 Implementiert `prd.md > Angebots-Basis`.
 
 ### `data/recipes.json` — der Rezept-Pool
@@ -130,7 +130,7 @@ familien-einkaufsplaner/
 ## External Services and Dependencies
 
 - **Anthropic API** — einziger externer Dienst. Aufruf: Messages-Endpoint mit Schema-Zwangsantwort, server-seitig, Key aus `.env`. Doku: https://docs.anthropic.com · SDK: https://github.com/anthropics/anthropic-sdk-typescript. Kosten: Cent-Beträge für den PoC (genaue Preise zu Build-Beginn verifizieren — heute nicht live geprüft). Rate Limits für diesen Anwendungsfall unkritisch (einzelne Aufrufe, kein Loop).
-- **Lidl/Aldi-Süd-Websites** — *nicht* zur Laufzeit der App: Quelle für die Momentaufnahme, die im Build (vom Agenten) in `data/offers/` überführt wird. Kein Scraping-Code im Produkt.
+- **Penny-Angebots-API** (`www.penny.de/.rest/offers/by-category/{kw}/{kategorie}`) — *nicht* zur Laufzeit der App: Quelle für die Momentaufnahme, gezogen vom Build-Zeit-Skript `apps/api/scripts/fetch-offers.ts` (`pnpm offers:fetch`). Lidl/Aldi bleiben im `Store`-Enum für spätere Fetcher; Scraping-Code liegt keiner im Produkt.
 - Alles Weitere (React, Fastify, better-sqlite3, zod, Vitest) ist Paketabhängigkeit, kein Dienst.
 
 ## Important Failure Modes

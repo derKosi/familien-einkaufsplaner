@@ -12,7 +12,7 @@ Quelle: `scope.md > The Unique Kernel`, `scope.md > The Core Loop`.
 
 1. **Erstes Öffnen, leere App:** Zwei Wege sichtbar — „Mit Demo-Familie testen" (Haushalt „Expedition 33" vorbefüllt) oder „Eigenen Haushalt anlegen". Quelle: `scope.md > What "Working" Looks Like`.
 2. **Haushalt anlegen, Person für Person:** Name, Rolle, Ernährungseinschränkungen, optional Kalorienziel; einfache Onboarding-Fragen (Beruf/Alltag, wie aktiv ist der Tag) liefern den geschätzten Tagesverbrauch. Jede Frage ist überspringbar („Skip/Later") — die Person existiert dann unvollständig und bleibt editierbar. Quelle: `scope.md > The POC Boundary`.
-3. **Laden wählen & Plan erzeugen:** Aldi Süd oder Lidl, pro Woche wählbar. Angebote werden geholt; der Plan für eine Woche entsteht und löst alle Einschränkungen gleichzeitig auf — nach dem konfigurierbaren Mahlzeitenmuster des Haushalts (mit guten Defaults). Quelle: `scope.md > The Core Loop`.
+3. **Laden wählen & Plan erzeugen:** Penny (weitere Ketten vorbereitet), pro Woche wählbar. Angebote werden geholt; der Plan für eine Woche entsteht und löst alle Einschränkungen gleichzeitig auf — nach dem konfigurierbaren Mahlzeitenmuster des Haushalts (mit guten Defaults). Quelle: `scope.md > The Core Loop`.
 4. **Prüfen & anpassen:** Event hinzufügen („Grillabend Samstag, 5 Personen" — Gerichtvorschläge bewusst aus den aktuellen Angeboten) oder Tage aussetzen. Plan und Einkaufsliste aktualisieren sich sofort. Quelle: `scope.md > The POC Boundary` (Events/Ausnahmen).
 5. **Der eine Einkauf:** Einkaufsliste nach Ladenabteilungen gruppiert, Produkte mit Menge, Preis und Angebots-Badge, abhakbar mit Fortschritt.
 6. **Unter der Woche:** „Next Meal"-Karte zeigt das nächste Essen und wie viele Mahlzeiten vorbereitet sind; Tagesdetail zeigt, was schnell kochbar ist.
@@ -24,7 +24,7 @@ Quelle: `scope.md > The Unique Kernel`, `scope.md > The Core Loop`.
 Vier Oberflächen, keine weiteren:
 
 1. **Hauptbildschirm** (von oben nach unten):
-   - Kopfzeile: Haushaltsname („Familie Expedition 33"), **Ladenwahl** (Aldi Süd/Lidl, pro Woche), dezenter Indikator „Plan basiert auf N aktuellen Angeboten".
+   - Kopfzeile: Haushaltsname („Familie Expedition 33"), **Ladenwahl** (Penny, pro Woche), dezenter Indikator „Plan basiert auf N aktuellen Angeboten".
    - **„Next Meal"-Hero-Karte:** nächstes geplantes Essen, für wie viele Personen, Zähler „X Mahlzeiten vorbereitet" (Meal-Prep-Status).
    - **Wochenstreifen:** 7 Tageskarten Mo–So, heute hervorgehoben; pro Tag Mahlzeiten-Chips (F/M/A) und Event-Marker (Grillabend-Icon). Tipp auf einen Tag → Tagesdetail.
    - **Einkaufslisten-Button**, prominent als Auszahlung der App.
@@ -71,7 +71,7 @@ Vier Oberflächen, keine weiteren:
 ### Angebots-Basis
 
 - „Plan basiert auf N aktuellen Angeboten" als sichtbarer Beleg für echte Daten.
-- Stehendes Sortiment als Rückgrat: Discounter führen Kernprodukte fast immer; stehen keine aktuellen Angebotsdaten bereit, sagt die App es offen („Keine aktuellen Angebote für Lidl gefunden") und bietet die letzte gespeicherte Angebotslage mit Datum an — nie still fingiert.
+- Stehendes Sortiment als Rückgrat: Discounter führen Kernprodukte fast immer; stehen keine aktuellen Angebotsdaten bereit, sagt die App es offen („Keine aktuellen Angebote für Penny gefunden") und bietet die letzte gespeicherte Angebotslage mit Datum an — nie still fingiert.
 
 ## States and Boundaries
 
@@ -99,7 +99,7 @@ Vier Oberflächen, keine weiteren:
 
 - Zwei-Wege-Erststart (Demo-Haushalt vorbefüllt / eigener Haushalt per Person-Flow mit Skip/Later)
 - Personenverwaltung (Einschränkungen, Kalorienziel + Verbrauchsschätzung, editierbar) mit personengebundenem Pastell-Theming
-- Wochenplan-Generierung nach Mahlzeitenmuster aus echten Angeboten (Aldi Süd/Lidl), mit Abwechslung und schnell-kochbar-Flags
+- Wochenplan-Generierung nach Mahlzeitenmuster aus echten Angeboten (Penny), mit Abwechslung und schnell-kochbar-Flags
 - Events & Ausnahmen mit sofortiger Aktualisierung von Plan und Liste
 - Einkaufsliste: aggregierte Mengen, Preise, Angebots-Badges, Abteilungsruppen, Abhaken
 - Light/Dark/System, große-Schrift-Option, reduced-motion-Option

@@ -7,7 +7,9 @@
     "dev": "pnpm build:shared && pnpm -r --parallel dev",
     "build": "pnpm build:shared && pnpm -r build",
     "test": "pnpm build:shared && pnpm -r test",
-    "planner:smoke": "pnpm --filter api planner:smoke"
+    "planner:smoke": "pnpm --filter api planner:smoke",
+    "offers:fetch": "pnpm --filter api offers:fetch",
+    "offers:validate": "pnpm --filter api offers:validate"
   },
   "devDependencies": {
     "typescript": "^5.6.0"

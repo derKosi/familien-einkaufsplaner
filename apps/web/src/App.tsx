@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { Person } from "@fep/shared";
+import type { OffersSummary, Person } from "@fep/shared";
 import { fetchState, seedDemoHousehold } from "./lib/api.js";
 import { FirstStart } from "./views/FirstStart.js";
 import { Main } from "./views/Main.js";
@@ -9,6 +9,7 @@ const STORAGE_KEY = "fep.current-person";
 export default function App() {
   const [state, setState] = useState<"loading" | "ready">("loading");
   const [household, setHousehold] = useState<null | import("@fep/shared").Household>(null);
+  const [offers, setOffers] = useState<OffersSummary | null>(null);
   const [currentPerson, setCurrentPerson] = useState<Person | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -17,6 +18,7 @@ export default function App() {
     fetchState()
       .then((s) => {
         setHousehold(s.household);
+        setOffers(s.offers);
         setState("ready");
       })
       .catch((e) => {
@@ -72,6 +74,7 @@ export default function App() {
   return (
     <Main
       household={household}
+      offers={offers}
       current={currentPerson}
       onSelectPerson={setCurrentPerson}
     />
