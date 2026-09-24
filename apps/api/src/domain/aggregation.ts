@@ -188,6 +188,7 @@ export function buildShoppingList(plan: WeekPlan, now: Date, events: Event[] = [
 
     let packs = 1;
     let priceCents = 0;
+    let basePriceCents = 0;
     let purchaseText = neededText;
     let leftover: string | null = null;
     let leftoverIsStock = false;
@@ -202,6 +203,7 @@ export function buildShoppingList(plan: WeekPlan, now: Date, events: Event[] = [
         : row.amount;
       packs = Math.max(1, Math.ceil(needInPackUnits / pack.packAmount));
       priceCents = packs * pack.priceCents;
+      basePriceCents = priceCents;
 
       const purchasedAmount = packs * pack.packAmount;
       if (pack.packUnit === "Stück") {
@@ -230,7 +232,8 @@ export function buildShoppingList(plan: WeekPlan, now: Date, events: Event[] = [
 
     const offer = matchOffer(item, offers);
     if (offer) {
-      priceCents = offer.priceCents; // Angebotspreis ersetzt den Packungspreis (Karte ≈ Angebot)
+      // Angebotspreis ersetzt den Packungspreis (Karte ≈ Angebot); Basis bleibt für die Ersparnis.
+      priceCents = offer.priceCents;
     }
 
     list.push(ListItem.parse({
@@ -241,6 +244,7 @@ export function buildShoppingList(plan: WeekPlan, now: Date, events: Event[] = [
       purchase: purchaseText,
       packs,
       priceCents,
+      basePriceCents,
       offer: offer !== null,
       offerProduct: offer?.product ?? null,
       leftover,
@@ -350,4 +354,39 @@ export function eventSuggestions(limit = 4) {
         a.portionPriceCents - b.portionPriceCents,
     )
     .slice(0, limit);
+}
+
+/** Zutatenzeilen mit anteiligen Packungskosten — Grundlage des aufklappbaren Panels. */
+export function recipePriceRows(recipeId: string, servings: number) {
+  const recipe = recipeById(recipeId);
+  if (!recipe) return { recipeId, title: recipeId, servings, kcalPerPortion: 0, rows: [] };
+  const purchase = loadPurchaseTable();
+  const nutrition = loadNutrition();
+  const snapshot = latestOfferSnapshot();
+  const offers = (snapshot?.offers ?? []).map((o) => ({ product: o.product, priceCents: o.priceCents, id: o.id }));
+
+  const rows = recipe.ingredients.map((ing) => {
+    const pack = purchase[ing.item];
+    const portionUnits =
+      pack?.gramsPerUnit !== undefined && ing.unit === "Stück" ? ing.amount * pack.gramsPerUnit : ing.amount;
+    // Anteilige Packungskosten je Portion („etwa"-Näherung, wie recipeCostPerPortion).
+    let portionPriceCents = 0;
+    if (pack) portionPriceCents = Math.round((portionUnits / pack.packAmount) * pack.priceCents);
+    const offer = matchOffer(ing.item, offers);
+    return {
+      item: ing.item,
+      amount: formatAmount(ing.amount, ing.unit),
+      portionPriceCents,
+      totalPriceCents: portionPriceCents * servings,
+      offerProduct: offer?.product ?? null,
+    };
+  });
+
+  return {
+    recipeId,
+    title: recipe.title,
+    servings,
+    kcalPerPortion: recipeKcalPerPortion(recipeId),
+    rows,
+  };
 }

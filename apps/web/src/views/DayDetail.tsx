@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import type { AppState, EventSuggestion } from "@fep/shared";
-import { fetchEventSuggestions } from "../lib/api.js";
+import type { AppState, EventSuggestion, RecipePricesResponse } from "@fep/shared";
+import { fetchEventSuggestions, fetchRecipePrices } from "../lib/api.js";
 
 interface Props {
   state: AppState;
@@ -23,6 +23,43 @@ function timePassed(day: number, slot: string): boolean {
 }
 
 const cents = (c: number) => `${(c / 100).toFixed(2).replace(".", ",")} €`;
+
+/** Aufklappbare Zutaten-Preisliste (Checkpoint: „pro Portion oder gesamt"). */
+function PricePanel({ recipeId, servings }: { recipeId: string; servings: number }) {
+  const [prices, setPrices] = useState<RecipePricesResponse | null>(null);
+  useEffect(() => {
+    fetchRecipePrices(recipeId, servings).then(setPrices).catch(() => {});
+  }, [recipeId, servings]);
+
+  return (
+    <details className="recipe-steps price-panel">
+      <summary>Zutaten &amp; Preise</summary>
+      {!prices && <p className="lead">Rechnet …</p>}
+      {prices && (
+        <table className="price-table">
+          <thead>
+            <tr><th>Zutat</th><th>je Portion</th><th>Preis/Portion</th><th>gesamt ({servings})</th></tr>
+          </thead>
+          <tbody>
+            {prices.rows.map((row) => (
+              <tr key={row.item}>
+                <td>{row.item}{row.offerProduct && <em className="offer-hint"> · Angebot</em>}</td>
+                <td>{row.amount}</td>
+                <td>{cents(row.portionPriceCents)}</td>
+                <td>{cents(row.totalPriceCents)}</td>
+              </tr>
+            ))}
+            <tr className="price-total">
+              <td colSpan={2}>Summe</td>
+              <td>{cents(prices.rows.reduce((s, r) => s + r.portionPriceCents, 0))}</td>
+              <td>{cents(prices.rows.reduce((s, r) => s + r.totalPriceCents, 0))}</td>
+            </tr>
+          </tbody>
+        </table>
+      )}
+    </details>
+  );
+}
 
 /**
  * Tagesdetail (prd.md > Screens and Layout 2): Gerichte, Mitesser, Anpassungen,
@@ -168,7 +205,7 @@ export function DayDetail({ state, day, onBack, onTogglePrepared, onAddEvent, on
               <div className="meal-card-persons">
                 {meal.persons.map(personName).join(", ")} · {meal.servings} Portionen
                 {r && (
-                  <span className="portion-meta"> · ~{cents(r.portionPriceCents)}/Portion · {r.kcalPerPortion} kcal</span>
+                  <span className="portion-meta"> · ~{cents(r.portionPriceCents)}/Portion · {r.kcalPerPortion} kcal/Portion</span>
                 )}
               </div>
               {meal.adaptations.length > 0 && (
@@ -185,6 +222,7 @@ export function DayDetail({ state, day, onBack, onTogglePrepared, onAddEvent, on
                   <span key={t} className={`tag tag-${t}`}>{t}</span>
                 ))}
               </div>
+              {r && <PricePanel recipeId={r.id} servings={meal.servings} />}
               {r && r.steps.length > 0 && (
                 <details className="recipe-steps">
                   <summary>Zubereitung</summary>

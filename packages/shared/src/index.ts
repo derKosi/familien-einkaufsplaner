@@ -258,6 +258,31 @@ export const EventSuggestionsResponse = z.object({
 });
 export type EventSuggestionsResponse = z.infer<typeof EventSuggestionsResponse>;
 
+/**
+ * Zutaten-Preiszeile für das aufklappbare Panel (Checkpoint: „aufklappbar —
+ * Zutaten mit ‚pro Portion oder gesamt'-Preisen"): Bedarf je Portion und die
+ * anteiligen Kosten, plus Gesamt für die geplanten Portionen.
+ */
+export const RecipePriceRow = z.object({
+  item: z.string(),
+  amount: z.string(),
+  portionPriceCents: z.number().int().nonnegative(),
+  totalPriceCents: z.number().int().nonnegative(),
+  /** Angebots-Treffer auf dieser Zutat, falls vorhanden. */
+  offerProduct: z.string().nullable(),
+});
+export type RecipePriceRow = z.infer<typeof RecipePriceRow>;
+
+/** GET /api/recipes/:id/prices?servings=N */
+export const RecipePricesResponse = z.object({
+  recipeId: z.string(),
+  title: z.string(),
+  servings: z.number().int().positive(),
+  kcalPerPortion: z.number().int(),
+  rows: z.array(RecipePriceRow),
+});
+export type RecipePricesResponse = z.infer<typeof RecipePricesResponse>;
+
 /** Fehlertexte der API für den typisierten Client. */
 export const ApiError = z.object({
   error: z.string(),
@@ -345,6 +370,8 @@ export const ListItem = z.object({
   purchase: z.string(),
   packs: z.number().int().positive(),
   priceCents: z.number().int().nonnegative(),
+  /** Packungspreis ohne Angebot — Differenz ist die Ersparnis (Checkpoint). */
+  basePriceCents: z.number().int().nonnegative().default(0),
   /** Angebots-Treffer (Badge + Preis aus dem Snapshot). */
   offer: z.boolean().default(false),
   offerProduct: z.string().nullable().default(null),

@@ -30,19 +30,27 @@ export function ShoppingList({ state, onBack, onToggleChecked }: Props) {
   const list = state.shoppingList;
   const checkedCount = list.filter((l) => l.checked).length;
   const total = list.reduce((sum, l) => sum + l.priceCents, 0);
+  // Laufende Summen (Checkpoint-Fix): Korb zählt mit, Rest bleibt sichtbar.
+  const checkedTotal = list.filter((l) => l.checked).reduce((s, l) => s + l.priceCents, 0);
+  const restTotal = total - checkedTotal;
+  const savings = list.reduce((s, l) => s + Math.max(0, l.basePriceCents - l.priceCents), 0);
   const groups = DEPARTMENT_ORDER.map((dept) => ({
     dept,
     rows: list.filter((l) => l.department === dept),
   })).filter((g) => g.rows.length > 0);
 
   return (
+    <div className="main">
     <section className="shopping-list" aria-label="Einkaufsliste">
       <button className="link-btn" onClick={onBack}>← Zurück zur Woche</button>
       <h2>Einkaufsliste</h2>
 
       <div className="list-progress">
         <progress value={checkedCount} max={list.length || 1} aria-label="Einkaufs-Fortschritt" />
-        <span>{checkedCount} von {list.length} im Korb · gesamt {cents(total)}</span>
+        <span>
+          {checkedCount} von {list.length} im Korb · Korb {cents(checkedTotal)} · Rest {cents(restTotal)}
+          {savings > 0 && <> · <b className="savings">~{cents(savings)} gespart</b></>}
+        </span>
       </div>
 
       {list.length === 0 && (
@@ -84,5 +92,6 @@ export function ShoppingList({ state, onBack, onToggleChecked }: Props) {
         </div>
       ))}
     </section>
+    </div>
   );
 }

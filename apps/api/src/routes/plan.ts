@@ -6,6 +6,7 @@ import {
   ExemptDaysRequest,
   GeneratePlanRequest,
   MealSlot,
+  RecipePricesResponse,
   WeekPlan,
   type AppState,
 } from "@fep/shared";
@@ -18,7 +19,7 @@ import { defaultWeekPattern, mondayOf } from "../domain/weeklogic.js";
 import { loadWeekPlan, saveWeekPlan } from "../plan-repo.js";
 import { clearChecked, setChecked } from "../list-repo.js";
 import { addEvent, clearEvents } from "../event-repo.js";
-import { eventSuggestions } from "../domain/aggregation.js";
+import { eventSuggestions, recipePriceRows } from "../domain/aggregation.js";
 import { loadRecipes } from "../domain/recipes.js";
 
 /**
@@ -104,6 +105,17 @@ export async function registerPlanRoutes(app: FastifyInstance): Promise<void> {
   app.get("/api/plan/event-suggestions", async () =>
     EventSuggestionsResponse.parse({ suggestions: eventSuggestions() }),
   );
+
+  /** Aufklappbares Zutaten-Preis-Panel (Checkpoint: „pro Portion oder gesamt"). */
+  app.get("/api/recipes/:id/prices", async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const servings = Math.max(1, Number.parseInt((request.query as { servings?: string }).servings ?? "2") || 2);
+    const recipe = loadRecipes().find((r) => r.id === id);
+    if (!recipe) {
+      return reply.code(404).send({ error: "Rezept unbekannt.", code: "no_recipe" });
+    }
+    return RecipePricesResponse.parse(recipePriceRows(id, servings));
+  });
 
   /**
    * Event hinzufügen (spec.md > Core Journey 3): skaliert die Hauptmahlzeit des

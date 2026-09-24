@@ -1,4 +1,4 @@
-import { ApiError, type AppState, type EventSuggestionsResponse, type Store } from "@fep/shared";
+import { ApiError, type AppState, type EventSuggestionsResponse, type RecipePricesResponse, type Store } from "@fep/shared";
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(path, {
@@ -64,4 +64,9 @@ export function setExemptDays(days: number[]): Promise<AppState> {
 /** GET /api/plan/event-suggestions — Angebote × Rezepte, mit Preis/kcal. */
 export function fetchEventSuggestions(): Promise<EventSuggestionsResponse> {
   return request<EventSuggestionsResponse>("/api/plan/event-suggestions");
+}
+
+/** GET /api/recipes/:id/prices — aufklappbares Zutaten-Preis-Panel. */
+export function fetchRecipePrices(recipeId: string, servings: number): Promise<RecipePricesResponse> {
+  return request<RecipePricesResponse>(`/api/recipes/${encodeURIComponent(recipeId)}/prices?servings=${servings}`);
 }
