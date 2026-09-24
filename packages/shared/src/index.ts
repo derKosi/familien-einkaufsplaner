@@ -378,6 +378,8 @@ export const ListItem = z.object({
   /** Differenz Kaufmenge − Bedarf; bei Verderblichem mit Nachrücker-Idee verknüpfbar. */
   leftover: z.string().nullable().default(null),
   leftoverIsStock: z.boolean().default(false),
+  /** Verderblich laut Kaufgebinde-Katalog — Grundlage der Vorrats-/Frische-Summen. */
+  perishable: z.boolean().default(false),
   /** Rezept-Vorschläge, die den Rest verwerten (Rezept-Nachrücker, Checkpoint). */
   leftoverUses: z.array(z.object({ recipeId: z.string(), title: z.string(), uses: z.string() })).default([]),
   checked: z.boolean().default(false),

@@ -26,7 +26,13 @@ const plan: WeekPlanT = WeekPlan.parse({
     meal(3, "Mittag", "roter-linsen-dal", [LUNE, GUSTAV]),
     meal(4, "Mittag", "kartoffelsuppe", [LUNE, GUSTAV]),
     meal(5, "Mittag", "gemuese-pfanne-mit-feta", [LUNE, GUSTAV]),
-    meal(6, "Frühstück", "bananen-haferflocken", [LUNE, GUSTAV]),
+    {
+      day: 6,
+      meals: [
+        { slot: "Frühstück", recipeId: "bananen-haferflocken", servings: 2, persons: [LUNE, GUSTAV], quick: false, prepared: "auto" },
+        { slot: "Mittag", recipeId: "bunter-tellersalat-mit-feta", servings: 1, persons: [LUNE], quick: true, prepared: "auto" },
+      ],
+    },
   ],
   missingInfo: [],
 });
@@ -74,6 +80,13 @@ describe("Aggregation: Mengen", () => {
     const kartoffeln = row("Kartoffeln");
     expect(kartoffeln.needed).toBe("700 g");
     expect(kartoffeln.leftoverIsStock).toBe(true);
+  });
+
+  it("Gramm-Bedarf am Stück-Gebinde: 60 g Salat sind 1 Kopf, nicht 200 (Regression)", () => {
+    const salat = row("Eisbergsalat");
+    expect(salat.needed).toBe("60 g");
+    expect(salat.packs).toBe(1);
+    expect(salat.priceCents).toBe(119);
   });
 
   it("preise kommen aus dem Gebindekatalog und sind ganzzahlig in Cent", () => {

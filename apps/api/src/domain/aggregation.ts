@@ -195,20 +195,33 @@ export function buildShoppingList(plan: WeekPlan, now: Date, events: Event[] = [
     let restAmount = 0;
     let restUnit: "g" | "ml" | "Stück" = row.unit;
     let kcal = row.kcal;
+    let perishable = false;
 
     if (pack) {
-      // Stück-Zutaten mit Gewichtsgebinde (Tomaten → 500-g-Karte) zuerst in Gramm überführen.
-      const needInPackUnits = pack.gramsPerUnit !== undefined && row.unit === "Stück"
-        ? (row.pieces ?? 0) * pack.gramsPerUnit
-        : row.amount;
-      packs = Math.max(1, Math.ceil(needInPackUnits / pack.packAmount));
+      perishable = pack.perishable;
+      // Einheitenbrücke in BEIDE Richtungen (Bug-Note Checkpoint 6): Rezept in Stück
+      // + Gewichtsgebinde (Tomaten → 500-g-Karte) rechnet in Gramm; Rezept in Gramm
+      // + Stückgebinde (Eisbergsalat 60 g → 1 Kopf à 400 g) rechnet in Stück.
+      let needInPackUnits = row.amount;
+      let piecesInPackUnits = row.pieces ?? 0;
+      if (pack.gramsPerUnit !== undefined) {
+        if (row.unit === "Stück") {
+          needInPackUnits = (row.pieces ?? 0) * pack.gramsPerUnit;
+        } else if (pack.packUnit === "Stück") {
+          piecesInPackUnits = row.amount / pack.gramsPerUnit;
+          needInPackUnits = row.amount;
+        }
+      }
+      packs = pack.packUnit === "Stück"
+        ? Math.max(1, Math.ceil(piecesInPackUnits / pack.packAmount))
+        : Math.max(1, Math.ceil(needInPackUnits / pack.packAmount));
       priceCents = packs * pack.priceCents;
       basePriceCents = priceCents;
 
       const purchasedAmount = packs * pack.packAmount;
       if (pack.packUnit === "Stück") {
         purchaseText = pack.packAmount === 1 ? `${purchasedAmount} Stück` : `${packs}× ${pack.packAmount} Stück`;
-        restAmount = purchasedAmount - (row.pieces ?? 0);
+        restAmount = Math.round((purchasedAmount - piecesInPackUnits) * 10) / 10;
         restUnit = "Stück";
       } else {
         purchaseText = `${packs}× ${pack.packAmount} ${pack.packUnit}`;
@@ -216,7 +229,9 @@ export function buildShoppingList(plan: WeekPlan, now: Date, events: Event[] = [
         restUnit = pack.packUnit;
       }
       if (restAmount > 0) {
-        leftover = `${restAmount} ${pack.packUnit === "Stück" ? "" : pack.packUnit + " "}übrig`.replace("  ", " ");
+        leftover = restUnit === "Stück"
+          ? `${restAmount} übrig`
+          : `${restAmount} ${restUnit} übrig`;
         leftoverIsStock = !pack.perishable;
       }
     } else {
@@ -249,6 +264,7 @@ export function buildShoppingList(plan: WeekPlan, now: Date, events: Event[] = [
       offerProduct: offer?.product ?? null,
       leftover,
       leftoverIsStock,
+      perishable,
       leftoverUses: pack?.perishable && restAmount > 0 ? leftoverUses(item, restAmount, restUnit) : [],
       checked: false,
       kcal: Math.round(kcal),

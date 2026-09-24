@@ -34,6 +34,7 @@ export function ShoppingList({ state, onBack, onToggleChecked }: Props) {
   const checkedTotal = list.filter((l) => l.checked).reduce((s, l) => s + l.priceCents, 0);
   const restTotal = total - checkedTotal;
   const savings = list.reduce((s, l) => s + Math.max(0, l.basePriceCents - l.priceCents), 0);
+  const stockTotal = list.filter((l) => !l.perishable).reduce((s, l) => s + l.priceCents, 0);
   const groups = DEPARTMENT_ORDER.map((dept) => ({
     dept,
     rows: list.filter((l) => l.department === dept),
@@ -49,6 +50,7 @@ export function ShoppingList({ state, onBack, onToggleChecked }: Props) {
         <progress value={checkedCount} max={list.length || 1} aria-label="Einkaufs-Fortschritt" />
         <span>
           {checkedCount} von {list.length} im Korb · Korb {cents(checkedTotal)} · Rest {cents(restTotal)}
+          {stockTotal > 0 && <> · davon {cents(stockTotal)} haltbarer Vorrat</>}
           {savings > 0 && <> · <b className="savings">~{cents(savings)} gespart</b></>}
         </span>
       </div>

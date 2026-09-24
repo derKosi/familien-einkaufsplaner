@@ -22,7 +22,7 @@
   "Champignons": { "packAmount": 400, "packUnit": "g", "perishable": true, "priceCents": 149 },
   "Spinat": { "packAmount": 250, "packUnit": "g", "perishable": true, "priceCents": 99 },
   "Brokkoli": { "packAmount": 500, "packUnit": "g", "perishable": true, "priceCents": 149 },
-  "Eisbergsalat": { "packAmount": 1, "packUnit": "Stück", "perishable": true, "priceCents": 119 },
+  "Eisbergsalat": { "packAmount": 1, "packUnit": "Stück", "perishable": true, "priceCents": 119, "gramsPerUnit": 400 },
   "Banane": { "packAmount": 1, "packUnit": "Stück", "perishable": true, "priceCents": 30 },
   "Zitrone": { "packAmount": 1, "packUnit": "Stück", "perishable": true, "priceCents": 35 },
   "Zwiebeln": { "packAmount": 500, "packUnit": "g", "perishable": false, "priceCents": 79 },
