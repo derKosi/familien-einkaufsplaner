@@ -17,8 +17,8 @@ export function loadRecipes(): Recipe[] {
   return cache;
 }
 
-/** Leichte Projektion für die UI (AppState.recipes) — inkl. Kurz-Anleitung. */
-export function recipesSummary(): RecipeSummary[] {
+/** Basis-Projektion ohne Preis/kcal — dekorirt getState mit den Aggregations-Helfern. */
+export function recipesSummary(): Array<Omit<RecipeSummary, "portionPriceCents" | "kcalPerPortion">> {
   return loadRecipes().map((r) => ({
     id: r.id,
     title: r.title,

@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import type { Person, Store } from "@fep/shared";
 import {
+  createEvent,
   fetchState,
   generatePlan,
   seedDemoHousehold,
+  setExemptDays,
   setListItemChecked,
   setMealPrepared,
 } from "./lib/api.js";
@@ -102,6 +104,26 @@ export default function App() {
     }
   }
 
+  /** Event hinzufügen (Grillabend & Co.) — skaliert Plan und Liste sofort. */
+  async function addEvent(day: number, personCount: number, dishHint: string | null) {
+    setError(null);
+    try {
+      setState(await createEvent(day, personCount, dishHint));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    }
+  }
+
+  /** Tage aussetzen / wieder aufnehmen — Liste rechnet sofort neu. */
+  async function changeExempt(days: number[]) {
+    setError(null);
+    try {
+      setState(await setExemptDays(days));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    }
+  }
+
   if (!state?.household) return <FirstStart onDemo={startDemo} busy={busy} />;
 
   if (showList) {
@@ -126,6 +148,8 @@ export default function App() {
       onSelectDay={setSelectedDay}
       onTogglePrepared={togglePrepared}
       onShowList={() => setShowList(true)}
+      onAddEvent={addEvent}
+      onSetExempt={changeExempt}
     />
   );
 }

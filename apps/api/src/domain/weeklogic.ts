@@ -74,6 +74,7 @@ export function computeNextMeal(
   const current = nowTick(now);
   let best: { tick: number; meal: (typeof plan.days)[number]["meals"][number]; day: number } | null = null;
   for (const day of plan.days) {
+    if (plan.exemptDays.includes(day.day)) continue; // ausgesetzt = keine Next-Meal-Kandidaten
     for (const meal of day.meals) {
       const tick = mealTick(day.day, meal.slot);
       if (tick < current) continue;
@@ -101,6 +102,7 @@ export function countPreparedMeals(plan: WeekPlan, now: Date): number {
   const current = nowTick(now);
   let count = 0;
   for (const day of plan.days) {
+    if (plan.exemptDays.includes(day.day)) continue; // ausgesetzt zählt nicht
     for (const meal of day.meals) {
       if (meal.prepared === "ja") count++;
       else if (meal.prepared === "auto" && mealTick(day.day, meal.slot) < current) count++;

@@ -6,8 +6,9 @@ import { offersSummary } from "./offers/store.js";
 import { loadWeekPlan } from "./plan-repo.js";
 import { loadRecipes, recipesSummary } from "./domain/recipes.js";
 import { computeNextMeal, countPreparedMeals } from "./domain/weeklogic.js";
-import { buildShoppingList } from "./domain/aggregation.js";
+import { buildShoppingList, recipeCostPerPortion, recipeKcalPerPortion } from "./domain/aggregation.js";
 import { checkedItems } from "./list-repo.js";
+import { listEvents } from "./event-repo.js";
 
 interface PersonRow {
   id: string;
@@ -47,14 +48,22 @@ export function loadPersons(): Person[] {
 /** Ein fester Haushalt im PoC — die erste (einzige) Zeile gilt. */
 export function getState(): AppState {
   const offers = offersSummary();
-  const recipes = recipesSummary();
+  const events = listEvents();
+  // Rezept-Projektion mit „etwa“-Portionspreis und kcal (Checkpoint-Wunsch).
+  const recipes = recipesSummary().map((r) => ({
+    ...r,
+    portionPriceCents: recipeCostPerPortion(r.id),
+    kcalPerPortion: recipeKcalPerPortion(r.id),
+  }));
   const weekPlan = loadWeekPlan();
 
   const planView = weekPlan
     ? {
         nextMeal: computeNextMeal(weekPlan, (id) => loadRecipes().find((r) => r.id === id)?.title, new Date()),
         mealsPrepared: countPreparedMeals(weekPlan, new Date()),
-        mealsTotal: weekPlan.days.reduce((n, d) => n + d.meals.length, 0),
+        mealsTotal: weekPlan.days
+          .filter((d) => !weekPlan.exemptDays.includes(d.day))
+          .reduce((n, d) => n + d.meals.length, 0),
       }
     : { nextMeal: null, mealsPrepared: 0, mealsTotal: 0 };
 
@@ -62,7 +71,7 @@ export function getState(): AppState {
   const checks = checkedItems();
   const listView = weekPlan
     ? (() => {
-        const { list, personCalories } = buildShoppingList(weekPlan, new Date());
+        const { list, personCalories } = buildShoppingList(weekPlan, new Date(), events);
         return {
           shoppingList: list.map((row) => ({ ...row, checked: checks.has(row.id) })),
           personCalories,
@@ -74,7 +83,7 @@ export function getState(): AppState {
     | { id: string; name: string }
     | undefined;
   if (!householdRow) {
-    return AppState.parse({ household: null, offers, recipes, ...planView, ...listView });
+    return AppState.parse({ household: null, offers, recipes, events, ...planView, ...listView });
   }
 
   const personRows = db
@@ -90,6 +99,7 @@ export function getState(): AppState {
     offers,
     recipes,
     weekPlan,
+    events,
     ...planView,
     ...listView,
   });

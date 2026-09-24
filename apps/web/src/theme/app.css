@@ -288,6 +288,67 @@ button.primary:disabled { opacity: 0.6; cursor: default; }
 .leftover-use { font-size: 12.5px; color: var(--person-accent); }
 .list-price { font-variant-numeric: tabular-nums; font-weight: 700; white-space: nowrap; margin-top: 2px; }
 
+/* Events & Ausnahmen (Slice 6) */
+.main { max-width: 880px; } /* Checkpoint: mittelbreit, nicht randvoll */
+.day-name .event-dot { margin-left: 4px; font-size: 10px; }
+.day-card.exempt { opacity: 0.55; background: transparent; border-style: dashed; }
+.day-card.exempt .day-name { text-decoration: line-through; }
+.exempt-label { color: var(--warn, #9a6700); font-size: 13px; font-weight: 400; }
+.day-tools { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+.small-btn {
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 8px;
+  padding: 7px 12px;
+  font: inherit;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+.small-btn:hover { border-color: var(--person-accent); }
+.small-btn.primary { background: var(--ink); color: #fff; border: none; font-weight: 700; }
+.event-form {
+  margin-top: 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: var(--card);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.event-form label { display: flex; gap: 8px; align-items: center; font-size: 14px; }
+.event-form input[type="number"] { width: 70px; font: inherit; padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; }
+.event-form input[type="text"] { flex: 1; font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; }
+.event-suggestions-title { font-size: 13px; font-weight: 700; color: var(--muted); }
+.suggestion-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font: inherit;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+.suggestion-row:hover { border-color: var(--person-accent); }
+.suggestion-row .offer-hint { font-style: normal; color: #c0272d; }
+.event-free { display: flex; gap: 8px; }
+.event-marker {
+  border: 1px dashed var(--person-accent);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 14px;
+  margin-top: 10px;
+  background: var(--person-main);
+}
+.event-cost { color: var(--muted); font-size: 13px; }
+.portion-meta { color: var(--muted); }
+
 /* Mobile-Erste-Hilfe (Checkpoint) — tieferer Pass kommt mit Slice 8 */
 @media (max-width: 640px) {
   .main { padding: 14px 12px 48px; }

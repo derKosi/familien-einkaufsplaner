@@ -3,6 +3,7 @@ import {
   NutritionTable,
   PurchaseTable,
   type Department,
+  type Event,
   type ListItem as ListItemT,
   type NutritionTable as NutritionTableT,
   type PersonCalories,
@@ -137,7 +138,7 @@ function leftoverUses(item: string, leftover: number, unit: "g" | "ml" | "Stück
   return suggestions;
 }
 
-export function buildShoppingList(plan: WeekPlan, now: Date): {
+export function buildShoppingList(plan: WeekPlan, now: Date, events: Event[] = []): {
   list: ListItemT[];
   personCalories: PersonCalories[];
 } {
@@ -151,12 +152,15 @@ export function buildShoppingList(plan: WeekPlan, now: Date): {
   const kcalByPerson = new Map<string, number>();
 
   for (const day of plan.days) {
+    if (plan.exemptDays.includes(day.day)) continue; // ausgesetzt = keine Mahlzeiten, kein Bedarf
+    const bonus = eventBonusFor(day.day, day.meals, events);
     for (const meal of day.meals) {
       const recipe = recipeById(meal.recipeId);
       if (!recipe) continue;
+      const servings = meal.servings + (meal.slot === bonus.slot ? bonus.personCount : 0);
       let mealKcal = 0;
       for (const ing of recipe.ingredients) {
-        const norm = normalizeIngredient(ing.item, ing.amount, ing.unit, meal.servings, nutrition);
+        const norm = normalizeIngredient(ing.item, ing.amount, ing.unit, servings, nutrition);
         mealKcal += norm.kcal;
         const row = needed.get(ing.item) ?? { amount: 0, unit: norm.pieces !== undefined ? "Stück" : norm.grams !== undefined ? (ing.unit === "ml" ? "ml" : "g") : (ing.unit === "ml" ? "ml" : "g"), kcal: 0 };
         if (norm.pieces !== undefined) {
@@ -169,8 +173,8 @@ export function buildShoppingList(plan: WeekPlan, now: Date): {
         row.kcal += norm.kcal;
         needed.set(ing.item, row);
       }
-      // Gleichmäßige Portionen am Tisch: anteilig auf die Mitesser.
-      const perPerson = mealKcal / meal.persons.length;
+      // Gleichmäßige Portionen am Tisch: anteilig auf die Mitesser (Events inklusive).
+      const perPerson = mealKcal / (meal.persons.length + (meal.slot === bonus.slot ? bonus.personCount : 0));
       for (const personId of meal.persons) {
         kcalByPerson.set(personId, (kcalByPerson.get(personId) ?? 0) + perPerson);
       }
@@ -266,4 +270,84 @@ function departmentFor(item: string): Department {
     if (ing) return ing.department;
   }
   return "Grundnahrung";
+}
+
+/**
+ * Events skalieren die Hauptmahlzeit des Tages (spec.md > Core Journey 3):
+ * bevorzugt das Abendessen, sonst die erste geplante Mahlzeit. Rückgabe
+ * personCount = 0 heißt: kein Event betreffen diese Mahlzeiten.
+ */
+function eventBonusFor(day: number, meals: Array<{ slot: string }>, events: Event[]): { slot: string; personCount: number } {
+  const dayEvents = events.filter((e) => e.day === day);
+  if (dayEvents.length === 0) return { slot: "", personCount: 0 };
+  const target =
+    meals.find((m) => m.slot === "Abendessen")?.slot ?? meals[0]?.slot ?? "";
+  if (!target) return { slot: "", personCount: 0 };
+  return {
+    slot: target,
+    personCount: dayEvents.reduce((n, e) => n + e.personCount, 0),
+  };
+}
+
+/** „Etwa“-Preis je Portion: anteilige Packungskosten über die Zutaten. */
+export function recipeCostPerPortion(recipeId: string): number {
+  const recipe = recipeById(recipeId);
+  if (!recipe) return 0;
+  const purchase = loadPurchaseTable();
+  let cents = 0;
+  for (const ing of recipe.ingredients) {
+    const pack = purchase[ing.item];
+    if (!pack) continue;
+    const portionInPackUnits =
+      pack.gramsPerUnit !== undefined && ing.unit === "Stück" ? ing.amount * pack.gramsPerUnit : ing.amount;
+    cents += (portionInPackUnits / pack.packAmount) * pack.priceCents;
+  }
+  return Math.round(cents);
+}
+
+/** kcal je Portion, aus der Nährwert-Tabelle gerechnet. */
+export function recipeKcalPerPortion(recipeId: string): number {
+  const recipe = recipeById(recipeId);
+  if (!recipe) return 0;
+  const nutrition = loadNutrition();
+  let kcal = 0;
+  for (const ing of recipe.ingredients) {
+    kcal += normalizeIngredient(ing.item, ing.amount, ing.unit, 1, nutrition).kcal;
+  }
+  return Math.round(kcal);
+}
+
+/** Angebots-Treffer der Rezept-Zutaten — Grundlage der Event-Vorschläge. */
+export function recipeOfferProducts(recipeId: string): string[] {
+  const recipe = recipeById(recipeId);
+  if (!recipe) return [];
+  const snapshot = latestOfferSnapshot();
+  const offers = (snapshot?.offers ?? []).map((o) => ({ product: o.product, priceCents: o.priceCents, id: o.id }));
+  const hits = new Set<string>();
+  for (const ing of recipe.ingredients) {
+    const match = matchOffer(ing.item, offers);
+    if (match) hits.add(match.product);
+  }
+  return [...hits];
+}
+
+/**
+ * Event-Vorschläge (prd.md > Events & Ausnahmen): Rezepte mit den stärksten
+ * Angebots-Treffern zuerst — mit Portionspreis und kcal (Checkpoint-Wunsch).
+ */
+export function eventSuggestions(limit = 4) {
+  return loadRecipes()
+    .map((r) => ({
+      recipeId: r.id,
+      title: r.title,
+      kcalPerPortion: recipeKcalPerPortion(r.id),
+      portionPriceCents: recipeCostPerPortion(r.id),
+      offerProducts: recipeOfferProducts(r.id),
+    }))
+    .sort(
+      (a, b) =>
+        b.offerProducts.length - a.offerProducts.length ||
+        a.portionPriceCents - b.portionPriceCents,
+    )
+    .slice(0, limit);
 }

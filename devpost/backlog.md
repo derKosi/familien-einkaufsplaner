@@ -38,6 +38,18 @@ kcal-Basis (pro Person aus Planbeteiligung) bewiesen hat.
 Über die Slice-8-Erste-Hilfe hinaus: Touch-Ziele, responsive Wochenstreifen-Details,
 visuelle Befeuchtung ohne den „Prospekt-Nüchtern"-Vertrag zu brechen.
 
+## 6. Zweiwochen-Planung mit Übertrag (Checkpoint-Runde 4)
+„Man plant zuerst die Gerichte für die nächsten 2 Wochen (zusammen mit dem
+Nachbargrill, wir haben ja auch noch 6 fertig für morgen)": Plan-Historie statt
+Einzelplan, listenübergreifende Gebinde-Optimierung („500 g Hack kaufen, über zwei
+Wochen verwerten"), Fertig-/Reste-Übertrag in die nächste Woche. Kosten: 1–2 Slices
+(Datenmodell + Listen-Merge). Startet sinnvoll NACH dem Budget-Rahmen (Slice 7),
+weil die Vorschläge dann schon preissensitiv sortieren.
+
+## 7. Budget-Rahmen über die Einstellungen hinaus
+Slice 7 liefert die Münzen (1–3) als Gewichtung der Vorschlags-Sortierung. Später
+denkbar: Wochenbudget-Wächter mit Summenwarnung auf der Liste.
+
 ## Entscheidungsregel
 Jeder Punkt: erst PoC-Demo durchspielen (60-Sekunden-Journey), dann bewerten, ob der
 Kernel-Beweis (echte Angebote → valider Plan → nachrechenbare Liste) ohne den Punkt

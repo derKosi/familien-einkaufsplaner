@@ -1,6 +1,14 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import { GeneratePlanRequest, MealSlot, WeekPlan, type AppState } from "@fep/shared";
+import {
+  CreateEventRequest,
+  EventSuggestionsResponse,
+  ExemptDaysRequest,
+  GeneratePlanRequest,
+  MealSlot,
+  WeekPlan,
+  type AppState,
+} from "@fep/shared";
 import { buildPlannerContext, type PatternEntry } from "../llm/context-contract.js";
 import { generateWeekPlan, PlannerError, realPlanClient } from "../llm/planner.js";
 import { loadPersons, getState } from "../household-repo.js";
@@ -9,6 +17,9 @@ import { plannerRecipes } from "../domain/recipes.js";
 import { defaultWeekPattern, mondayOf } from "../domain/weeklogic.js";
 import { loadWeekPlan, saveWeekPlan } from "../plan-repo.js";
 import { clearChecked, setChecked } from "../list-repo.js";
+import { addEvent, clearEvents } from "../event-repo.js";
+import { eventSuggestions } from "../domain/aggregation.js";
+import { loadRecipes } from "../domain/recipes.js";
 
 /**
  * Der Kernel (spec.md > Core Journey 2, prd.md > Wochenplan): Laden wählen →
@@ -84,7 +95,67 @@ export async function registerPlanRoutes(app: FastifyInstance): Promise<void> {
     });
     saveWeekPlan(weekPlan);
     clearChecked(); // neue Woche, neuer Haken-Stand (prd.md > Wochenplan: ersetzt sichtbar)
+    clearEvents(); // neue Woche, neue Events
 
+    return getState() satisfies AppState;
+  });
+
+  /** Vorschläge aus dem aktuellen Angebot — mit Portionspreis und kcal (Checkpoint-Wunsch). */
+  app.get("/api/plan/event-suggestions", async () =>
+    EventSuggestionsResponse.parse({ suggestions: eventSuggestions() }),
+  );
+
+  /**
+   * Event hinzufügen (spec.md > Core Journey 3): skaliert die Hauptmahlzeit des
+   * Tages und rechnet die Liste sofort neu. Ohne erkennbarem Gericht läuft der
+   * Hinweis als freier Titel — ehrlich ohne Listen-Impact.
+   */
+  app.post("/api/plan/events", async (request, reply) => {
+    const body = CreateEventRequest.safeParse(request.body);
+    if (!body.success) {
+      return reply.code(400).send({ error: "Ungültiger Request-Body.", code: "bad_request" });
+    }
+    if (!loadWeekPlan()) {
+      return reply.code(409).send({ error: "Kein Wochenplan vorhanden.", code: "no_plan" });
+    }
+    const { day, personCount, dishHint } = body.data;
+
+    let recipeId: string | null = null;
+    let title = dishHint?.trim() || "";
+    if (dishHint) {
+      const hint = dishHint.toLowerCase();
+      recipeId = loadRecipes().find(
+        (r) => r.id.includes(hint.replace(/\s+/g, "-")) || r.title.toLowerCase().includes(hint) || hint.includes(r.title.toLowerCase()),
+      )?.id ?? null;
+      // Ehrlich bleiben: ein Hinweis, der kein Rezept trifft, bleibt Freititel —
+      // kein stillschweigender Ersatz (Checkpoint: Vorschlag ODER Auswahl).
+    } else {
+      // Ohne Hinweis: der Top-Vorschlag aus dem aktuellen Angebot (Autoselect).
+      const top = eventSuggestions(1)[0];
+      if (top) {
+        recipeId = top.recipeId;
+        title = top.title;
+      }
+    }
+    if (recipeId && !title) {
+      title = loadRecipes().find((r) => r.id === recipeId)?.title ?? recipeId;
+    }
+
+    addEvent({ day, personCount, recipeId, title: title || "Event" });
+    return getState() satisfies AppState;
+  });
+
+  /** Tag aussetzen / wieder aufnehmen (prd.md > Events & Ausnahmen): Liste rechnet sofort neu. */
+  app.post("/api/plan/exemptions", async (request, reply) => {
+    const body = ExemptDaysRequest.safeParse(request.body);
+    if (!body.success) {
+      return reply.code(400).send({ error: "Ungültiger Request-Body.", code: "bad_request" });
+    }
+    const plan = loadWeekPlan();
+    if (!plan) {
+      return reply.code(409).send({ error: "Kein Wochenplan vorhanden.", code: "no_plan" });
+    }
+    saveWeekPlan({ ...plan, exemptDays: [...new Set(body.data.days)].sort() });
     return getState() satisfies AppState;
   });
 

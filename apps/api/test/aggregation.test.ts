@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { WeekPlan, type Person, type WeekPlan as WeekPlanT } from "@fep/shared";
-import { buildShoppingList } from "../src/domain/aggregation.js";
+import { WeekPlan, type Event, type Person, type WeekPlan as WeekPlanT } from "@fep/shared";
+import { buildShoppingList, eventSuggestions } from "../src/domain/aggregation.js";
 
 /**
  * Nachrechenbar-Beweis (checklist.md Slice 5): Aggregation und kcal —
@@ -105,5 +105,46 @@ describe("Aggregation: kcal", () => {
 
   it("listet kcal je Position (Grundlage der dezenten Anzeige)", () => {
     expect(row("Spaghetti").kcal).toBeGreaterThan(0);
+  });
+});
+
+describe("Events & Ausnahmen (Slice 6)", () => {
+  it("Grillabend: Event mit 5 Personen skaliert die Hauptmahlzeit des Tages", () => {
+    const grillabend: Event = {
+      id: "event-1",
+      day: 4,
+      personCount: 5,
+      recipeId: "kartoffelsuppe",
+      title: "Nachbargrill",
+    };
+    const before = buildShoppingList(plan, now).list.find((l) => l.id === "Karotten")!;
+    const after = buildShoppingList(plan, now, [grillabend]).list.find((l) => l.id === "Karotten")!;
+    // Tag 4 (kartoffelsuppe): 60 g × 2 + Event +5 Portionen × 60 g = +300 g Bedarf
+    expect(Number.parseInt(after.needed)).toBe(Number.parseInt(before.needed) + 300);
+    // 500-g-Pack: 240 g → 1 Packung, 540 g → 2 Packungen — das Gebinde springt
+    expect(before.packs).toBe(1);
+    expect(after.packs).toBe(2);
+  });
+
+  it("ausgesetzte Tage entfallen aus Bedarf, Zählern und Next-Meal", () => {
+    const exemptPlan: WeekPlanT = WeekPlan.parse({ ...plan, exemptDays: [1, 2] });
+    const { list: reduced } = buildShoppingList(exemptPlan, now);
+    // Tag 2 ist das Schweinefilet — ohne Tag 2 keine Filet-Position
+    expect(reduced.find((l) => l.id === "Schweinefilet")).toBeUndefined();
+    // Tag 1 entfällt (linsen-bolognese), Tag 0 bleibt
+    expect(reduced.find((l) => l.id === "Hackfleisch gemischt")).toBeDefined();
+  });
+
+  it("Event-Vorschläge tragen Portionspreis, kcal und Angebots-Treffer", () => {
+    const suggestions = eventSuggestions(4);
+    expect(suggestions).toHaveLength(4);
+    for (const s of suggestions) {
+      expect(s.portionPriceCents).toBeGreaterThan(0);
+      expect(s.kcalPerPortion).toBeGreaterThan(0);
+    }
+    // Sortiert: die meisten Angebots-Treffer zuerst
+    expect(suggestions[0].offerProducts.length).toBeGreaterThanOrEqual(
+      suggestions[suggestions.length - 1].offerProducts.length,
+    );
   });
 });

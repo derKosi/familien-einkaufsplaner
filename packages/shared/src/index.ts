@@ -197,6 +197,8 @@ export const WeekPlan = z.object({
   /** Datum der Angebotslage — null = Plan ohne aktuelle Angebote (ehrlich markiert). */
   offersDated: z.string().nullable(),
   days: z.array(StoredDay).min(7).max(7),
+  /** Ausgesetzte Tage (Checkpoint „Tag aussetzen") — Mahlzeiten/Liste ignorieren sie. */
+  exemptDays: z.array(z.number().int().min(0).max(6)).default([]),
   /** Miss-Log des Planner-Laufs — Transparenz statt Magie. */
   missingInfo: z.array(z.string()).default([]),
 });
@@ -209,6 +211,52 @@ export const GeneratePlanRequest = z.object({
   allowNoOffers: z.boolean().default(false),
 });
 export type GeneratePlanRequest = z.infer<typeof GeneratePlanRequest>;
+
+// ─── Events & Ausnahmen (spec.md > Core Journey 3, prd.md > Events & Ausnahmen) ───
+
+/** Ein Event am Tag (z. B. Grillabend mit Nachbarn) — skaliert die Hauptmahlzeit. */
+export const Event = z.object({
+  id: z.string(),
+  day: z.number().int().min(0).max(6),
+  personCount: z.number().int().positive(),
+  /** Rezept des Event-Gerichts — null bei freier Eingabe ohne Rezept-Bezug. */
+  recipeId: z.string().nullable(),
+  title: z.string().min(1),
+});
+export type Event = z.infer<typeof Event>;
+
+/** POST /api/plan/events */
+export const CreateEventRequest = z.object({
+  day: z.number().int().min(0).max(6),
+  personCount: z.number().int().min(1).max(30),
+  /** Freitext oder leer — ohne Hinweis wählt der Server den Top-Vorschlag aus dem Angebot. */
+  dishHint: z.string().max(120).nullable().default(null),
+});
+export type CreateEventRequest = z.infer<typeof CreateEventRequest>;
+
+/** POST /api/plan/exemptions */
+export const ExemptDaysRequest = z.object({
+  days: z.array(z.number().int().min(0).max(6)),
+});
+export type ExemptDaysRequest = z.infer<typeof ExemptDaysRequest>;
+
+/** Vorschlag für ein Event-Gericht — mit Portionspreis und kcal (Checkpoint-Wunsch). */
+export const EventSuggestion = z.object({
+  recipeId: z.string(),
+  title: z.string(),
+  kcalPerPortion: z.number().int(),
+  /** „etwa"-Preis: anteilige Packungskosten je Portion (spec.md > aggregation). */
+  portionPriceCents: z.number().int(),
+  /** Treffer im aktuellen Angebot — Grund, warum dieser Vorschlag kommt. */
+  offerProducts: z.array(z.string()),
+});
+export type EventSuggestion = z.infer<typeof EventSuggestion>;
+
+/** GET /api/plan/event-suggestions?day=N */
+export const EventSuggestionsResponse = z.object({
+  suggestions: z.array(EventSuggestion),
+});
+export type EventSuggestionsResponse = z.infer<typeof EventSuggestionsResponse>;
 
 /** Fehlertexte der API für den typisierten Client. */
 export const ApiError = z.object({
@@ -327,6 +375,9 @@ export const RecipeSummary = z.object({
   tags: z.array(RecipeTag),
   /** Kurz-Anleitung für die Tagesansicht (Checkpoint: „Zubereitung nirgends sichtbar"). */
   steps: z.array(z.string()),
+  /** „Etwa"-Preis je Portion: anteilige Packungskosten (Checkpoint-Wunsch). */
+  portionPriceCents: z.number().int(),
+  kcalPerPortion: z.number().int(),
 });
 export type RecipeSummary = z.infer<typeof RecipeSummary>;
 
@@ -356,5 +407,7 @@ export const AppState = z.object({
   shoppingList: z.array(z.lazy(() => ListItem)).default([]),
   /** kcal-Wochenbilanz je Person (Planbeteiligung) — Anzeige dezent (Slice 8). */
   personCalories: z.array(z.lazy(() => PersonCalories)).default([]),
+  /** Events der Woche (Marker im Streifen, Skalierung in Plan und Liste). */
+  events: z.array(z.lazy(() => Event)).default([]),
 });
 export type AppState = z.infer<typeof AppState>;

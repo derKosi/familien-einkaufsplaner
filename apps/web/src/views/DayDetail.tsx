@@ -1,10 +1,14 @@
-import type { AppState } from "@fep/shared";
+import { useEffect, useState } from "react";
+import type { AppState, EventSuggestion } from "@fep/shared";
+import { fetchEventSuggestions } from "../lib/api.js";
 
 interface Props {
   state: AppState;
   day: number;
   onBack: () => void;
   onTogglePrepared: (day: number, slot: string, prepared: boolean) => void;
+  onAddEvent: (day: number, personCount: number, dishHint: string | null) => void;
+  onSetExempt: (days: number[]) => void;
 }
 
 const DAYS = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"];
@@ -18,21 +22,17 @@ function timePassed(day: number, slot: string): boolean {
   return day * 24 + SLOT_HOUR[slot] < today * 24 + new Date().getHours();
 }
 
-const TAG_LABEL: Record<string, string> = {
-  vegetarisch: "vegetarisch",
-  milchfrei: "milchfrei",
-  vegan: "vegan",
-  glutenfrei: "glutenfrei",
-  schnell: "schnell kochbar",
-};
+const cents = (c: number) => `${(c / 100).toFixed(2).replace(".", ",")} €`;
 
 /**
- * Tagesdetail (prd.md > Screens and Layout 2): Gerichte des Tages, wer mitisst,
- * Anpassungen, Zubereitung — und der Abhak beim Kochen (Checkpoint).
- * Events/Aussetzen kommen mit Slice 6 — hier liegt der Lese-Grundstock.
+ * Tagesdetail (prd.md > Screens and Layout 2): Gerichte, Mitesser, Anpassungen,
+ * Zubereitung, Abhak — und der Einstieg für Event hinzufügen / Tag aussetzen.
  */
-export function DayDetail({ state, day, onBack, onTogglePrepared }: Props) {
-  const dayPlan = state.weekPlan?.days.find((d) => d.day === day);
+export function DayDetail({ state, day, onBack, onTogglePrepared, onAddEvent, onSetExempt }: Props) {
+  const plan = state.weekPlan;
+  const dayPlan = plan?.days.find((d) => d.day === day);
+  const exempt = plan?.exemptDays.includes(day) ?? false;
+  const dayEvents = state.events.filter((e) => e.day === day);
   const personName = (id: string) => state.household?.persons.find((p) => p.id === id)?.name ?? "?";
   const recipe = (id: string) => state.recipes.find((r) => r.id === id);
   const meals = [...(dayPlan?.meals ?? [])].sort(
@@ -41,14 +41,106 @@ export function DayDetail({ state, day, onBack, onTogglePrepared }: Props) {
       SLOT_ORDER.indexOf(b.slot as (typeof SLOT_ORDER)[number]),
   );
 
+  // Event-Formular
+  const [eventOpen, setEventOpen] = useState(false);
+  const [personCount, setPersonCount] = useState(5);
+  const [hint, setHint] = useState("");
+  const [suggestions, setSuggestions] = useState<EventSuggestion[]>([]);
+  useEffect(() => {
+    if (eventOpen && suggestions.length === 0) {
+      fetchEventSuggestions().then((r) => setSuggestions(r.suggestions)).catch(() => {});
+    }
+  }, [eventOpen, suggestions.length]);
+
+  function toggleExempt() {
+    if (!plan) return;
+    const next = exempt
+      ? plan.exemptDays.filter((d) => d !== day)
+      : [...plan.exemptDays, day];
+    onSetExempt(next);
+  }
+
   return (
     <section className="day-detail" aria-label={`Tagesdetail ${DAYS[day]}`}>
       <button className="link-btn" onClick={onBack}>← Zurück zur Woche</button>
-      <h2>{DAYS[day]}</h2>
+      <h2>{DAYS[day]}{exempt && <span className="exempt-label"> · ausgesetzt</span>}</h2>
 
-      {meals.length === 0 && (
-        <p className="lead">Keine Mahlzeiten an diesem Tag (ausgesetzt oder nicht geplant).</p>
+      <div className="day-tools">
+        <button className="small-btn" onClick={toggleExempt}>
+          {exempt ? "Tag wieder aufnehmen" : "Tag aussetzen"}
+        </button>
+        <button className="small-btn" onClick={() => setEventOpen((v) => !v)}>
+          {eventOpen ? "Event-Formular schließen" : "Event hinzufügen"}
+        </button>
+      </div>
+
+      {eventOpen && (
+        <div className="event-form">
+          <label>
+            Personen:
+            <input
+              type="number"
+              min={1}
+              max={30}
+              value={personCount}
+              onChange={(e) => setPersonCount(Number.parseInt(e.target.value) || 1)}
+            />
+          </label>
+          <div className="event-suggestions">
+            <div className="event-suggestions-title">Vorschläge aus dem aktuellen Angebot:</div>
+            {suggestions.map((s) => (
+              <button
+                key={s.recipeId}
+                className="suggestion-row"
+                onClick={() => {
+                  onAddEvent(day, personCount, s.title);
+                  setEventOpen(false);
+                }}
+              >
+                <b>{s.title}</b>
+                <span>
+                  ~{cents(s.portionPriceCents)}/Portion · {s.kcalPerPortion} kcal
+                  {s.offerProducts.length > 0 && (
+                    <em className="offer-hint"> · im Angebot: {s.offerProducts.slice(0, 2).join(", ")}</em>
+                  )}
+                </span>
+              </button>
+            ))}
+          </div>
+          <div className="event-free">
+            <input
+              type="text"
+              placeholder="oder freie Eingabe (z. B. „Pizzabrocken“)"
+              value={hint}
+              onChange={(e) => setHint(e.target.value)}
+            />
+            <button
+              className="small-btn primary"
+              onClick={() => {
+                onAddEvent(day, personCount, hint.trim() || null);
+                setEventOpen(false);
+              }}
+            >
+              Hinzufügen
+            </button>
+          </div>
+        </div>
       )}
+
+      {exempt && (
+        <p className="lead">Dieser Tag ist ausgesetzt — Mahlzeiten und Listenpositionen ruhen.</p>
+      )}
+
+      {dayEvents.map((e) => (
+        <div key={e.id} className="event-marker">
+          🎯 Event: {e.title} · +{e.personCount} Personen
+          {e.recipeId && state.recipes.find((r) => r.id === e.recipeId) && (
+            <span className="event-cost">
+              {" "}· ~{cents(recipe(e.recipeId)!.portionPriceCents)}/Portion, {recipe(e.recipeId)!.kcalPerPortion} kcal
+            </span>
+          )}
+        </div>
+      ))}
 
       <div className="day-detail-meals">
         {meals.map((meal, i) => {
@@ -75,6 +167,9 @@ export function DayDetail({ state, day, onBack, onTogglePrepared }: Props) {
               </div>
               <div className="meal-card-persons">
                 {meal.persons.map(personName).join(", ")} · {meal.servings} Portionen
+                {r && (
+                  <span className="portion-meta"> · ~{cents(r.portionPriceCents)}/Portion · {r.kcalPerPortion} kcal</span>
+                )}
               </div>
               {meal.adaptations.length > 0 && (
                 <ul className="meal-card-adaptations">
@@ -87,7 +182,7 @@ export function DayDetail({ state, day, onBack, onTogglePrepared }: Props) {
               )}
               <div className="meal-card-tags">
                 {(r?.tags ?? []).map((t) => (
-                  <span key={t} className={`tag tag-${t}`}>{TAG_LABEL[t] ?? t}</span>
+                  <span key={t} className={`tag tag-${t}`}>{t}</span>
                 ))}
               </div>
               {r && r.steps.length > 0 && (

@@ -1,4 +1,4 @@
-import { ApiError, type AppState, type Store } from "@fep/shared";
+import { ApiError, type AppState, type EventSuggestionsResponse, type Store } from "@fep/shared";
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(path, {
@@ -43,4 +43,25 @@ export function setListItemChecked(itemId: string, checked: boolean): Promise<Ap
     method: "PATCH",
     body: JSON.stringify({ checked }),
   });
+}
+
+/** POST /api/plan/events — Grillabend & Co., skaliert Plan und Liste sofort. */
+export function createEvent(day: number, personCount: number, dishHint: string | null): Promise<AppState> {
+  return request<AppState>("/api/plan/events", {
+    method: "POST",
+    body: JSON.stringify({ day, personCount, dishHint }),
+  });
+}
+
+/** POST /api/plan/exemptions — Tage aussetzen / wieder aufnehmen (setzt die Liste neu). */
+export function setExemptDays(days: number[]): Promise<AppState> {
+  return request<AppState>("/api/plan/exemptions", {
+    method: "POST",
+    body: JSON.stringify({ days }),
+  });
+}
+
+/** GET /api/plan/event-suggestions — Angebote × Rezepte, mit Preis/kcal. */
+export function fetchEventSuggestions(): Promise<EventSuggestionsResponse> {
+  return request<EventSuggestionsResponse>("/api/plan/event-suggestions");
 }

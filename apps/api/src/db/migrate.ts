@@ -33,6 +33,12 @@ export function migrate(): void {
       item TEXT PRIMARY KEY,
       checked INTEGER NOT NULL DEFAULT 0
     );
+
+    -- Events (Grillabend & Co.) — skaliert die Hauptmahlzeit ihres Tages.
+    CREATE TABLE IF NOT EXISTS event (
+      id TEXT PRIMARY KEY,
+      payload TEXT NOT NULL
+    );
   `);
 
   // Bestehende Datenbanken auf neue Spalten heben (CREATE IF NOT EXISTS reicht dafür nicht).

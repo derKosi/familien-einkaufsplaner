@@ -13,6 +13,8 @@ interface Props {
   onSelectDay: (day: number | null) => void;
   onTogglePrepared: (day: number, slot: string, prepared: boolean) => void;
   onShowList: () => void;
+  onAddEvent: (day: number, personCount: number, dishHint: string | null) => void;
+  onSetExempt: (days: number[]) => void;
 }
 
 const DAYS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
@@ -68,7 +70,7 @@ function OffersNote({ state }: { state: AppState }) {
  * Hauptbildschirm (prd.md > Screens and Layout): Kopfzeile mit Ladenwahl und
  * Angebots-Indikator, Next-Meal-Hero, Wochenstreifen mit Mahlzeiten-Chips.
  */
-export function Main({ state, current, onSelectPerson, generating, generateError, onGenerate, selectedDay, onSelectDay, onTogglePrepared, onShowList }: Props) {
+export function Main({ state, current, onSelectPerson, generating, generateError, onGenerate, selectedDay, onSelectDay, onTogglePrepared, onShowList, onAddEvent, onSetExempt }: Props) {
   const today = todayIndex();
   const title = (id: string) => state.recipes.find((r) => r.id === id)?.title ?? id;
   const plan = state.weekPlan;
@@ -145,7 +147,14 @@ export function Main({ state, current, onSelectPerson, generating, generateError
       />
 
       {selectedDay !== null ? (
-        <DayDetail state={state} day={selectedDay} onBack={() => onSelectDay(null)} onTogglePrepared={onTogglePrepared} />
+        <DayDetail
+          state={state}
+          day={selectedDay}
+          onBack={() => onSelectDay(null)}
+          onTogglePrepared={onTogglePrepared}
+          onAddEvent={onAddEvent}
+          onSetExempt={onSetExempt}
+        />
       ) : (
         <>
           {state.nextMeal ? (
@@ -173,14 +182,20 @@ export function Main({ state, current, onSelectPerson, generating, generateError
           <section className="week-strip" aria-label="Wochenplan">
             {DAYS.map((day, i) => {
               const dayPlan = plan?.days.find((d) => d.day === i);
+              const dayEvents = state.events.filter((e) => e.day === i);
+              const exempt = plan?.exemptDays.includes(i) ?? false;
               return (
                 <button
                   key={day}
-                  className={`day-card ${i === today ? "today" : ""}`}
+                  className={`day-card ${i === today ? "today" : ""} ${exempt ? "exempt" : ""}`}
                   onClick={() => onSelectDay(i)}
                   title={`${day} im Detail ansehen`}
                 >
-                  <div className="day-name">{day}</div>
+                  <div className="day-name">
+                    {day}
+                    {exempt && <span className="exempt-label"> · ausgesetzt</span>}
+                    {dayEvents.length > 0 && <span className="event-dot">🎯{dayEvents.length}</span>}
+                  </div>
                   <div className="day-meals">
                     {dayPlan?.meals.map((meal, j) => (
                       <span
