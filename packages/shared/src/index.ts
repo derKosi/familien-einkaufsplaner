@@ -32,15 +32,40 @@ export const HouseholdSettings = z.object({
   /** 1 = knapp, 2 = normal, 3 = großzügig — gewichtet Vorschlags-Sortierung. */
   budget: z.number().int().min(1).max(3).default(2),
   freezer: z.boolean().default(true),
-  /** 1 = Student-küche-tauglich, 3 = souverän (ganze Hühner). */
+  /** 1 = Student-küche-tauglich, 3 = souverän. */
   skillLevel: z.number().int().min(1).max(3).default(2),
-  /** 0 = Montag … 6 = Sonntag; null = Wochenstart bleibt Montag. */
-  shoppingDay: z.number().int().min(0).max(6).nullable().default(null),
-  /** Tage, an denen (frisch) gekocht wird — Kontext für den Planner. */
+  /** Einkaufstage (0 = Montag … 6 = Sonntag) — der Plan läuft von Einkauf zu
+   *  Einkauf; leer = egal (Montag). Mehrere Tage erlaubt (z. B. Mi + Sa). */
+  shoppingDays: z.array(z.number().int().min(0).max(6)).default([]),
+  /** Tage, an denen gekocht UND vorgekocht wird — Komponenten für Folgetage. */
   cookDays: z.array(z.number().int().min(0).max(6)).default([]),
+  /** Wie streng sind Wiederholungen geregelt: „normal" erlaubt Meal-Prep-Warm-ups,
+   *  „streng" verbietet jedes Gericht doppelt in der Woche. */
+  repeatPolicy: z.enum(["normal", "streng"]).default("normal"),
+  /** Vorkochen & Einfrieren ausdrücklich gewünscht — der Planner plant
+   *  Doppelt-Ansätze und einfrierbare Portionen, mit prepNote je Mahlzeit. */
+  mealPrep: z.boolean().default(false),
   pattern: z.array(PatternEntry).nullable().default(null),
 });
 export type HouseholdSettings = z.infer<typeof HouseholdSettings>;
+
+/**
+ * PATCH-Form von HouseholdSettings — bewusst ein eigenes Schema OHNE `.default()`:
+ * `HouseholdSettings.partial()` injiziert beim Parsen die Defaults der fehlenden
+ * Felder, d. h. jeder Teil-Patch hätte alle übrigen Felder auf Defaults
+ * zurückgeschrieben. Hier gelten nur die mitgeschickten Felder.
+ */
+export const HouseholdSettingsPatch = z.object({
+  budget: z.number().int().min(1).max(3).optional(),
+  freezer: z.boolean().optional(),
+  skillLevel: z.number().int().min(1).max(3).optional(),
+  shoppingDays: z.array(z.number().int().min(0).max(6)).optional(),
+  cookDays: z.array(z.number().int().min(0).max(6)).optional(),
+  repeatPolicy: z.enum(["normal", "streng"]).optional(),
+  mealPrep: z.boolean().optional(),
+  pattern: z.array(PatternEntry).nullable().optional(),
+});
+export type HouseholdSettingsPatch = z.infer<typeof HouseholdSettingsPatch>;
 
 /** Pastell-Paar (Main + Akzent) — identifiziert die Person in der Ansicht. */
 export const ColorPair = z.enum(["salbei", "aprikot", "lavendel", "himmel"]);
@@ -166,6 +191,8 @@ export const PlannerMeal = z.object({
   quick: z.boolean(),
   /** Nur wenn das Basisgericht eine weiche Einschränkung verletzt — sonst leer. */
   adaptations: z.array(MealAdaptation).default([]),
+  /** Vorbereitungs-Hinweis (Meal-Prep): was wann vorgekocht/eingefroren wird. */
+  prepNote: z.string().max(200).optional(),
 });
 export type PlannerMeal = z.infer<typeof PlannerMeal>;
 
@@ -207,6 +234,8 @@ export const StoredMeal = z.object({
   persons: z.array(z.string().uuid()).min(1),
   quick: z.boolean(),
   adaptations: z.array(MealAdaptation).default([]),
+  /** Vorbereitungs-Hinweis aus dem Plan (Meal-Prep), optional. */
+  prepNote: z.string().max(200).optional(),
   prepared: PreparedState.default("auto"),
 });
 export type StoredMeal = z.infer<typeof StoredMeal>;
@@ -296,6 +325,8 @@ export type EventSuggestionsResponse = z.infer<typeof EventSuggestionsResponse>;
 export const RecipePriceRow = z.object({
   item: z.string(),
   amount: z.string(),
+  /** Kochmenge für die geplanten Portionen (amount × servings, formatiert). */
+  totalAmount: z.string(),
   portionPriceCents: z.number().int().nonnegative(),
   totalPriceCents: z.number().int().nonnegative(),
   /** Angebots-Treffer auf dieser Zutat, falls vorhanden. */
@@ -347,7 +378,9 @@ export const Recipe = z.object({
   ingredients: z.array(RecipeIngredient).min(1),
   /** Kurz-Anleitung, 2–4 Schritte (PoC-Tiefe). */
   steps: z.array(z.string()).min(1),
-  /** Koch-Aufwand 1 (Student-tauglich) bis 3 (souverän) — Checkpoint „ganze Hühner". */
+  /** Gesamtzeit in Minuten (Content-Pass, Lerner-Wunsch „Zeiten sehen"). */
+  minutes: z.number().int().min(1).max(300).optional(),
+  /** Koch-Aufwand 1 (Student-tauglich) bis 3 (souverän). */
   skill: z.number().int().min(1).max(3).default(2),
   /** Nötige Ausstattung — ohne Tiefkühlfach keine TK-Rezepte (Einstellungen). */
   equipment: z.array(z.enum(["Ofen", "Tiefkühl"])).default([]),
@@ -438,6 +471,8 @@ export const RecipeSummary = z.object({
   tags: z.array(RecipeTag),
   /** Kurz-Anleitung für die Tagesansicht (Checkpoint: „Zubereitung nirgends sichtbar"). */
   steps: z.array(z.string()),
+  /** Gesamtzeit in Minuten — sichtbar am Gericht (Lerner-Wunsch „Zeiten sehen"). */
+  minutes: z.number().int().min(1).max(300).optional(),
   /** Koch-Aufwand 1–3 und nötige Ausstattung (Slice 7, Einstellungen). */
   skill: z.number().int().min(1).max(3),
   equipment: z.array(z.enum(["Ofen", "Tiefkühl"])),

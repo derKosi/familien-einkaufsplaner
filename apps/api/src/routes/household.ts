@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import { ConstraintTag, HouseholdSettings, Person } from "@fep/shared";
+import { ConstraintTag, HouseholdSettingsPatch, Person } from "@fep/shared";
 import {
   addPerson,
   createHousehold,
@@ -26,6 +26,18 @@ const PersonBody = z.object({
   activityProfile: z.string().max(300).nullable().default(null),
   /** Skip/Later: false = bewusst mit Lücken angelegt. */
   complete: z.boolean().default(true),
+});
+
+/** PATCH-Form — OHNE Defaults (sonst wischt jeder Teil-Patch Constraints weg, vgl. SettingsPatch). */
+const PersonPatch = z.object({
+  name: z.string().min(1).max(60).optional(),
+  roleClass: Person.shape.roleClass.optional(),
+  colorPair: Person.shape.colorPair.optional(),
+  constraints: z.array(ConstraintTag).optional(),
+  allergies: z.array(ConstraintTag).optional(),
+  calorieGoal: z.number().int().positive().nullable().optional(),
+  activityProfile: z.string().max(300).nullable().optional(),
+  complete: z.boolean().optional(),
 });
 
 /** Skalierungsherz: wer ohne Farbe ankommt, bekommt den nächsten Pastell-Ton. */
@@ -57,7 +69,7 @@ export async function registerHouseholdRoutes(app: FastifyInstance): Promise<voi
 
   app.patch("/api/persons/:id", async (request, reply) => {
     const { id } = request.params as { id: string };
-    const body = PersonBody.partial().safeParse(request.body);
+    const body = PersonPatch.safeParse(request.body);
     if (!body.success) {
       return reply.code(400).send({ error: "Ungültige Personenangaben.", code: "bad_request" });
     }
@@ -69,9 +81,11 @@ export async function registerHouseholdRoutes(app: FastifyInstance): Promise<voi
     return updatePerson(id, merged);
   });
 
-  /** Einstellungen: Budget-Münzen, Geräte, Koch-Level, Einkaufs-/Kochtage, Wochenmuster. */
+  /** Einstellungen: Budget-Münzen, Geräte, Koch-Level, Einkaufs-/Kochtage, Wochenmuster.
+   * HouseholdSettingsPatch statt HouseholdSettings.partial() — partial() injiziert
+   * die Defaults der fehlenden Felder und hätte jeden Teil-Patch zum Reset gemacht. */
   app.patch("/api/settings", async (request, reply) => {
-    const body = HouseholdSettings.partial().safeParse(request.body);
+    const body = HouseholdSettingsPatch.safeParse(request.body);
     if (!body.success) {
       return reply.code(400).send({ error: "Ungültige Einstellungen.", code: "bad_request" });
     }

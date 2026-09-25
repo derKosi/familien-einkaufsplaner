@@ -103,7 +103,9 @@ function kcalOf(entry: { kcal: number; basis: "100g" | "100ml" | "Stück"; grams
 
 function formatAmount(amount: number, unit: string): string {
   const rounded = Math.round(amount * 10) / 10;
-  return `${Number.isInteger(rounded) ? rounded : rounded.toFixed(1)} ${unit}`;
+  // de-DE: Komma statt Punkt („0,6 übrig", nicht „0.6")
+  const text = Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1).replace(".", ",");
+  return `${text} ${unit}`;
 }
 
 /** Angebots-Treffer: konservatives Token-Matching (mindestens ein Token ≥ 4 Zeichen). */
@@ -309,6 +311,17 @@ function eventBonusFor(day: number, meals: Array<{ slot: string }>, events: Even
   };
 }
 
+/** Einheitenbrücke Rezeptportion → Kaufgebinde, in BEIDE Richtungen
+ *  (Bug-Note Checkpoint 6 — jetzt auch in den Rezeptkosten, nicht nur in der
+ *  Aggregation): Rezept in Stück + Gewichtsgebinde rechnet in Gramm; Rezept in
+ *  Gramm + Stückgebinde rechnet in Stück. Ohne gramsPerUnit: unverändert. */
+function portionInPackUnits(pack: PurchaseTableT[string], item: { amount: number; unit: string }): number {
+  if (pack.gramsPerUnit === undefined) return item.amount;
+  if (item.unit === "Stück") return item.amount * pack.gramsPerUnit;
+  if (pack.packUnit === "Stück") return item.amount / pack.gramsPerUnit;
+  return item.amount;
+}
+
 /** „Etwa“-Preis je Portion: anteilige Packungskosten über die Zutaten. */
 export function recipeCostPerPortion(recipeId: string): number {
   const recipe = recipeById(recipeId);
@@ -318,9 +331,7 @@ export function recipeCostPerPortion(recipeId: string): number {
   for (const ing of recipe.ingredients) {
     const pack = purchase[ing.item];
     if (!pack) continue;
-    const portionInPackUnits =
-      pack.gramsPerUnit !== undefined && ing.unit === "Stück" ? ing.amount * pack.gramsPerUnit : ing.amount;
-    cents += (portionInPackUnits / pack.packAmount) * pack.priceCents;
+    cents += (portionInPackUnits(pack, ing) / pack.packAmount) * pack.priceCents;
   }
   return Math.round(cents);
 }
@@ -385,15 +396,15 @@ export function recipePriceRows(recipeId: string, servings: number) {
 
   const rows = recipe.ingredients.map((ing) => {
     const pack = purchase[ing.item];
-    const portionUnits =
-      pack?.gramsPerUnit !== undefined && ing.unit === "Stück" ? ing.amount * pack.gramsPerUnit : ing.amount;
     // Anteilige Packungskosten je Portion („etwa"-Näherung, wie recipeCostPerPortion).
     let portionPriceCents = 0;
-    if (pack) portionPriceCents = Math.round((portionUnits / pack.packAmount) * pack.priceCents);
+    if (pack) portionPriceCents = Math.round((portionInPackUnits(pack, ing) / pack.packAmount) * pack.priceCents);
     const offer = matchOffer(ing.item, offers);
     return {
       item: ing.item,
       amount: formatAmount(ing.amount, ing.unit),
+      // Kochmenge: was tatsächlich für die geplanten Portionen im Topf landet.
+      totalAmount: formatAmount(ing.amount * servings, ing.unit),
       portionPriceCents,
       totalPriceCents: portionPriceCents * servings,
       offerProduct: offer?.product ?? null,

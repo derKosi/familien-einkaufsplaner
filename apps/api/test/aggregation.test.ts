@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { WeekPlan, type Event, type Person, type WeekPlan as WeekPlanT } from "@fep/shared";
-import { buildShoppingList, eventSuggestions } from "../src/domain/aggregation.js";
+import { buildShoppingList, eventSuggestions, recipeCostPerPortion, recipePriceRows } from "../src/domain/aggregation.js";
+import { loadRecipes } from "../src/domain/recipes.js";
 
 /**
  * Nachrechenbar-Beweis (checklist.md Slice 5): Aggregation und kcal —
@@ -159,5 +160,39 @@ describe("Events & Ausnahmen (Slice 6)", () => {
     expect(suggestions[0].offerProducts.length).toBeGreaterThanOrEqual(
       suggestions[suggestions.length - 1].offerProducts.length,
     );
+  });
+});
+
+describe("Rezept-Portionskosten (Preis-Panel, Vorschläge, Rezept-Projektion)", () => {
+  it("Rezept-Gramm auf Stück-Karte: 60 g Salat sind 0,15 Kopf (~18 ct), nicht 60 Köpfe (Regression)", () => {
+    const { rows } = recipePriceRows("bunter-tellersalat-mit-feta", 4);
+    const salat = rows.find((r) => r.item === "Eisbergsalat");
+    expect(salat).toBeDefined();
+    // 60 g / 400 g pro Kopf × 119 ct = 17,85 → 18 ct je Portion
+    expect(salat!.portionPriceCents).toBe(18);
+    expect(salat!.totalPriceCents).toBe(72);
+  });
+
+  it("Kochmenge = Portion × Servings (480 g statt 4× rechnen), Komma de-DE", () => {
+    const { rows } = recipePriceRows("bunter-tellersalat-mit-feta", 4);
+    const salat = rows.find((r) => r.item === "Eisbergsalat");
+    expect(salat!.totalAmount).toBe("240 g"); // 60 g × 4 — die Menge, die tatsächlich im Topf landet
+    const gurke = rows.find((r) => r.item === "Gurke");
+    expect(gurke!.totalAmount).toBe("1 Stück"); // 0,25 × 4 = glatt 1 (Anzeige „0,3" war gerundet)
+  });
+
+  it("Rezept-Stück auf Gewichts-Karte: 1 Tomate (~65 g) kostet ~19 ct aus der 500-g-Karte", () => {
+    const { rows } = recipePriceRows("bunter-tellersalat-mit-feta", 4);
+    const tomate = rows.find((r) => r.item === "Tomaten");
+    expect(tomate).toBeDefined();
+    // 1 × 65 g / 500 g × 149 ct = 19,37 → 19 ct je Portion (Brücke in beide Richtungen)
+    expect(tomate!.portionPriceCents).toBe(19);
+  });
+
+  it("kein Rezept kostet absurd viel je Portion — Einheitenbrücken-Falle komplett", () => {
+    for (const r of loadRecipes()) {
+      const cents = recipeCostPerPortion(r.id);
+      expect(cents, `${r.id}: ${cents} ct/Portion`).toBeLessThan(500);
+    }
   });
 });

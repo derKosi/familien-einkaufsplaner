@@ -29,10 +29,16 @@ export interface ContractHousehold {
   /** 1 = knapp, 2 = normal, 3 = großzügig — gewichtet Gerichte-/Vorschlagswahl. */
   budget: number;
   freezer: boolean;
-  /** Koch-Level 1–3 — Rezepte darüber vermeiden („ganze Hühner"). */
+  /** Koch-Level 1–3 — Rezepte darüber vermeiden. */
   skillLevel: number;
-  /** Tage, an denen frisch gekocht wird — quick-Flags und Frische danach planen. */
+  /** Koch-/Prep-Tage: frisch kochen UND Komponenten für Folgetage vorbereiten. */
   cookDays: number[];
+  /** Einkaufstage — die Woche läuft von Einkauf zu Einkauf. */
+  shoppingDays: number[];
+  /** Wie streng Wiederholungen vermieden werden. */
+  repeatPolicy: "normal" | "streng";
+  /** Vorkochen & Einfrieren ausdrücklich gewünscht → prepNote je Mahlzeit. */
+  mealPrep: boolean;
 }
 
 export interface PlannerContext {

@@ -52,15 +52,16 @@ export function mondayOf(date: Date): string {
 
 /**
  * Wochenstart am Einkaufstag (Slice 7, Lerner-Wunsch „daran orientieren"):
- * Datum des Einkaufstags in der Woche von `date` — oder Montag, wenn kein
- * Einkaufstag gesetzt ist.
+ * der letzte Einkaufstag an oder vor `date` (mehrere möglich, z. B. Mi + Sa) —
+ * oder Montag, wenn kein Einkaufstag gesetzt ist. Läuft nie in die Zukunft
+ * (Bug-Note: „Fr + Einkaufstag Sa" war vorab schon „morgen" gewesen).
  */
-export function shoppingWeekStart(date: Date, shoppingDay: number | null): string {
-  if (shoppingDay === null) return mondayOf(date);
+export function shoppingWeekStart(date: Date, shoppingDays: number[]): string {
+  if (shoppingDays.length === 0) return mondayOf(date);
   const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-  const jsDay = d.getUTCDay() || 7;
-  const current = jsDay - 1; // 0 = Montag … 6 = Sonntag
-  d.setUTCDate(d.getUTCDate() - (current - shoppingDay));
+  const current = (d.getUTCDay() + 6) % 7; // 0 = Montag … 6 = Sonntag
+  const back = Math.min(...shoppingDays.map((sd) => (current - sd + 7) % 7)); // 0–6 Tage zurück
+  d.setUTCDate(d.getUTCDate() - back);
   return d.toISOString().slice(0, 10);
 }
 

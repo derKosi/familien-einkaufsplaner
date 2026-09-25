@@ -62,6 +62,9 @@ export async function registerPlanRoutes(app: FastifyInstance): Promise<void> {
         freezer: settings.freezer,
         skillLevel: settings.skillLevel,
         cookDays: settings.cookDays,
+        shoppingDays: settings.shoppingDays,
+        repeatPolicy: settings.repeatPolicy,
+        mealPrep: settings.mealPrep,
       },
       recipes: plannerRecipes(),
       offers: (snapshot?.offers ?? []).map((o) => ({
@@ -83,7 +86,7 @@ export async function registerPlanRoutes(app: FastifyInstance): Promise<void> {
     }
 
     const weekPlan = WeekPlan.parse({
-      weekOf: shoppingWeekStart(new Date(), settings.shoppingDay),
+      weekOf: shoppingWeekStart(new Date(), settings.shoppingDays),
       store,
       basedOnOffers: snapshot?.offers.length ?? 0,
       offersDated: snapshot?.fetchedAt ?? null,
@@ -96,6 +99,7 @@ export async function registerPlanRoutes(app: FastifyInstance): Promise<void> {
           persons: meal.personRefs,
           quick: meal.quick,
           adaptations: meal.adaptations,
+          prepNote: meal.prepNote,
           prepared: "auto",
         })),
       })),
