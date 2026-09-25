@@ -11,6 +11,13 @@
   --warn: #9a6700;
   --person-main: #e9eef5;
   --person-accent: #43618e;
+  /* Text auf dunklen (Light) bzw. hellen (Dark) Flächen — nie hart #fff mischen. */
+  --on-ink: #faf7f2;
+  --on-accent: #ffffff;
+  /* Funktionsfarben als Paare: Text/Borders brauchen im Dark hellere Werte. */
+  --ok-green: #2e7d32;
+  --tag-blue: #0277bd;
+  --offer-red: #c0272d;
 }
 
 [data-person="salbei"]  { --person-main: #e7f2ea; --person-accent: #5f8158; }
@@ -28,6 +35,11 @@
   --warn: #d9a94a;
   --person-main: #232622;
   --person-accent: #9db8d9;
+  --on-ink: #171614;
+  --on-accent: #14181c;
+  --ok-green: #7cc47f;
+  --tag-blue: #6ec1e8;
+  --offer-red: #e07075;
 }
 [data-theme="dark"][data-person="salbei"]  { --person-main: #232b24; --person-accent: #9cc2a1; }
 [data-theme="dark"][data-person="aprikot"] { --person-main: #302822; --person-accent: #d99a67; }

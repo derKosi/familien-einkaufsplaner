@@ -1,5 +1,6 @@
 import { useState } from "react";
-import type { AppState, HouseholdSettings, MealSlot } from "@fep/shared";
+import type { AppState, HouseholdSettings, MealSlot, Person } from "@fep/shared";
+import { PersonForm } from "../components/PersonForm.js";
 import { applyAppearance, loadAppearance, saveAppearance, type Appearance, type FontSizePref, type MotionPref, type ThemePref } from "../theme/theme.js";
 
 interface Props {
@@ -7,6 +8,7 @@ interface Props {
   onBack: () => void;
   onSaveSettings: (patch: Partial<HouseholdSettings>) => void;
   onToggleComplete: (personId: string, complete: boolean) => void;
+  onEditPerson: (personId: string, patch: Partial<Person>) => void;
 }
 
 const DAYS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
@@ -19,37 +21,34 @@ const coins = (n: number) => "€".repeat(n) + "◦".repeat(3 - n);
  * Wochenmuster ändern — plus die Checkpoint-Wünsche: Budget-Münzen (1–3),
  * Geräte (Tiefkühlfach), Koch-Level und Einkaufs-/Kochtage.
  */
-export function Settings({ state, onBack, onSaveSettings, onToggleComplete }: Props) {
+export function Settings({ state, onBack, onSaveSettings, onToggleComplete, onEditPerson }: Props) {
   const s = state.household?.settings;
   if (!s) return <div className="first-start"><p className="lead">Kein Haushalt.</p></div>;
 
   const persons = state.household?.persons ?? [];
   const incomplete = persons.filter((p) => !p.complete);
+  const adults = persons.filter((p) => p.roleClass === "Erwachsener").map((p) => p.id);
+  /** Anzeige-Fallback: pattern null heißt serverseitig „Standard-Muster“, nicht „nichts geplant“. */
+  const activePattern = s.pattern ?? defaultPatternFor(persons.map((p) => p.id), adults);
   /** Muster-Matrix: entry existiert → Personengruppe „alle“ oder „Erwachsene“. */
   const patternKey = (day: number, slot: MealSlot) =>
-    s.pattern?.find((e) => e.day === day && e.slot === slot);
-  const adults = persons.filter((p) => p.roleClass === "Erwachsener").map((p) => p.id);
+    activePattern.find((e) => e.day === day && e.slot === slot);
 
-  function toggleSlot(day: number, slot: MealSlot) {
-    const pattern = [...(s!.pattern ?? defaultPatternFor(persons.map((p) => p.id), adults))];
+  /** Klick auf eine Muster-Zelle zykliert: leer → Erwachsene → alle → leer.
+   *  (Vorher war „aus" unerreichbar — der Filter-Zweig war toter Code.) */
+  function cycleSlot(day: number, slot: MealSlot) {
+    const pattern = [...activePattern];
     const existing = pattern.find((e) => e.day === day && e.slot === slot);
-    if (existing) {
-      onSaveSettings({ pattern: pattern.filter((e) => e !== existing) });
-    } else {
+    if (!existing) {
       const group = persons.length === adults.length || adults.length === 0 ? persons.map((p) => p.id) : adults;
       onSaveSettings({ pattern: [...pattern, { day, slot, personRefs: group }] });
+    } else if (existing.personRefs.length < persons.length) {
+      onSaveSettings({
+        pattern: pattern.map((e) => (e === existing ? { ...e, personRefs: persons.map((p) => p.id) } : e)),
+      });
+    } else {
+      onSaveSettings({ pattern: pattern.filter((e) => e !== existing) });
     }
-  }
-
-  function cycleGroup(day: number, slot: MealSlot) {
-    const existing = patternKey(day, slot);
-    if (!existing) return;
-    const pattern = (s!.pattern ?? []).map((e) =>
-      e === existing
-        ? { ...e, personRefs: e.personRefs.length === persons.length ? adults : persons.map((p) => p.id) }
-        : e,
-    );
-    onSaveSettings({ pattern });
   }
 
   const dayOptions = DAYS.map((label, i) => ({ label, value: i }));
@@ -115,41 +114,49 @@ export function Settings({ state, onBack, onSaveSettings, onToggleComplete }: Pr
             <input type="checkbox" checked={s.freezer} onChange={(e) => onSaveSettings({ freezer: e.target.checked })} />
             Tiefkühlfach vorhanden
           </label>
+          <label className="radio-chip">
+            <input type="checkbox" checked={s.mealPrep} onChange={(e) => onSaveSettings({ mealPrep: e.target.checked })} />
+            Vorkochen &amp; Einfrieren einplanen
+          </label>
         </div>
         <div className="form-row">
           <span className="form-label">Koch-Level:</span>
           {[1, 2, 3].map((l) => (
             <label key={l} className="radio-chip">
               <input type="radio" name="skill" checked={s.skillLevel === l} onChange={() => onSaveSettings({ skillLevel: l })} />
-              {l} — {l === 1 ? "einfach" : l === 2 ? "sicher" : "souverän (ganze Hühner)"}
+              {l} — {l === 1 ? "einfach" : l === 2 ? "sicher" : "souverän"}
             </label>
           ))}
         </div>
-        <p className="hint">Der Plan wählt überwiegend Rezepte bis zu diesem Level; ohne Tiefkühlfach keine TK-Rezepte.</p>
+        <p className="hint">
+          Der Plan wählt überwiegend Rezepte bis zu diesem Level; ohne Tiefkühlfach keine TK-Rezepte. Mit Vorkochen
+          &amp; Einfrieren plant der Plan große Ansätze und einfrierbare Reste — mit Hinweis je Gericht.
+        </p>
       </section>
 
       <section className="settings-block">
         <h3>Einkaufs- &amp; Kochtage</h3>
         <div className="form-row">
-          <span className="form-label">Einkaufstag:</span>
+          <span className="form-label">Einkaufstage:</span>
           {dayOptions.map((d) => (
             <label key={d.value} className="radio-chip">
               <input
-                type="radio"
-                name="shopping"
-                checked={s.shoppingDay === d.value}
-                onChange={() => onSaveSettings({ shoppingDay: d.value })}
+                type="checkbox"
+                checked={s.shoppingDays.includes(d.value)}
+                onChange={() =>
+                  onSaveSettings({
+                    shoppingDays: s.shoppingDays.includes(d.value)
+                      ? s.shoppingDays.filter((x) => x !== d.value)
+                      : [...s.shoppingDays, d.value],
+                  })
+                }
               />
               {d.label}
             </label>
           ))}
-          <label className="radio-chip">
-            <input type="radio" name="shopping" checked={s.shoppingDay === null} onChange={() => onSaveSettings({ shoppingDay: null })} />
-            egal (Montag)
-          </label>
         </div>
         <div className="form-row">
-          <span className="form-label">Kochtage:</span>
+          <span className="form-label">Koch-/Prep-Tage:</span>
           {dayOptions.map((d) => (
             <label key={d.value} className="radio-chip">
               <input
@@ -167,12 +174,33 @@ export function Settings({ state, onBack, onSaveSettings, onToggleComplete }: Pr
             </label>
           ))}
         </div>
-        <p className="hint">Der Plan läuft von Einkaufstag zu Einkaufstag; an Kochtagen steht Frischkochen im Fokus.</p>
+        <p className="hint">
+          Der Plan läuft von Einkauf zu Einkauf (mehrere Tage erlaubt — nichts angewählt: egal, dann Montag). An
+          Koch-/Prep-Tagen wird frisch gekocht und Komponenten für die Folgetage vorbereitet.
+        </p>
+      </section>
+
+      <section className="settings-block">
+        <h3>Wiederholungen</h3>
+        <div className="form-row">
+          {([["normal", "Meal-Prep erlaubt"], ["streng", "streng vermeiden"]] as Array<["normal" | "streng", string]>).map(
+            ([v, label]) => (
+              <label key={v} className="radio-chip">
+                <input type="radio" name="repeat" checked={s.repeatPolicy === v} onChange={() => onSaveSettings({ repeatPolicy: v })} />
+                {label}
+              </label>
+            ),
+          )}
+        </div>
+        <p className="hint">
+          „Meal-Prep erlaubt“: Reste-Tage und wiederkehrende Komponenten sind ausdrücklich okay. „Streng vermeiden“:
+          kein Gericht doppelt in der Woche.
+        </p>
       </section>
 
       <section className="settings-block">
         <h3>Wochenmuster</h3>
-        <p className="hint">Anklicken = Mahlzeit geplant (für Erwachsene, wenn es welche gibt). Nochmal klicken auf den Tag-Text wechselt alle ↔ Erwachsene.</p>
+        <p className="hint">Klick auf die Zelle zykliert: + geplant (für Erwachsene, wenn es welche gibt) → alle → aus.</p>
         <table className="pattern-table">
           <thead>
             <tr><th></th>{DAYS.map((d) => <th key={d}>{d}</th>)}</tr>
@@ -189,13 +217,13 @@ export function Settings({ state, onBack, onSaveSettings, onToggleComplete }: Pr
                       {entry ? (
                         <button
                           className="pattern-cell on"
-                          title="Klick: Gruppe wechseln · Zeile rechts entfernen"
-                          onClick={() => cycleGroup(i, slot)}
+                          title="Klick: Erwachsene → alle → aus"
+                          onClick={() => cycleSlot(i, slot)}
                         >
                           {all ? "alle" : "Erw."}
                         </button>
                       ) : (
-                        <button className="pattern-cell" onClick={() => toggleSlot(i, slot)}>+</button>
+                        <button className="pattern-cell" onClick={() => cycleSlot(i, slot)}>+</button>
                       )}
                     </td>
                   );
@@ -213,21 +241,39 @@ export function Settings({ state, onBack, onSaveSettings, onToggleComplete }: Pr
         <h3>Personen</h3>
         {persons.map((p) => (
           <div key={p.id} className="settings-person">
-            <b>{p.name}</b>
-            <span className="form-label">
-              {p.roleClass}
-              {p.constraints.length > 0 && ` · isst nicht: ${p.constraints.join(", ")}`}
-              {p.allergies.length > 0 && ` · ALLERGIE: ${p.allergies.join(", ")}`}
-              {p.calorieGoal && ` · ${p.calorieGoal} kcal`}
-            </span>
-            <label className="radio-chip">
-              <input type="checkbox" checked={p.complete} onChange={(e) => onToggleComplete(p.id, e.target.checked)} />
-              vollständig
-            </label>
+            <div className="settings-person-row">
+              <b>{p.name}</b>
+              <span className="form-label">
+                {p.roleClass}
+                {p.calorieGoal && ` · ${p.calorieGoal} kcal`}
+              </span>
+              {p.constraints.length > 0 && (
+                <span className="tag tag-constraint">isst nicht: {p.constraints.join(", ")}</span>
+              )}
+              {p.allergies.length > 0 && (
+                <span className="tag tag-allergy">ALLERGIE: {p.allergies.join(", ")}</span>
+              )}
+              <label className="radio-chip">
+                <input type="checkbox" checked={p.complete} onChange={(e) => onToggleComplete(p.id, e.target.checked)} />
+                vollständig
+              </label>
+            </div>
+            <details className="person-edit">
+              <summary>Bearbeiten</summary>
+              <PersonForm
+                // Remount bei Datenänderung → das Formular zeigt immer den echten Stand.
+                key={`${p.id}:${p.name}:${p.complete}:${p.constraints.join(",")}:${p.allergies.join(",")}:${p.calorieGoal ?? ""}`}
+                initial={p}
+                busy={false}
+                primaryLabel="Speichern"
+                secondaryLabel="Mit Lücken speichern"
+                onSave={(patch) => onEditPerson(p.id, patch)}
+              />
+            </details>
           </div>
         ))}
         {incomplete.length > 0 && (
-          <p className="hint">{incomplete.length} Person(en) unvollständig — hier anhaken, sobald die Angaben nachgetragen sind.</p>
+          <p className="hint">{incomplete.length} Person(en) unvollständig — über „Bearbeiten“ ausfüllen oder anhaken, sobald die Angaben nachgetragen sind.</p>
         )}
       </section>
     </div>

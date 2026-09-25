@@ -24,39 +24,44 @@ function timePassed(day: number, slot: string): boolean {
 
 const cents = (c: number) => `${(c / 100).toFixed(2).replace(".", ",")} €`;
 
-/** Aufklappbare Zutaten-Preisliste (Checkpoint: „pro Portion oder gesamt"). */
-function PricePanel({ recipeId, servings }: { recipeId: string; servings: number }) {
+/** Rezept-Panel (Lerner-Feedback): EIN Aufklapper — Zutaten mit Kochmengen und
+ *  Zubereitung. Keine Preise hier (die leben in der Einkaufsliste). */
+function RecipePanel({ recipeId, servings, steps }: { recipeId: string; servings: number; steps: string[] }) {
   const [prices, setPrices] = useState<RecipePricesResponse | null>(null);
   useEffect(() => {
     fetchRecipePrices(recipeId, servings).then(setPrices).catch(() => {});
   }, [recipeId, servings]);
 
   return (
-    <details className="recipe-steps price-panel">
-      <summary>Zutaten &amp; Preise (für {servings} Portion{servings === 1 ? "" : "en"})</summary>
-      {!prices && <p className="lead">Rechnet …</p>}
-      {prices && (
-        <table className="price-table">
-          <thead>
-            <tr><th>Zutat</th><th>je Portion</th><th>Preis/Portion</th><th>gesamt ({servings})</th></tr>
-          </thead>
-          <tbody>
-            {prices.rows.map((row) => (
-              <tr key={row.item}>
-                <td>{row.item}{row.offerProduct && <em className="offer-hint"> · Angebot</em>}</td>
-                <td>{row.amount}</td>
-                <td>{cents(row.portionPriceCents)}</td>
-                <td>{cents(row.totalPriceCents)}</td>
-              </tr>
-            ))}
-            <tr className="price-total">
-              <td colSpan={2}>Summe</td>
-              <td>{cents(prices.rows.reduce((s, r) => s + r.portionPriceCents, 0))}</td>
-              <td>{cents(prices.rows.reduce((s, r) => s + r.totalPriceCents, 0))}</td>
-            </tr>
-          </tbody>
-        </table>
-      )}
+    <details className="recipe-steps">
+      <summary>Rezept</summary>
+      <div className="recipe-columns">
+        <div>
+          {!prices && <p className="lead">Rechnet …</p>}
+          {prices && (
+            <table className="price-table">
+              <tbody>
+                {prices.rows.map((row) => (
+                  <tr key={row.item}>
+                    <td>{row.item}{row.offerProduct && <em className="offer-hint"> · Angebot</em>}</td>
+                    <td><b>{row.totalAmount}</b></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+        {steps.length > 0 && (
+          <div>
+            <p className="recipe-servings">für {servings} Portion{servings === 1 ? "" : "en"}</p>
+            <ol>
+              {steps.map((s, j) => (
+                <li key={j}>{s}</li>
+              ))}
+            </ol>
+          </div>
+        )}
+      </div>
     </details>
   );
 }
@@ -189,7 +194,10 @@ export function DayDetail({ state, day, onBack, onTogglePrepared, onAddEvent, on
             <article key={i} className={`meal-card ${checked ? "prepared" : ""}`}>
               <div className="meal-card-head">
                 <div>
-                  <div className="meal-card-slot">{meal.slot}</div>
+                  <div className="meal-card-slot">
+                    {meal.slot}
+                    {r?.minutes && <span className="minutes-flag"> · ~{r.minutes} Min</span>}
+                  </div>
                   <h3>
                     {r?.title ?? meal.recipeId}
                     {meal.quick && <span className="quick-flag"> · schnell kochbar</span>}
@@ -210,6 +218,11 @@ export function DayDetail({ state, day, onBack, onTogglePrepared, onAddEvent, on
                   <span className="portion-meta"> · ~{cents(r.portionPriceCents)}/Portion · {r.kcalPerPortion} kcal/Portion</span>
                 )}
               </div>
+              {meal.prepNote && (
+                <p className="meal-prep-note">
+                  <b>Vorbereitung:</b> {meal.prepNote}
+                </p>
+              )}
               {meal.adaptations.length > 0 && (
                 <ul className="meal-card-adaptations">
                   {meal.adaptations.map((a, j) => (
@@ -224,17 +237,7 @@ export function DayDetail({ state, day, onBack, onTogglePrepared, onAddEvent, on
                   <span key={t} className={`tag tag-${t}`}>{t}</span>
                 ))}
               </div>
-              {r && <PricePanel recipeId={r.id} servings={meal.servings} />}
-              {r && r.steps.length > 0 && (
-                <details className="recipe-steps">
-                  <summary>Zubereitung</summary>
-                  <ol>
-                    {r.steps.map((s, j) => (
-                      <li key={j}>{s}</li>
-                    ))}
-                  </ol>
-                </details>
-              )}
+              {r && <RecipePanel recipeId={r.id} servings={meal.servings} steps={r.steps} />}
             </article>
           );
         })}

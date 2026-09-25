@@ -10,7 +10,7 @@ interface Props {
 
 /**
  * Profil-Umschalter: reiner Ansichtswechsel ohne Login (prd.md > Identität).
- * Die gewählte Person färbt die ganze Ansicht (data-person auf <body>).
+ * Die gewählte Person färbt die ganze Ansicht (data-person aufs Wurzel-Element).
  */
 export function PersonSwitcher({ persons, current, onSelect }: Props) {
   return (

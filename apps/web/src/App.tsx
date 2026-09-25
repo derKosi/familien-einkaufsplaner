@@ -59,8 +59,10 @@ export default function App() {
   }, [currentPerson]);
 
   // Die gewählte Person färbt die Ansicht (Pastell-Paar, prd.md > Look and Feel).
+  // Auf die Wurzel, nicht <body>: nur dort matchen die Dark-Paar-Selektoren
+  // [data-theme="dark"][data-person="…"] (sonst bleiben Light-Tints im Dark aktiv).
   useEffect(() => {
-    document.body.dataset.person = currentPerson?.colorPair ?? "";
+    document.documentElement.dataset.person = currentPerson?.colorPair ?? "";
   }, [currentPerson]);
 
   async function startDemo() {
@@ -169,6 +171,9 @@ export default function App() {
         }}
         onToggleComplete={(personId, complete) => {
           updatePerson(personId, { complete }).then(setState).catch((e) => setError(String(e)));
+        }}
+        onEditPerson={(personId, patch) => {
+          updatePerson(personId, patch).then(setState).catch((e) => setError(String(e)));
         }}
       />
     );

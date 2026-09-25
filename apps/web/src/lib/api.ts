@@ -2,7 +2,7 @@ import { ApiError, type AppState, type EventSuggestionsResponse, type HouseholdS
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(path, {
-    headers: { "content-type": "application/json" },
+    headers: init?.body ? { "content-type": "application/json" } : undefined,
     ...init,
   });
   const body = await res.json();
