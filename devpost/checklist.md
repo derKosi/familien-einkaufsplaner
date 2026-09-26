@@ -96,18 +96,19 @@ Build mode: fast
 
 ## Final Review
 
-- [ ] Final review complete — feedback resolved and learner confirms ready to ship
+- [x] Final review complete — feedback resolved and learner confirms ready to ship (26.09.: Fixes bestätigt, „okay, weiter"; Rest bewusst im Backlog)
 
 ## Code Tour and App Map
 
-- [ ] Learning activity complete — guided route, focused alternative, prior practice connected, or brief recap
-- [ ] Optional edit and transfer reflection addressed — offered/declined/already covered/not applicable as appropriate
-- [ ] `devpost/app-map.html` generated from finished code, checked, and shown, including a project-grounded practice to reuse
+- [x] Learning activity complete — guided route, focused alternative, prior practice connected, or brief recap
+- [x] Optional edit and transfer reflection addressed — offered/declined/already covered/not applicable as appropriate
+- [x] `devpost/app-map.html` generated from finished code, checked, and shown, including a project-grounded practice to reuse
 
-Activity and evidence: [offen]
-Route and stops: [offen]
-Edit outcome: [offen]
-Reflection: [offen]
+Activity and evidence: **Focused Alternative, bereits im Build geschehen — zitiert, nicht wiederholt:** der zod-Defaults-Datenverlust (Generalprobe-/Testrunde: „Einkaufstag setzen löschte Kochtage", Personen-Patch löschte Constraints) und sein Fix (eigene Patch-Schemata ohne Defaults: `HouseholdSettingsPatch` in packages/shared, `PersonPatch` in routes/household.ts), aufgedeckt durch das Wegwerf-DB-Verifikationsmuster — exakt die Lerner-Kernfrage „wo zahlt Planung/Methode ein?" (learner-profile > Desired Learning Outcome).
+Route and stops: **Referenz-Route in `devpost/app-map.html`** (3 Stopps: lib/api.ts `generatePlan` → routes/plan.ts Handler + `buildPlannerContext` → llm/planner.ts `generateWeekPlan`/`validateConstraints`); laut als Referenz gekennzeichnet, nicht als interaktive Tour absolviert.
+Edit outcome: **nicht applicable** — Focused Alternative ohne Edit-Übung (Praxis laut code-tour.md: „cite that moment and move straight to the ending").
+Reflection: **offered** — offene Frage „Was würdest du beim nächsten Agent-Start anders machen?" (Antwort kann im Anschluss folgen; persönliche Antworten gehören nur ins ignorierte learner-profile, nicht in öffentliche Artefakte).
+App map: `devpost/app-map.html` (Snapshot Commit 61aadc0), Pfade/Symbole gegen den Quellcode geprüft (`grep`-Verifikation, u. a. `PersonPatch`-Fundort routes/household.ts:32), im Browser geöffnet; statisch, ohne Netz/JS-Pflicht, keine Profil- oder Demo-Personendaten.
 Activity mode: [offen]
 
 ## Revisions

@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>App-Map — Familien-Einkaufsplaner</title>
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  body {
+    font: 16px/1.55 -apple-system, "Segoe UI", system-ui, sans-serif;
+    max-width: 860px; margin: 0 auto; padding: 24px 20px 64px;
+  }
+  h1 { font-size: 1.5rem; letter-spacing: -0.01em; margin: 0 0 4px; }
+  h2 { font-size: 1.1rem; margin: 36px 0 8px; border-bottom: 1px solid var(--line); padding-bottom: 4px; }
+  :root { --line: #d8d5cf; --muted: #6b6862; --card: #f6f4f0; --accent: #8a2a2e; }
+  @media (prefers-color-scheme: dark) {
+    :root { --line: #3c3a37; --muted: #a8a49d; --card: #232320; --accent: #e07a7e; }
+  }
+  .meta { color: var(--muted); font-size: 0.9rem; }
+  code, .path {
+    font: 0.86em/1.4 ui-monospace, Menlo, Consolas, monospace;
+    background: var(--card); padding: 1px 5px; border-radius: 4px; word-break: break-all;
+  }
+  .path { display: inline-block; }
+  .diagram { margin: 16px 0; }
+  .diagram .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; }
+  .box {
+    flex: 1 1 150px; background: var(--card); border: 1px solid var(--line);
+    border-radius: 8px; padding: 8px 10px; font-size: 0.88rem;
+  }
+  .box b { display: block; }
+  .box .path { font-size: 0.78rem; }
+  .arrow { align-self: center; color: var(--muted); font-size: 1.1rem; flex: 0 0 auto; }
+  .lane { margin-top: 8px; font-size: 0.85rem; color: var(--muted); }
+  .lane code { font-size: 0.8rem; }
+  details { margin: 10px 0; border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; }
+  summary { cursor: pointer; font-weight: 600; }
+  summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  ol.route { padding-left: 20px; }
+  ol.route li { margin: 8px 0; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+  td, th { text-align: left; vertical-align: top; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .note { background: var(--card); border-left: 3px solid var(--accent); padding: 10px 14px; border-radius: 0 8px 8px 0; }
+</style>
+</head>
+<body>
+
+<h1>Familien-Einkaufsplaner — App-Map</h1>
+<p class="meta">Snapshot von Commit <code>61aadc0</code> (26.09.2026). Die Karte kann gegenüber dem Code driften — Pfade und Symbole wurden gegen den Stand geprüft, nicht gegen künftige.</p>
+
+<h2>Worum es geht</h2>
+<p>Aus den echten Wochenangeboten eines Discounters (Penny) baut ein LLM-Planner einen
+Essensplan für einen Haushalt — Einschränkungen pro Person respektiert (Unverträglichkeit
+→ Anpassung am Gericht, Allergie → allergenfreies Basisgericht) — und rechnet daraus eine
+nachrechenbare Einkaufsliste mit Kaufgebinde und Restverwertung. Events (Grillabend) und
+ausgesetzte Tage skalieren Plan und Liste sofort.</p>
+
+<h2>Die Hauptteile</h2>
+<table>
+  <tr><th>Teil</th><th>Wo</th><th>Aufgabe</th></tr>
+  <tr><td>Web-SPA</td><td><span class="path">apps/web</span> (Vite + React)</td><td>Wochenstreifen, Tagesdetail, Einkaufsliste, Onboarding/Einstellungen; Light/Dark/System</td></tr>
+  <tr><td>API</td><td><span class="path">apps/api</span> (Fastify)</td><td>State, Plan-Generierung, Events/Ausnahmen, Liste, Personen</td></tr>
+  <tr><td>Gemeinsame Verträge</td><td><span class="path">packages/shared</span> (zod)</td><td>Ein Schema-Paket für API und Web — auch für Patch-Körper</td></tr>
+  <tr><td>Planner</td><td><span class="path">apps/api/src/llm/planner.ts</span></td><td>LLM-Aufruf, eigene JSON-Extraktion, zod-Zwang, Constraint-Prüfung mit Retry</td></tr>
+  <tr><td>Aggregation</td><td><span class="path">apps/api/src/domain/aggregation.ts</span></td><td>Plan × Rezepte → Listenpositionen (Gebinde, Reste, kcal) — rein deterministisch</td></tr>
+  <tr><td>Datenbasis</td><td><span class="path">data/</span> (JSON + SQLite)</td><td>Angebots-Snapshots, Rezept-Pool, Kaufgebinte; Laufzeit-DB <code>data/app.db</code></td></tr>
+</table>
+
+<h2>Ein Aktion im Ganzem: „Plan erstellen"</h2>
+<div class="diagram">
+  <div class="row">
+    <div class="box"><b>Klick „Plan erstellen“</b><span class="path">apps/web/src/views/Main.tsx</span><br><span class="path">lib/api.ts → generatePlan()</span></div>
+    <div class="arrow">→</div>
+    <div class="box"><b>POST /api/plan/generate</b><span class="path">apps/api/src/routes/plan.ts</span></div>
+    <div class="arrow">→</div>
+    <div class="box"><b>Kontext pseudonymisieren</b><span class="path">llm/context-contract.ts → buildPlannerContext()</span></div>
+    <div class="arrow">→</div>
+    <div class="box"><b>Planen + prüfen</b><span class="path">llm/planner.ts → generateWeekPlan(), validateConstraints()</span></div>
+    <div class="arrow">→</div>
+    <div class="box"><b>Persistieren + Antwort</b><span class="path">SQLite week_plan → AppState</span><br>Wochenstreifen zeichnet neu</div>
+  </div>
+  <div class="lane">Externe Dienste: LLM-API (zur Laufzeit, im Planner) · Penny-Angebots-API (nur zur Build-/Abrufzeit über <span class="path">apps/api/scripts/fetch-offers.ts</span>, nie zur App-Laufzeit) · Speicher: <code>data/app.db</code> (SQLite).</div>
+</div>
+
+<h2>Referenz-Route: einer Aktion durch den Code folgen</h2>
+<p class="meta">Als Nachschlage-Route dokumentiert (nicht als geführte Tour absolviert).</p>
+<ol class="route">
+  <li><b>Einstieg im Web:</b> <span class="path">apps/web/src/lib/api.ts</span> — <code>generatePlan(store)</code> schickt <code>POST /api/plan/generate</code> und erhält den neuen <code>AppState</code>; die Oberfläche rendert daraus Wochenstreifen und Next-Meal-Karte.</li>
+  <li><b>Nahtstelle API:</b> <span class="path">apps/api/src/routes/plan.ts</span> — der <code>/api/plan/generate</code>-Handler baut über <code>buildPlannerContext()</code> (<span class="path">llm/context-contract.ts</span>) den pseudonymisierten Kontext: nur GUIDs, Rollenklassen und Tags — keine Namen.</li>
+  <li><b>Der Planner:</b> <span class="path">apps/api/src/llm/planner.ts</span> — <code>generateWeekPlan()</code> ruft das Modell, extrahiert JSON selbst, erzwingt das zod-Schema und prüft mit <code>validateConstraints()</code> jede Mahlzeit gegen alle Mitesser; ein Verstoßtext (nur GUIDs) geht in den Retry. Danach persistiert die Route den Plan als Einzelzeile — „Regenerieren ersetzt sichtbar“.</li>
+</ol>
+
+<h2>Um X zu ändern, hier anfangen</h2>
+<table>
+  <tr><th>Will ich ändern …</th><th>Starte in …</th></tr>
+  <tr><td>Reihenfolge/Gruppierung der Einkaufsabteilungen</td><td><span class="path">apps/web/src/views/ShoppingList.tsx</span> — <code>DEPARTMENT_ORDER</code></td></tr>
+  <tr><td>Welche Penny-Kategorien/Angebote gezogen werden</td><td><span class="path">apps/api/scripts/fetch-offers.ts</span> — <code>DEFAULT_CATEGORIES</code>, <code>CATEGORY_DEPARTMENT</code>; dann <code>pnpm offers:fetch</code></td></tr>
+  <tr><td>Plan-Regeln (Wiederholungen, Anpassungen, Muster)</td><td><span class="path">apps/api/src/llm/planner.ts</span> (Prompt + <code>validateConstraints</code>) und <span class="path">apps/api/src/domain/weeklogic.ts</span>/<code>planrules.ts</code></td></tr>
+  <tr><td>Rezepte, Nährwerte, Kaufgebinte</td><td><span class="path">data/recipes.json</span>, <span class="path">data/nutrition.json</span>, <span class="path">data/purchase.json</span> (zod-validiert beim Laden)</td></tr>
+  <tr><td>Personen-Patch-Felder (Onboarding/Einstellungen)</td><td><span class="path">apps/api/src/routes/household.ts</span> — <code>PersonPatch</code>; Haushalts-Einstellungen: <span class="path">packages/shared/src/index.ts</span> — <code>HouseholdSettingsPatch</code></td></tr>
+</table>
+
+<h2>Eine Praxis zum Wiederverwenden</h2>
+<div class="note">
+  <b>Teil-Updates niemals dieselben Schemata mit Defaults nutzen lassen.</b> Im Build überschrieb
+  ein <code>Schema.partial()</code>-Patch fehlende Felder still mit <code>.default()</code>-Werten —
+  „Einkaufstag setzen“ löschte die Kochtage, ein Personen-Patch löschte Constraints (aufgedeckt
+  beim Testen gegen eine Wegwerf-DB, dokumentiert in <span class="path">devpost/checklist.md</span> →
+  Revisions). Fix waren eigene Patch-Schemata ohne Defaults
+  (<code>HouseholdSettingsPatch</code>, <code>PersonPatch</code>).
+  Auf jedem Projekt übertragbar: für jedes PATCH-Endpunkt ein explizites Schema ohne
+  <code>.default()</code> — und neue Flows einmal gegen eine frische Datenkopie fahren, nicht nur
+  gegen die ohnehin volle Entwicklungs-DB.
+</div>
+
+<h2>App wieder starten</h2>
+<p><span class="path">docker compose up</span> → <code>http://localhost:8080</code> (Host-Port
+überschreibbar: <code>FEP_PORT=8085 docker compose up</code>). Entwicklung:
+<code>pnpm install</code>, <code>cp .env.example .env</code> (API-Key eintragen),
+<code>pnpm dev</code>. Erster Start: „Mit Demo-Familie testen“ oder eigener Haushalt.</p>
+
+</body>
+</html>
