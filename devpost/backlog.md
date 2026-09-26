@@ -37,6 +37,9 @@ kcal-Basis (pro Person aus Planbeteiligung) bewiesen hat.
 ## 5. Mobile-Feinschliff & Modernität
 Über die Slice-8-Erste-Hilfe hinaus: Touch-Ziele, responsive Wochenstreifen-Details,
 visuelle Befeuchtung ohne den „Prospekt-Nüchtern"-Vertrag zu brechen.
+Generalprobe (26.09.): generelle Unsicherheit, wie das Design auf dem Handy ankommt —
+konkreter Fund war die Packungsmenge im Kleintext (geffixt, siehe checklist.md >
+Revisions); Rest am Gerät auf dem Zweitrechner/praktisch prüfen.
 
 ## 6. Zweiwochen-Planung mit Übertrag (Checkpoint-Runde 4)
 „Man plant zuerst die Gerichte für die nächsten 2 Wochen (zusammen mit dem
@@ -49,6 +52,23 @@ weil die Vorschläge dann schon preissensitiv sortieren.
 ## 7. Budget-Rahmen über die Einstellungen hinaus
 Slice 7 liefert die Münzen (1–3) als Gewichtung der Vorschlags-Sortierung. Später
 denkbar: Wochenbudget-Wächter mit Summenwarnung auf der Liste.
+
+## 8. Gericht entfernen/tauschen je Mahlzeit (Generalprobe 26.09.)
+Bisher: Events ergänzen, Tage aussetzen. Fehlt: eine einzelne Mahlzeit am Tag durch
+ein anderes Rezept ersetzen oder streichen — mit Listen-Neuberechnung (Gebinde-Effekte!
+„Haferflocken raus → Packung weg?"). Kosten: PATCH /api/plan/meal (recipeId/null) +
+Rezeptwahl-UI (Pool-Filter nach Tags/Quick) + Listen-Rescale ≈ 1 Slice. Verwandt mit
+Item 1 (Planungswerkbank) — das hier ist die Kleinform davon.
+
+## 9. Rezept-Vorlesen + Koch-Timer (Generalprobe 26.09.)
+Vorlesefunktion (SpeechSynthesis, nur die Rezept-Schritte) und Timer/Zähler je
+Zubereitungsschritt. Barrierefreiheit + Koch-Alltag; Nutzer: „muss nur das Rezept
+vorlesen". Kosten: ½ Slice, kein Datenmodell-Bedarf, rein client-seitig.
+
+## 10. Playwright-E2E auf dem Zweitrechner (26.09.)
+Dieser Mac blockiert Chromium (Safari+AppleScript-Fall, siehe AGENTS.md); der
+Zweitrechner hat Playwright. Kern-Journey als E2E gegen den Docker-Build
+(seed → plan → Liste → Event). Kein Shipment-Blocker — schönes Post-PoC-Projekt.
 
 ## Entscheidungsregel
 Jeder Punkt: erst PoC-Demo durchspielen (60-Sekunden-Journey), dann bewerten, ob der

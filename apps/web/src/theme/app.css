@@ -235,11 +235,16 @@ button.primary:disabled { opacity: 0.6; cursor: default; }
 .recipe-steps { margin-top: 10px; font-size: 14px; }
 .recipe-steps summary { cursor: pointer; color: var(--person-accent); font-weight: 700; font-size: 13px; }
 .recipe-steps ol { margin: 8px 0 2px; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; }
-/* Desktop: Mengen links, Zubereitung rechts; mobile einspaltig (Lerner-Idee). */
+/* Desktop: Mengen links (5/12), Zubereitung rechts (7/12); mobile einspaltig
+   (Lerner-Idee). Fester Raster nach Generalprobe-Feedback: Zutat 3 : Menge 2 :
+   Zubereitung 7 — Mengen starten in jeder Rezeptkarte an gleicher x-Position. */
 .recipe-columns { display: grid; grid-template-columns: 1fr; gap: 2px 28px; }
+.price-table { width: 100%; table-layout: fixed; border-collapse: collapse; }
+.price-table td { padding: 2px 0; vertical-align: top; }
+.price-table td:first-child { width: 60%; }
 .recipe-servings { margin: 0 0 6px; font-weight: 700; font-size: 13px; color: var(--muted); }
 @media (min-width: 720px) {
-  .recipe-columns { grid-template-columns: minmax(0, 5fr) minmax(0, 4fr); align-items: start; }
+  .recipe-columns { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: start; }
 }
 
 /* Zubereitet-Markierung im Wochenstreifen */
@@ -285,6 +290,8 @@ button.primary:disabled { opacity: 0.6; cursor: default; }
 .list-row input { width: 17px; height: 17px; margin-top: 3px; accent-color: var(--ok-green); cursor: pointer; }
 .list-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .row-checked .list-main b { text-decoration: line-through; color: var(--muted); }
+.row-checked .list-buy { text-decoration: line-through; color: var(--muted); }
+.list-buy { font-size: 15.5px; }
 .list-amounts { font-size: 13.5px; color: var(--muted); }
 .leftover { font-style: normal; }
 .leftover.perish { color: var(--warn, #9a6700); }

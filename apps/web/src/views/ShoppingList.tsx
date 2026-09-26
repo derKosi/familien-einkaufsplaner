@@ -71,8 +71,11 @@ export function ShoppingList({ state, onBack, onToggleChecked }: Props) {
               />
               <span className="list-main">
                 <b>{row.product}</b>
+                {/* Kaufmenge prominent (Generalprobe: „wie viele Packungen" muss
+                    auf dem Handy ohne Kleingedrucktes lesbar sein). */}
+                <b className="list-buy">Kaufen: {row.purchase}</b>
                 <span className="list-amounts">
-                  bedarf {row.needed} → kaufen {row.purchase}
+                  bedarf {row.needed}
                   {row.leftover && (
                     <i className={row.leftoverIsStock ? "leftover stock" : "leftover perish"}>
                       {" "}· {row.leftover}{row.leftoverIsStock ? " (Vorrat)" : ""}

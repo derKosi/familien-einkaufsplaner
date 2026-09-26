@@ -92,7 +92,7 @@ Build mode: fast
 ## Hands-on Checkpoints
 
 - [ ] Early usable behavior explored — nach Slice 4: Kernel-Feedback (wirkt der Plan richtig? Passen Vorschläge/Mengen-Logik zur Vorstellung?) — dieses Feedback formt Slice 5–7.
-- [ ] Final kick-the-tires exploration and feedback completed — nach Slice 8: freie Erkundung + 60-Sekunden-Demo-Generalprobe.
+- [x] Final kick-the-tires exploration and feedback completed — nach Slice 8: freie Erkundung + 60-Sekunden-Demo-Generalprobe (26.09., Docker auf :8085, Feedback in Revisions).
 
 ## Final Review
 
@@ -158,3 +158,8 @@ Activity mode: [offen]
   5. **Wochenmuster: Abwählen unmöglich** — der Entfernen-Zweig war toter Code, der Tooltip versprach eine nicht existierende Interaktion; nach Reset zeigte die Maske leere Zellen statt des Server-Standards. Fix: 3-Stufen-Zyklus (+ → Erwachsene → alle → aus) und Anzeige-Fallback.
   - **Neue Features aus Lerner-Feedback:** mehrere Einkaufstage (`shoppingDays`, Wochenanker = letzter Einkauf rückwärts — Zukunft-Bug in `shoppingWeekStart` mitgefixt), Koch-/Prep-Tage mit sichtbarer Vorbereitung (`mealPrep`-Schalter → `prepNote` je Mahlzeit, grüne Box im Tagesdetail), Wiederholungen-Politik (normal/streng), Rezept-Zeiten (`minutes` für 24 Rezepte, Badge am Gericht), Kochmengen-Panel („Rezept": Mengen links, „für 4 Portionen" + Zubereitung rechts, Preise bewusst nur in Liste und Meta-Zeile), Personen-Bearbeiten-Formular in den Einstellungen (gemeinsame `PersonForm`-Komponente, Onboarding nutzt sie weiter).
   - **Bekannt, nicht gefixt:** Serien-Klick-Race in Settings-Radios (zweiter Klick baut auf stale Props); Zeitzonen-Rand in `nowTick`-Kanten; latenter Hook-Ordnungs-Verstoß in Settings.tsx (`useState` nach Early-Return); aktive Person sprang in einem Testlauf unerklärt um.
+- **Generalprobe-Runde (26.09., Docker-Demo auf :8085 nach `FEP_PORT`-Umbau, DB davor zurückgesetzt für die echte Erstsituation):**
+  1. **Gerichte entfernen/tauschen fehlt** („Grillabend mit Nachbarn, oder?") — echtes neues PRD-Verhalten, kein Politzug vor dem Ship → **Backlog 8**.
+  2. **Packungsmenge saß im Kleintext** („bedarf X → kaufen Y" in 13,5px muted — „ich kann auf dem Handy nicht lesen, wie viele Packungen Haferflocken"): Kaufmenge in eigene prominente Zeile „Kaufen: 2× 500 g" (`.list-buy`, 15,5px, volle Tinte, durchgestrichen im Abhak); Kleintext bleibt für Bedarf/Reste.
+  3. **Rezept-Panel: Mengen begannen je Karte an anderer x-Position** — `.price-table` hatte gar kein CSS, Browser-Auto-Layout maß Spalten nach Inhalt. Fix: fester Raster nach Lerner-Vorschlag „Bootstrap 3, 2, 7" — Zutat 3 : Menge 2 : Zubereitung 7 (`table-layout: fixed`, 60/40 in der Mengentabelle; `.recipe-columns` 5fr/7fr statt 5fr/4fr — Zubereitung bekommt mehr Raum).
+  4. **Vorlesen/Timer** („muss nur das Rezept vorlesen") → **Backlog 9**. **Mobile-Design-Sorge allgemein** → **Backlog 5** ergänzt. **Playwright-E2E auf Zweitrechner** → **Backlog 10**.
