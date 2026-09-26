@@ -47,6 +47,7 @@ PRD ref: `prd.md > The Core Journey`.
 
 - **Entwicklung:** `pnpm install`, `pnpm dev` — API auf `:3001`, Vite-Dev-Server auf `:5173` (Proxy eingerichtet). `ANTHROPIC_API_KEY` in `.env` (nur Server; `.env.example` ohne Geheimnis wird committet, `.env` ist ge-ignored).
 - **Demo-Aufnahme (Pflichtweg):** `docker compose up` → `http://localhost:8080` öffnen, E33-Haushalt seeden, Plan generieren, 60-Sekunden-Demo aus `prd.md > What "Working" Looks Like` abfilmen. Einreicherung erfordert Demo-Video + öffentliches GitHub-Repo; beides muss ohne Deployment funktionieren.
+- **Veröffentlicht (6-ship):** Repo: `https://github.com/derKosi/familien-einkaufsplaner` (public, 26.09.2026). Demo-Video-URL: [offen]. Optionales Deployment: nicht gebaut (PoC läuft lokal im Container).
 - **Optionales Deployment (Ziel, kein PoC-Bestandteil):** Azure-Ubuntu-VM des Lerners, ein Container, `data/`-Mount, Subdomain hinter bestehendem Caddy. Entscheidungen dazu trifft `6-ship`.
 
 ## Look and Feel
