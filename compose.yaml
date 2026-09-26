@@ -1,12 +1,13 @@
 # Demo-Aufnahme-Pflichtweg (spec.md > Where It Runs): `docker compose up`
-# → http://localhost:8080, Haushalt seeden, Plan generieren, abfilmen.
+# → http://localhost:8080 (Host-Port überschreibbar: FEP_PORT=8085 docker compose up),
+# Haushalt seeden, Plan generieren, abfilmen.
 services:
   app:
     build:
       context: .
       dockerfile: docker/Dockerfile
     ports:
-      - "8080:3001"
+      - "${FEP_PORT:-8080}:3001"
     volumes:
       - ./data:/app/data
     env_file:

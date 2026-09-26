@@ -27,6 +27,9 @@ echter LLM-Aufruf) → Wochenstreifen, Tagesansicht, Einkaufsliste.
 ```bash
 docker compose up
 # → http://localhost:8080
+
+# Port belegt? Host-Port überschreiben:
+FEP_PORT=8085 docker compose up
 ```
 
 `data/` ist als Bind-Mount eingehängt (SQLite + Angebots-Snapshots + Rezept-Pool);
